@@ -12,7 +12,7 @@ pub struct Message {
     pub template_1: usize,
     pub word_1_list: Option<usize>,
     pub word_1_word: Option<usize>,
-    pub conjugation: Option<usize>,
+    pub conjunction: Option<usize>,
     pub template_2: Option<usize>,
     pub word_2_list: Option<usize>,
     pub word_2_word: Option<usize>,

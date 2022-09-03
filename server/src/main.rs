@@ -89,7 +89,6 @@ async fn main() -> Result<()> {
             ).await?;
             Ok(())
         }))
-        // .connect_with(options.filename(&config.database.path))
         .connect_with(options.filename(&config.database))
         .await
         .context("could not connect to database")?;
@@ -103,9 +102,11 @@ async fn main() -> Result<()> {
         packs: Default::default(),
     });
 
+    println!("adding packs");
     state.update_packs().await?;
 
     let address = state.config.address.clone();
+    println!("listening at {}", address);
     warp::serve(web::routes(state)).run(address).await;
     Ok(())
 }
