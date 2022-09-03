@@ -1,7 +1,6 @@
 #![feature(let_chains)]
 
 use std::collections::HashMap;
-use std::net::SocketAddr;
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
@@ -11,16 +10,19 @@ use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
+use crate::config::Config;
 use crate::pack::Pack;
 
 mod pack;
 mod message;
 mod web;
 mod util;
+mod config;
 
 static MIGRATOR: Migrator = sqlx::migrate!();
 
 pub struct State {
+    pub config: Config,
     pub db: Pool<Sqlite>,
     pub packs: RwLock<HashMap<Uuid, Pack>>,
 }
@@ -29,7 +31,7 @@ impl State {
     pub async fn update_packs(&self) -> Result<()> {
         let mut packs = HashMap::new();
 
-        let mut dir = tokio::fs::read_dir("packs").await?;
+        let mut dir = tokio::fs::read_dir(&self.config.packs).await?;
         while let Ok(Some(entry)) = dir.next_entry().await {
             if !entry.path().is_file() {
                 continue;
@@ -64,6 +66,18 @@ impl State {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.is_empty() {
+        eprintln!("usage: server [config]");
+        return Ok(());
+    }
+
+    let config_str = tokio::fs::read_to_string(&args[0])
+        .await
+        .with_context(|| format!("could not read config file at {}", args[0]))?;
+    let config: Config = toml::from_str(&config_str)
+        .context("could not parse config file")?;
+
     let options = SqliteConnectOptions::new();
     // options.log_statements(LevelFilter::Debug);
 
@@ -76,7 +90,7 @@ async fn main() -> Result<()> {
             Ok(())
         }))
         // .connect_with(options.filename(&config.database.path))
-        .connect_with(options.filename("./database.sqlite"))
+        .connect_with(options.filename(&config.database))
         .await
         .context("could not connect to database")?;
     MIGRATOR.run(&pool)
@@ -84,12 +98,14 @@ async fn main() -> Result<()> {
         .context("could not run database migrations")?;
 
     let state = Arc::new(State {
+        config,
         db: pool,
         packs: Default::default(),
     });
 
     state.update_packs().await?;
 
-    warp::serve(web::routes(state)).run("127.0.0.1:8080".parse::<SocketAddr>()?).await;
+    let address = state.config.address.clone();
+    warp::serve(web::routes(state)).run(address).await;
     Ok(())
 }
