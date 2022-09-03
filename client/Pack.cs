@@ -1,7 +1,29 @@
+using YamlDotNet.Serialization.NamingConventions;
+
 namespace OrangeGuidanceTomestone;
 
 [Serializable]
 public class Pack {
+    internal static Lazy<Pack[]> All { get; } = new(() => {
+        var des = new YamlDotNet.Serialization.DeserializerBuilder()
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .Build();
+        return new[] {
+                "ffxiv",
+                "elden-ring",
+                "dark-souls",
+            }
+            .Select(name => {
+                try {
+                    return des.Deserialize<Pack>(Resourcer.Resource.AsString($"{name}.yaml"));
+                } catch {
+                    return null;
+                }
+            })
+            .Where(pack => pack != null)
+            .ToArray()!;
+    });
+
     public string Name { get; init; }
     public Guid Id { get; init; }
     public string[] Templates { get; init; }

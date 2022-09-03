@@ -30,9 +30,10 @@ async fn logic(state: Arc<State>, id: i64, message_id: Uuid, vote: i8) -> Result
     };
     sqlx::query!(
         // language=sqlite
-        "insert or ignore into votes (user, message, vote) values (?, ?, ?)",
+        "insert into votes (user, message, vote) values (?, ?, ?) on conflict do update set vote = ?",
         id,
         message_id,
+        vote,
         vote,
     )
         .execute(&state.db)

@@ -64,8 +64,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="elden-ring.yaml"/>
-        <EmbeddedResource Include="elden-ring.yaml"/>
+        <EmbeddedResource Include="../server/packs/*.yaml" LinkBase="packs"/>
     </ItemGroup>
 
 </Project>
