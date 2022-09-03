@@ -51,20 +51,21 @@
             <HintPath>$(Dalamud)\Lumina.Excel.dll</HintPath>
             <Private>false</Private>
         </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>$(Dalamud)\Newtonsoft.Json.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DalamudPackager" Version="2.1.8"/>
-        <PackageReference Include="Fody" Version="6.6.3">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Resourcer.Fody" Version="1.8.0"/>
-        <PackageReference Include="YamlDotNet" Version="12.0.0"/>
+        <PackageReference Include="DalamudPackager" Version="2.1.8" />
+        <PackageReference Include="Fody" Version="6.6.3" PrivateAssets="all" />
+        <PackageReference Include="Resourcer.Fody" Version="1.8.0" />
+        <PackageReference Include="YamlDotNet" Version="12.0.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="../server/packs/*.yaml" LinkBase="packs"/>
+        <EmbeddedResource Include="../server/packs/*.yaml" LinkBase="packs" />
     </ItemGroup>
 
 </Project>

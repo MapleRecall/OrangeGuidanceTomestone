@@ -1,5 +1,7 @@
+using System.Net.Http.Headers;
 using System.Text;
 using ImGuiNET;
+using Newtonsoft.Json;
 
 namespace OrangeGuidanceTomestone;
 
@@ -151,7 +153,34 @@ public class PluginUi : IDisposable {
             ImGui.BeginDisabled();
         }
 
-        if (ImGui.Button("Write") && valid) {
+        if (ImGui.Button("Write") && valid && this.Plugin.ClientState.LocalPlayer is { } player) {
+            var req = new MessageRequest {
+                Territory = this.Plugin.ClientState.TerritoryType,
+                X = player.Position.X,
+                Y = player.Position.Y,
+                Z = player.Position.Z,
+                PackId = pack.Id,
+                Template1 = this._part1,
+                Word1List = this._word1.Item1 == -1 ? null : this._word1.Item1,
+                Word1Word = this._word1.Item2 == -1 ? null : this._word1.Item2,
+                Conjunction = this._conj == -1 ? null : this._conj,
+                Template2 = this._part2,
+                Word2List = this._word2.Item1 == -1 ? null : this._word2.Item1,
+                Word2Word = this._word2.Item2 == -1 ? null : this._word2.Item2,
+            };
+
+            var json = JsonConvert.SerializeObject(req);
+            Task.Run(async () => {
+                var content = new StringContent(json) {
+                    Headers = {
+                        ContentType = new MediaTypeHeaderValue("application/json"),
+                    },
+                };
+
+                content.Headers.Add("X-Api-Key", this.Plugin.Config.ApiKey);
+
+                await new HttpClient().PostAsync("https://tryfingerbuthole.anna.lgbt/messages", content);
+            });
         }
 
         if (valid) {
