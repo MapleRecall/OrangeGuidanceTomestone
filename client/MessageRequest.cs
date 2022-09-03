@@ -11,11 +11,24 @@ public class MessageRequest {
     public float Y { get; set; }
     public float Z { get; set; }
     public Guid PackId { get; set; }
+
+    [JsonProperty("template_1")]
     public int Template1 { get; set; }
+
+    [JsonProperty("word_1_list")]
     public int? Word1List { get; set; }
+
+    [JsonProperty("word_1_word")]
     public int? Word1Word { get; set; }
+
     public int? Conjunction { get; set; }
+
+    [JsonProperty("template_2")]
     public int? Template2 { get; set; }
+
+    [JsonProperty("word_2_list")]
     public int? Word2List { get; set; }
+
+    [JsonProperty("word_2_word")]
     public int? Word2Word { get; set; }
 }

@@ -149,7 +149,7 @@ public class PluginUi : IDisposable {
         this.ClearIfNecessary();
 
         var valid = this.ValidSetup();
-        if (valid) {
+        if (!valid) {
             ImGui.BeginDisabled();
         }
 
@@ -164,7 +164,7 @@ public class PluginUi : IDisposable {
                 Word1List = this._word1.Item1 == -1 ? null : this._word1.Item1,
                 Word1Word = this._word1.Item2 == -1 ? null : this._word1.Item2,
                 Conjunction = this._conj == -1 ? null : this._conj,
-                Template2 = this._part2,
+                Template2 = this._part2 == -1 ? null : this._part2,
                 Word2List = this._word2.Item1 == -1 ? null : this._word2.Item1,
                 Word2Word = this._word2.Item2 == -1 ? null : this._word2.Item2,
             };
@@ -183,7 +183,7 @@ public class PluginUi : IDisposable {
             });
         }
 
-        if (valid) {
+        if (!valid) {
             ImGui.EndDisabled();
         }
 

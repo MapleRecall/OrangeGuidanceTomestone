@@ -1,3 +1,4 @@
+using Dalamud.Logging;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace OrangeGuidanceTomestone;
@@ -15,8 +16,9 @@ public class Pack {
             }
             .Select(name => {
                 try {
-                    return des.Deserialize<Pack>(Resourcer.Resource.AsString($"{name}.yaml"));
-                } catch {
+                    return des.Deserialize<Pack>(Resourcer.Resource.AsStringUnChecked($"OrangeGuidanceTomestone.packs.{name}.yaml"));
+                } catch (Exception ex) {
+                    PluginLog.LogError(ex, name);
                     return null;
                 }
             })
