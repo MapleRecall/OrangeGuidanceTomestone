@@ -9,12 +9,14 @@ public class Plugin : IDalamudPlugin {
     [PluginService]
     internal DalamudPluginInterface Interface { get; init; }
     
+    internal PluginUi Ui { get; }
+    
     public Plugin() {
-        
+        this.Ui = new PluginUi(this);
     }
     
     public void Dispose() {
-        throw new NotImplementedException();
+        this.Ui.Dispose();
     }
 
 }
