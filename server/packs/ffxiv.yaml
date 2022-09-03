@@ -1,0 +1,17 @@
+name: FINAL FANTASY XIV
+id: 7cd9e479-080a-4fec-9511-41a53034c2ad
+
+templates:
+  - '{0} ahead'
+  - 'Be wary of {0}'
+  - 'Try {0}'
+  - 'Need {0}'
+  - 'Imminent {0}...'
+  - 'Weakness: {0}'
+  - '{0}'
+  - '{0}?'
+  - 'Good Luck'
+  - 'I did it!'
+  - 'Here!'
+  - 'I can''t take this...'
+  - 'Praise the Sun!'
