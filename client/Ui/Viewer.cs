@@ -39,6 +39,10 @@ internal class Viewer {
             goto End;
         }
 
+        if (this._idx >= nearby.Count) {
+            this._idx = Math.Max(0, nearby.Count - 1);
+        }
+
         if (!ImGui.BeginTable("##viewer-table", 3)) {
             goto End;
         }
