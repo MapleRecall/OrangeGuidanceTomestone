@@ -27,6 +27,8 @@ internal class Messages : IDisposable {
         this.Plugin.ClientState.Logout -= this.RemoveVfx;
         this.Plugin.ClientState.Login -= this.SpawnVfx;
         this.Plugin.Framework.Update -= this.HandleSpawnQueue;
+
+        this.RemoveVfx(null, null);
     }
 
     private unsafe void HandleSpawnQueue(Framework framework) {
