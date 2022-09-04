@@ -65,7 +65,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="../server/packs/elden-ring.yaml" LinkBase="packs"/>
+        <EmbeddedResource Include="../server/packs/*.yaml" LinkBase="packs"/>
     </ItemGroup>
 
 </Project>
