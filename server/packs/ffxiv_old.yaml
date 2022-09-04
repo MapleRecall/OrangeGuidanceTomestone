@@ -1,5 +1,5 @@
-name: FINAL FANTASY XIV
-id: 7fe38343-efb5-477b-a17f-71d910ae075b
+name: FINAL FANTASY XIV (v1)
+id: 7cd9e479-080a-4fec-9511-41a53034c2ad
 
 templates:
   - '{0} ahead'
@@ -63,8 +63,6 @@ words:
       - Warrior of Light
       - Warrior of Darkness
       - Garlean
-      - Allagan
-      - Ascian
       - paladin
       - warrior
       - dark knight
@@ -111,10 +109,6 @@ words:
       - pair
       - trio
       - thief
-      - uplander
-
-  - name: The Twelve
-    words:
       - Halone
       - Menphina
       - Thaliak
@@ -124,7 +118,7 @@ words:
       - Byregot
       - Rhalgr
       - Azeyma
-      - Nald'thal
+      - 'Nald''thal'
       - Nophica
       - Althyk
 
@@ -162,15 +156,11 @@ words:
       - skill
       - summoning
 
-  - name: Beings
+  - name: Wildlife
     words:
       - goobbue
       - chocobo
       - cactuar
-      - porxie
-      - moogle
-      - goblin
-      - dragon
 
   - name: Situations
     words:
@@ -195,8 +185,6 @@ words:
 
   - name: Places
     words:
-      - Eorzea
-      - Garlemald
       - high road
       - bridge
       - castle
@@ -289,34 +277,5 @@ words:
 
   - name: Phrases
     words:
-      - good luck
-      - look carefully
-      - listen carefully
-      - think carefully
-      - well done
-      - I did it!
-      - I've failed...
-      - here!
-      - not here!
-      - don't you dare!
-      - do it!
-      - I can't take this...
-      - don't think
-      - so lonely...
-      - here again...
-      - just getting started
-      - stay calm
-      - keep moving
-      - turn back
-      - give up
-      - don't give up
-      - help me...
-      - I don't believe it...
-      - too high up
-      - I want to go home...
-      - it's like a dream...
-      - seems familiar...
-      - beautiful...
-      - you don't have the right
-      - are you ready?
       - this was not my intention
+      - seems familiar...

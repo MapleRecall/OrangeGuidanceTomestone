@@ -43,15 +43,15 @@ public class Plugin : IDalamudPlugin {
         }
 
         this.Vfx = new Vfx();
-        this.Ui = new PluginUi(this);
         this.Messages = new Messages(this);
+        this.Ui = new PluginUi(this);
         this.Commands = new Commands(this);
     }
 
     public void Dispose() {
         this.Commands.Dispose();
-        this.Messages.Dispose();
         this.Ui.Dispose();
+        this.Messages.Dispose();
         this.Vfx.Dispose();
     }
 
