@@ -80,7 +80,7 @@ internal class Viewer {
                         this.Plugin.Config.ApiKey,
                         HttpMethod.Patch,
                         $"/messages/{message.Id}/votes",
-                        null,
+                        "application/json",
                         new StringContent("1")
                     );
                 });
@@ -94,7 +94,7 @@ internal class Viewer {
                         this.Plugin.Config.ApiKey,
                         HttpMethod.Patch,
                         $"/messages/{message.Id}/votes",
-                        null,
+                        "application/json",
                         new StringContent("-1")
                     );
                 });
