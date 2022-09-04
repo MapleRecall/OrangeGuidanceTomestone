@@ -86,7 +86,7 @@ words:
       - 'pyromancy scroll'
       - 'miracle scroll'
       - 'ember'
-      - 'trap'
+      - 'danger'
       - 'covenant'
       - 'amazing key'
       - 'amazing treasure'
@@ -101,7 +101,7 @@ words:
       - 'amazing pyromancy scroll'
       - 'amazing miracle scroll'
       - 'amazing ember'
-      - 'amazing trap'
+      - 'amazing danger'
 
   - name: Techniques
     words:
