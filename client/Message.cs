@@ -1,3 +1,4 @@
+using System.Numerics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -13,7 +14,9 @@ internal class Message {
 
     [JsonProperty("message")]
     public string Text { get; init; }
-    
+
     public int PositiveVotes { get; init; }
     public int NegativeVotes { get; init; }
+
+    internal Vector3 Position => new(this.X, this.Y, this.Z);
 }
