@@ -1,31 +1,32 @@
 use std::sync::Arc;
 
 use anyhow::Context;
+use uuid::Uuid;
 use warp::{Filter, Rejection, Reply};
 use warp::filters::BoxedFilter;
 
-use crate::message::RetrievedMessage;
+use crate::message::RetrievedMessageTerritory;
 use crate::State;
-use crate::web::AnyhowRejection;
+use crate::web::{AnyhowRejection, WebError};
 
-pub fn get_location(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
+pub fn get_message(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
     warp::get()
         .and(warp::path("messages"))
         .and(warp::path::param())
         .and(warp::path::end())
         .and(super::get_id(Arc::clone(&state)))
-        .and_then(move |location: u32, id: i64| logic(Arc::clone(&state), id, location))
+        .and_then(move |message_id: Uuid, id: i64| logic(Arc::clone(&state), id, message_id))
         .boxed()
 }
 
-async fn logic(state: Arc<State>, id: i64, location: u32) -> Result<impl Reply, Rejection> {
-    // TODO: when we're not just returning all results, make sure own messages are always present
-    let location = location as i64;
-    let messages = sqlx::query_as!(
-        RetrievedMessage,
+async fn logic(state: Arc<State>, id: i64, message_id: Uuid) -> Result<impl Reply, Rejection> {
+    let message_id = message_id.simple().to_string();
+    let message = sqlx::query_as!(
+        RetrievedMessageTerritory,
         // language=sqlite
         r#"
             select m.id,
+                   m.territory,
                    m.x,
                    m.y,
                    m.z,
@@ -36,15 +37,17 @@ async fn logic(state: Arc<State>, id: i64, location: u32) -> Result<impl Reply, 
             from messages m
                      left join votes v on m.id = v.message
                      left join votes v2 on m.id = v2.message and v2.user = ?
-            where m.territory = ?
+            where m.id = ?
             group by m.id"#,
         id,
-        location,
+        message_id,
     )
-        .fetch_all(&state.db)
+        .fetch_optional(&state.db)
         .await
-        .context("could not get messages from database")
+        .context("could not get message from database")
         .map_err(AnyhowRejection)
         .map_err(warp::reject::custom)?;
-    Ok(warp::reply::json(&messages))
+
+    let message = message.ok_or_else(|| warp::reject::custom(WebError::NoSuchMessage))?;
+    Ok(warp::reply::json(&message))
 }

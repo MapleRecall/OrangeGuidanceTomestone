@@ -17,6 +17,7 @@ internal class Message {
 
     public int PositiveVotes { get; init; }
     public int NegativeVotes { get; init; }
+    public int UserVote { get; set; }
 
     internal Vector3 Position => new(this.X, this.Y, this.Z);
 }
@@ -35,6 +36,7 @@ internal class MessageWithTerritory {
 
     public int PositiveVotes { get; init; }
     public int NegativeVotes { get; init; }
+    public int UserVote { get; set; }
 
     internal Vector3 Position => new(this.X, this.Y, this.Z);
 
@@ -48,6 +50,7 @@ internal class MessageWithTerritory {
             Text = message.Text,
             PositiveVotes = message.PositiveVotes,
             NegativeVotes = message.NegativeVotes,
+            UserVote = message.UserVote,
         };
     }
 }

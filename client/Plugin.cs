@@ -1,4 +1,5 @@
-﻿using Dalamud.Game;
+﻿using Dalamud.Data;
+using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
@@ -17,6 +18,9 @@ public class Plugin : IDalamudPlugin {
 
     [PluginService]
     internal CommandManager CommandManager { get; init; }
+
+    [PluginService]
+    internal DataManager DataManager { get; init; }
 
     [PluginService]
     internal Framework Framework { get; init; }

@@ -18,17 +18,6 @@ pub struct Message {
     pub word_2_word: Option<usize>,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct VoteMessage {
-    pub post_id: Uuid,
-    pub vote: u8,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct DeleteMessage {
-    pub post_id: Uuid,
-}
-
 #[derive(Debug, Serialize)]
 pub struct RetrievedMessage {
     pub id: String,
@@ -38,6 +27,7 @@ pub struct RetrievedMessage {
     pub message: String,
     pub positive_votes: i32,
     pub negative_votes: i32,
+    pub user_vote: i64,
 }
 
 #[derive(Debug, Serialize)]
@@ -50,4 +40,5 @@ pub struct RetrievedMessageTerritory {
     pub message: String,
     pub positive_votes: i32,
     pub negative_votes: i32,
+    pub user_vote: i64,
 }
