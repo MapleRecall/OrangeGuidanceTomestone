@@ -60,7 +60,7 @@ internal class Messages : IDisposable {
 
     internal void SpawnVfx() {
         var territory = this.Plugin.ClientState.TerritoryType;
-        if (territory == 0) {
+        if (territory == 0 || this.Plugin.Config.BannedTerritories.Contains(territory)) {
             return;
         }
 
