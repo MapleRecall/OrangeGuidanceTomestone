@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+
 namespace OrangeGuidanceTomestone.Helpers;
 
 internal static class ServerHelper {
@@ -10,12 +12,13 @@ internal static class ServerHelper {
         var req = new HttpRequestMessage(method, url);
         if (content != null) {
             req.Content = content;
+
+            if (contentType != null) {
+                req.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+            }
         }
 
         req.Headers.Add("X-Api-Key", apiKey);
-        if (contentType != null) {
-            req.Headers.Add("Content-Type", contentType);
-        }
 
         return req;
     }
