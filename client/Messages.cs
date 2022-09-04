@@ -55,7 +55,7 @@ internal class Messages : IDisposable {
         this.SpawnVfx();
     }
 
-    private void SpawnVfx() {
+    internal void SpawnVfx() {
         var territory = this.Plugin.ClientState.TerritoryType;
         if (territory == 0) {
             return;
