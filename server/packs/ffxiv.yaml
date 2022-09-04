@@ -23,6 +23,7 @@ templates:
   - 'Praise the {0}'
   - 'Let there be {0}'
   - 'Ahh, {0}...'
+  - 'Such {0}...'
   - '{0}'
   - '{0}!'
   - '{0}?'
@@ -41,9 +42,225 @@ conjunctions:
   - ','
 
 words:
+  - name: Enemies
+    words:
+      - enemy
+      - weak foe
+      - strong foe
+      - monster
+      - voidsent
+      - dragon
+      - boss
+      - group
+      - zombie
+      - wolf
+      - skeleton
+      - goblin
+      - primal
+
+  - name: People
+    words:
+      - Warrior of Light
+      - Warrior of Darkness
+      - Garlean
+      - paladin
+      - warrior
+      - dark knight
+      - gunbreaker
+      - white mage
+      - scholar
+      - astrologian
+      - sage
+      - monk
+      - ninja
+      - dragoon
+      - samurai
+      - reaper
+      - bard
+      - machinist
+      - dancer
+      - black mage
+      - summoner
+      - red mage
+      - blue mage
+      - merchant
+      - teacher
+      - master
+      - friend
+      - lover
+      - angel
+      - sinner
+      - good sort
+      - wicked sort
+      - plump sort
+      - skinny sort
+      - lovable sort
+      - pathetic sort
+      - strange sort
+      - nimble sort
+      - laggardly sort
+      - invisible sort
+      - unfathomable sort
+      - giant sort
+      - liar
+      - traitor
+      - hero
+      - champion
+      - pair
+      - trio
+      - thief
+
+  - name: Things
+    words:
+      - item
+      - necessary item
+      - something
+      - something incredible
+      - weapon
+      - crystal
+      - job stone
+      - map
+
+  - name: Battle Tactics
+    words:
+      - stealth
+      - kiting
+      - jumping off
+      - aggro
+      - pursuit
+      - confusion
+
+  - name: Actions
+    words:
+      - attacking
+      - healing
+      - jumping
+      - casting
+      - crafting
+      - running
+      - walking
+      - skill
+      - summoning
+
   - name: Wildlife
     words:
       - goobbue
+      - chocobo
+
+  - name: Situations
+    words:
+      - morning
+      - noon
+      - evening
+      - night
+      - clear sky
+      - overcast
+      - rain
+      - storm
+      - mist
+      - snow
+      - battle
+      - ritual
+      - explosion
+      - safety
+      - danger
+      - hidden path
+      - secret passage
+      - dead end
+
+  - name: Places
+    words:
+      - high road
+      - bridge
+      - castle
+      - fort
+      - city
+      - ruins
+      - church
+      - tower
+      - camp site
+      - house
+      - tunnel
+      - cave
+      - great tree
+      - surface
+      - underground
+      - forest
+      - river
+      - lake
+      - mountain
+      - valley
+      - cliff
+      - waterside
+      - nest
+      - hole
+
+  - name: Directions
+    words:
+      - east
+      - west
+      - south
+      - north
+      - ahead
+      - behind
+      - left
+      - right
+      - centre
+      - up
+      - down
+      - edge
+
+  - name: Body Parts
+    words:
+      - head
+      - stomach
+      - back
+      - arms
+      - legs
+      - rump
+      - tail
+      - core
+      - fingers
+      - horns
+
+  - name: Affinities
+    words:
+      - physical
+      - magical
+      - magic
+      - fire
+      - lightning
+      - wind
+      - ice
+      - earth
+      - water
+      - unaspected
+      - poison
+      - bleed
+      - death
+
   - name: Concepts
     words:
+      - life
+      - death
+      - aether
+      - astral
+      - umbral
+      - calamity
+      - light
+      - darkness
       - devastation
+      - fear
+      - despair
+      - joy
+      - bliss
+      - good luck
+      - bad luck
+      - secret
+      - faith
+      - loyalty
+
+  - name: Phrases
+    words:
+      - this was not my intention
+      - seems familiar...
