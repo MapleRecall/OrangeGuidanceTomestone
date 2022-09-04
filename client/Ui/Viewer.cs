@@ -1,6 +1,7 @@
 using System.Numerics;
 using Dalamud.Interface;
 using ImGuiNET;
+using OrangeGuidanceTomestone.Helpers;
 
 namespace OrangeGuidanceTomestone.Ui;
 
@@ -72,6 +73,32 @@ internal class Viewer {
             ImGui.PushTextWrapPos();
             ImGui.TextUnformatted(message.Text);
             ImGui.PopTextWrapPos();
+
+            if (ImGui.Button("Like")) {
+                Task.Run(async () => {
+                    await ServerHelper.SendRequest(
+                        this.Plugin.Config.ApiKey,
+                        HttpMethod.Patch,
+                        $"/messages/{message.Id}/votes",
+                        null,
+                        new StringContent("1")
+                    );
+                });
+            }
+            
+            ImGui.SameLine();
+
+            if (ImGui.Button("Dislike")) {
+                Task.Run(async () => {
+                    await ServerHelper.SendRequest(
+                        this.Plugin.Config.ApiKey,
+                        HttpMethod.Patch,
+                        $"/messages/{message.Id}/votes",
+                        null,
+                        new StringContent("-1")
+                    );
+                });
+            }
         }
 
         if (ImGui.TableSetColumnIndex(2)) {
