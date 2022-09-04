@@ -20,7 +20,7 @@ internal class ViewerButton {
         }
 
         ImGui.SetNextWindowBgAlpha(0.5f);
-        if (!ImGui.Begin("##ogt-viewer-button", ImGuiWindowFlags.NoTitleBar)) {
+        if (!ImGui.Begin("##ogt-viewer-button", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize)) {
             ImGui.End();
             return;
         }
