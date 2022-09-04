@@ -1,0 +1,39 @@
+using ImGuiNET;
+
+namespace OrangeGuidanceTomestone.Ui;
+
+internal class ViewerButton {
+    private Plugin Plugin { get; }
+
+    internal ViewerButton(Plugin plugin) {
+        this.Plugin = plugin;
+    }
+
+    internal void Draw() {
+        if (this.Plugin.Ui.Viewer.Visible) {
+            return;
+        }
+
+        var nearby = this.Plugin.Messages.Nearby().ToList();
+        if (nearby.Count == 0) {
+            return;
+        }
+
+        ImGui.SetNextWindowBgAlpha(0.5f);
+        if (!ImGui.Begin("##ogt-viewer-button", ImGuiWindowFlags.NoTitleBar)) {
+            ImGui.End();
+            return;
+        }
+
+        var label = "View message";
+        if (nearby.Count > 1) {
+            label += "s";
+        }
+
+        if (ImGui.Button(label)) {
+            this.Plugin.Ui.Viewer.Visible = true;
+        }
+
+        ImGui.End();
+    }
+}

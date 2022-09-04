@@ -2,6 +2,7 @@ using System.Numerics;
 using Dalamud.Game;
 using Dalamud.Logging;
 using Newtonsoft.Json;
+using OrangeGuidanceTomestone.Helpers;
 
 namespace OrangeGuidanceTomestone;
 
@@ -63,10 +64,11 @@ internal class Messages : IDisposable {
         this.RemoveVfx(null, null);
 
         Task.Run(async () => {
-            var req = new HttpRequestMessage(HttpMethod.Get, $"https://tryfingerbuthole.anna.lgbt/messages/{territory}");
-            req.Headers.Add("X-Api-Key", this.Plugin.Config.ApiKey);
-
-            var resp = await new HttpClient().SendAsync(req);
+            var resp = await ServerHelper.SendRequest(
+                this.Plugin.Config.ApiKey,
+                HttpMethod.Get,
+                $"/messages/{territory}"
+            );
             var json = await resp.Content.ReadAsStringAsync();
             var messages = JsonConvert.DeserializeObject<Message[]>(json)!;
 

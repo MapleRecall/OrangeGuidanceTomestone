@@ -28,7 +28,7 @@ async fn logic(state: Arc<State>, id: i64, message: Message) -> Result<impl Repl
         pack.format(
             message.template_1,
             message.word_1_list.and_then(|list| message.word_1_word.map(|word| (list, word))),
-            message.conjugation,
+            message.conjunction,
             message.template_2,
             message.word_2_list.and_then(|list| message.word_2_word.map(|word| (list, word))),
         )

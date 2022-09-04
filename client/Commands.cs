@@ -16,6 +16,6 @@ internal class Commands : IDisposable {
     }
     
     private void OnCommand(string command, string arguments) {
-        this.Plugin.Ui.WriterVisible ^= true;
+        this.Plugin.Ui.MainWindow.Visible ^= true;
     }
 }
