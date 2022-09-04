@@ -34,12 +34,15 @@ impl Pack {
         if let Some(conj_idx) = conjunction {
             if let Some(template_2_idx) = template_2_idx {
                 let conj = self.conjunctions.get(conj_idx)?;
-                if conj.len() > 1 || conj.chars().next().map(|x| !x.is_ascii_punctuation()).unwrap_or(false) {
+                let is_punc = conj.len() == 1 && conj.chars().next().map(|x| x.is_ascii_punctuation()).unwrap_or(false);
+                if is_punch {
+                    formatted.push_str(conj);
                     formatted.push('\n');
+                } else {
+                    formatted.push('\n');
+                    formatted.push_str(conj);
+                    formatted.push(' ');
                 }
-
-                formatted.push_str(conj);
-                formatted.push(' ');
 
                 let template_2 = self.templates.get(template_2_idx)?;
                 if template_2.contains("{0}") && word_2_idx.is_none() {
