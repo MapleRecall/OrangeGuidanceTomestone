@@ -67,7 +67,8 @@ internal unsafe class Vfx : IDisposable {
         }
 
         if (this._staticVfxRun(vfx, 0.0f, 0xFFFFFFFF) != 0) {
-            this.NeedToRun.Enqueue((IntPtr) vfx);
+            this.RemoveStatic(vfx);
+            return null;
         }
 
         // update position
