@@ -74,6 +74,8 @@ internal class Viewer {
             ImGui.TextUnformatted(message.Text);
             ImGui.PopTextWrapPos();
 
+            ImGui.TextUnformatted($"Appraisals: {message.PositiveVotes - message.NegativeVotes}");
+
             if (ImGui.Button("Like")) {
                 Task.Run(async () => {
                     await ServerHelper.SendRequest(
@@ -85,7 +87,7 @@ internal class Viewer {
                     );
                 });
             }
-            
+
             ImGui.SameLine();
 
             if (ImGui.Button("Dislike")) {
