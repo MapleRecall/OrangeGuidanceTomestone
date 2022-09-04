@@ -35,7 +35,7 @@ internal unsafe class Vfx : IDisposable {
         this.Spawned.Clear();
     }
 
-    internal VfxStruct* SpawnStatic(Guid id, string path, Vector3 pos) {
+    internal VfxStruct* SpawnStatic(Guid id, string path, Vector3 pos, Quaternion rotation) {
         VfxStruct* vfx;
         fixed (byte* p = Encoding.UTF8.GetBytes(path)) {
             fixed (byte* pool = Pool) {
@@ -54,6 +54,8 @@ internal unsafe class Vfx : IDisposable {
 
         // update position
         vfx->Position = new Vector3(pos.X, pos.Y, pos.Z);
+        // update rotation
+        vfx->Rotation = new Quaternion(rotation.X, rotation.Y, rotation.Z, rotation.W);
 
         // update
         vfx->Flags |= 2;
@@ -80,6 +82,9 @@ internal unsafe class Vfx : IDisposable {
 
         [FieldOffset(0x50)]
         public Vector3 Position;
+
+        [FieldOffset(0x60)]
+        public Quaternion Rotation;
 
         [FieldOffset(0x70)]
         public Vector3 Scale;
