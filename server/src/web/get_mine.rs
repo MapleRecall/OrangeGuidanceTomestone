@@ -27,6 +27,7 @@ async fn logic(state: Arc<State>, id: i64) -> Result<impl Reply, Rejection> {
                    m.x,
                    m.y,
                    m.z,
+                   m.yaw,
                    m.message,
                    coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                    coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
