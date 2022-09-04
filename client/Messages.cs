@@ -107,7 +107,15 @@ internal class Messages : IDisposable {
     }
 
     internal void Add(Message message) {
+        this.CurrentMutex.Wait();
         this.Current[message.Id] = message;
+        this.CurrentMutex.Release();
         this.SpawnQueue.Enqueue(message);
+    }
+
+    internal void Remove(Guid id) {
+        this.CurrentMutex.Wait();
+        this.Current.Remove(id);
+        this.CurrentMutex.Release();
     }
 }
