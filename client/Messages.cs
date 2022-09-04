@@ -63,7 +63,10 @@ internal class Messages : IDisposable {
         this.RemoveVfx(null, null);
 
         Task.Run(async () => {
-            var resp = await new HttpClient().GetAsync($"https://tryfingerbuthole.anna.lgbt/messages/{territory}");
+            var req = new HttpRequestMessage(HttpMethod.Get, $"https://tryfingerbuthole.anna.lgbt/messages/{territory}");
+            req.Headers.Add("X-Api-Key", this.Plugin.Config.ApiKey);
+
+            var resp = await new HttpClient().SendAsync(req);
             var json = await resp.Content.ReadAsStringAsync();
             var messages = JsonConvert.DeserializeObject<Message[]>(json)!;
 

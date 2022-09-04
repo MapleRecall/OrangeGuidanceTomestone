@@ -3,15 +3,47 @@ id: 7cd9e479-080a-4fec-9511-41a53034c2ad
 
 templates:
   - '{0} ahead'
+  - 'No {0} ahead'
+  - '{0} required ahead'
   - 'Be wary of {0}'
   - 'Try {0}'
-  - 'Need {0}'
-  - 'Imminent {0}...'
-  - 'Weakness: {0}'
+  - 'Likely {0}'
+  - 'First off, {0}'
+  - 'Seek {0}'
+  - 'Still no {0}...'
+  - 'Why is it always {0}?'
+  - 'If only I had a {0}...'
+  - 'Didn''t expect {0}...'
+  - 'Visions of {0}...'
+  - 'Could this be a {0}?'
+  - 'Time for {0}'
+  - '{0}, O {0}'
+  - 'Behold, {0}!'
+  - 'Offer {0}'
+  - 'Praise the {0}'
+  - 'Let there be {0}'
+  - 'Ahh, {0}...'
   - '{0}'
+  - '{0}!'
   - '{0}?'
-  - 'Good Luck'
-  - 'I did it!'
-  - 'Here!'
-  - 'I can''t take this...'
-  - 'Praise the Sun!'
+  - '{0}...'
+
+conjunctions:
+  - 'and then'
+  - 'or'
+  - 'but'
+  - 'therefore'
+  - 'in short'
+  - 'except'
+  - 'by the way'
+  - 'so to speak'
+  - 'all the more'
+  - ','
+
+words:
+  - name: Wildlife
+    words:
+      - goobbue
+  - name: Concepts
+    words:
+      - devastation

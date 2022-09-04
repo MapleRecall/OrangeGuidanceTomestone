@@ -1,6 +1,7 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
+using Dalamud.Game;
 using Dalamud.Utility.Signatures;
 
 namespace OrangeGuidanceTomestone;
@@ -8,23 +9,40 @@ namespace OrangeGuidanceTomestone;
 internal unsafe class Vfx : IDisposable {
     private static readonly byte[] Pool = Encoding.UTF8.GetBytes("Client.System.Scheduler.Instance.VfxObject");
 
+    private Plugin Plugin { get; }
+
     [Signature("E8 ?? ?? ?? ?? F3 0F 10 35 ?? ?? ?? ?? 48 89 43 08")]
     private delegate* unmanaged<byte*, byte*, VfxStruct*> _staticVfxCreate;
 
     [Signature("E8 ?? ?? ?? ?? 8B 4B 7C 85 C9")]
-    private delegate* unmanaged<VfxStruct*, float, uint, void> _staticVfxRun;
+    private delegate* unmanaged<VfxStruct*, float, uint, ulong> _staticVfxRun;
 
     [Signature("40 53 48 83 EC 20 48 8B D9 48 8B 89 ?? ?? ?? ?? 48 85 C9 74 28 33 D2 E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9")]
     private delegate* unmanaged<VfxStruct*, void> _staticVfxRemove;
 
     private List<IntPtr> Spawned { get; } = new();
+    private Queue<IntPtr> NeedToRun { get; } = new();
 
-    internal Vfx() {
+    internal Vfx(Plugin plugin) {
+        this.Plugin = plugin;
         SignatureHelper.Initialise(this);
+
+        this.Plugin.Framework.Update += this.Run;
     }
 
     public void Dispose() {
+        this.Plugin.Framework.Update -= this.Run;
         this.RemoveAll();
+    }
+
+    private void Run(Framework framework) {
+        if (!this.NeedToRun.TryDequeue(out var ptr)) {
+            return;
+        }
+
+        if (this._staticVfxRun((VfxStruct*) ptr, 0.0f, 0xFFFFFFFF) != 0) {
+            this.NeedToRun.Enqueue(ptr);
+        }
     }
 
     internal void RemoveAll() {
@@ -33,6 +51,7 @@ internal unsafe class Vfx : IDisposable {
         }
 
         this.Spawned.Clear();
+        this.NeedToRun.Clear();
     }
 
     internal VfxStruct* SpawnStatic(string path, Vector3 pos) {
@@ -47,7 +66,9 @@ internal unsafe class Vfx : IDisposable {
             return null;
         }
 
-        this._staticVfxRun(vfx, 0.0f, 0xFFFFFFFF);
+        if (this._staticVfxRun(vfx, 0.0f, 0xFFFFFFFF) != 0) {
+            this.NeedToRun.Enqueue((IntPtr) vfx);
+        }
 
         // update position
         vfx->Position = new Vector3(pos.X, pos.Y, pos.Z);
