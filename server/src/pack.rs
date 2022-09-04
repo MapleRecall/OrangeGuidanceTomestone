@@ -35,7 +35,7 @@ impl Pack {
             if let Some(template_2_idx) = template_2_idx {
                 let conj = self.conjunctions.get(conj_idx)?;
                 let is_punc = conj.len() == 1 && conj.chars().next().map(|x| x.is_ascii_punctuation()).unwrap_or(false);
-                if is_punch {
+                if is_punc {
                     formatted.push_str(conj);
                     formatted.push('\n');
                 } else {

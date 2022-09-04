@@ -43,7 +43,7 @@ pub struct RetrievedMessage {
 #[derive(Debug, Serialize)]
 pub struct RetrievedMessageTerritory {
     pub id: String,
-    puv territory: i64,
+    pub territory: i64,
     pub x: f64,
     pub y: f64,
     pub z: f64,

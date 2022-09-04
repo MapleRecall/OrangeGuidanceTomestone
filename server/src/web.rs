@@ -77,6 +77,7 @@ async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
             WebError::InvalidAuthToken => StatusCode::BAD_REQUEST,
             WebError::InvalidPackId => StatusCode::NOT_FOUND,
             WebError::InvalidIndex => StatusCode::NOT_FOUND,
+            WebError::TooManyMessages => StatusCode::BAD_REQUEST,
         }
     } else {
         eprintln!("{:#?}", err);
