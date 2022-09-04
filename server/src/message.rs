@@ -39,3 +39,15 @@ pub struct RetrievedMessage {
     pub positive_votes: i32,
     pub negative_votes: i32,
 }
+
+#[derive(Debug, Serialize)]
+pub struct RetrievedMessageTerritory {
+    pub id: String,
+    puv territory: i64,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+    pub message: String,
+    pub positive_votes: i32,
+    pub negative_votes: i32,
+}

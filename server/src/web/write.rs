@@ -36,6 +36,21 @@ async fn logic(state: Arc<State>, id: i64, message: Message) -> Result<impl Repl
             .map_err(warp::reject::custom)?
     };
 
+    let existing = sqlx::query!(
+        // language=sqlite
+        "select count(*) as count from messages where user = ?",
+        id
+    )
+        .fetch_one(&state.db)
+        .await
+        .context("could not get count of messages")
+        .map_err(AnyhowRejection)
+        .map_err(warp::reject::custom)?;
+
+    if existing.count >= 10 {
+        return Err(warp::reject::custom(WebError::TooManyMessages));
+    }
+
     let message_id = Uuid::new_v4().simple().to_string();
     let territory = message.territory as i64;
 

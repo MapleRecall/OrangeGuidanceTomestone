@@ -14,14 +14,16 @@ mod write;
 mod erase;
 mod get_location;
 mod vote;
+mod get_mine;
 
 pub fn routes(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
     register::register(Arc::clone(&state))
         .or(unregister::unregister(Arc::clone(&state)))
         .or(write::write(Arc::clone(&state)))
         .or(erase::erase(Arc::clone(&state)))
-        .or(get_location::get_location(Arc::clone(&state)))
         .or(vote::vote(Arc::clone(&state)))
+        .or(get_location::get_location(Arc::clone(&state)))
+        .or(get_mine::get_mine(Arc::clone(&state)))
         .recover(handle_rejection)
         .boxed()
 }
@@ -56,6 +58,7 @@ pub enum WebError {
     InvalidAuthToken,
     InvalidPackId,
     InvalidIndex,
+    TooManyMessages,
 }
 
 impl Reject for WebError {}
