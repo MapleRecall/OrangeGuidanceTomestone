@@ -98,8 +98,8 @@ internal class Messages : IDisposable {
         this.CurrentMutex.Wait();
         var nearby = this.Current
             .Values
-            .Where(msg => Math.Abs(msg.Position.Y - position.Y) < 1f)
-            .Where(msg => Vector3.Distance(msg.Position, position) < 2f)
+            .Where(msg => Math.Abs(msg.Position.Y - position.Y) <= 1f)
+            .Where(msg => Vector3.Distance(msg.Position, position) <= 2f)
             .ToList();
         this.CurrentMutex.Release();
 
