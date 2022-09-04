@@ -174,6 +174,7 @@ internal class Write : ITab {
                         X = player.Position.X,
                         Y = player.Position.Y,
                         Z = player.Position.Z,
+                        Yaw = player.Rotation,
                         Text = actualText,
                         NegativeVotes = 0,
                         PositiveVotes = 0,
