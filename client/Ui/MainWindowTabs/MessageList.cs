@@ -1,4 +1,6 @@
+using Dalamud.Utility;
 using ImGuiNET;
+using Lumina.Excel.GeneratedSheets;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
 
@@ -23,10 +25,14 @@ internal class MessageList : ITab {
         this.MessagesMutex.Wait();
 
         foreach (var message in this.Messages) {
+            var territory = this.Plugin.DataManager.GetExcelSheet<TerritoryType>()?.GetRow(message.Territory);
+            var territoryName = territory?.PlaceName.Value?.Name?.ToDalamudString().TextValue ?? "???";
+
             ImGui.TextUnformatted(message.Text);
             ImGui.TreePush();
-            ImGui.TextUnformatted($"Likes: {message.PositiveVotes}");
-            ImGui.TextUnformatted($"Dislikes: {message.NegativeVotes}");
+            ImGui.TextUnformatted($"Location: {territoryName}");
+            var appraisals = Math.Max(0, message.PositiveVotes - message.NegativeVotes);
+            ImGui.TextUnformatted($"Appraisals: {appraisals} ({message.PositiveVotes} - {message.NegativeVotes}");
             if (ImGui.Button($"Delete##{message.Id}")) {
                 this.Delete(message.Id);
             }

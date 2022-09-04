@@ -77,32 +77,50 @@ internal class Viewer {
             ImGui.TextUnformatted(message.Text);
             ImGui.PopTextWrapPos();
 
-            ImGui.TextUnformatted($"Appraisals: {message.PositiveVotes - message.NegativeVotes}");
+            var appraisals = Math.Max(0, message.PositiveVotes - message.NegativeVotes);
+            ImGui.TextUnformatted($"Appraisals: {appraisals:N0}");
 
-            if (ImGui.Button("Like")) {
+            void Vote(int way) {
                 Task.Run(async () => {
-                    await ServerHelper.SendRequest(
+                    var resp = await ServerHelper.SendRequest(
                         this.Plugin.Config.ApiKey,
                         HttpMethod.Patch,
                         $"/messages/{message.Id}/votes",
                         "application/json",
-                        new StringContent("1")
+                        new StringContent(way.ToString())
                     );
+
+                    if (resp.IsSuccessStatusCode) {
+                        message.UserVote = way;
+                    }
                 });
+            }
+
+            var vote = message.UserVote;
+            if (vote == 1) {
+                ImGui.BeginDisabled();
+            }
+
+            if (ImGui.Button("Like")) {
+                Vote(1);
+            }
+
+            if (vote == 1) {
+                ImGui.EndDisabled();
             }
 
             ImGui.SameLine();
 
+            if (vote == -1) {
+                ImGui.BeginDisabled();
+            }
+
             if (ImGui.Button("Dislike")) {
-                Task.Run(async () => {
-                    await ServerHelper.SendRequest(
-                        this.Plugin.Config.ApiKey,
-                        HttpMethod.Patch,
-                        $"/messages/{message.Id}/votes",
-                        "application/json",
-                        new StringContent("-1")
-                    );
-                });
+                Vote(-1);
+            }
+
+            if (vote == -1) {
+                ImGui.EndDisabled();
             }
         }
 
