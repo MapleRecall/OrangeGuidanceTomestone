@@ -41,6 +41,7 @@ public class Plugin : IDalamudPlugin {
     public void Dispose() {
         this.Messages.Dispose();
         this.Ui.Dispose();
+        this.Vfx.Dispose();
     }
 
     internal void SaveConfig() {
