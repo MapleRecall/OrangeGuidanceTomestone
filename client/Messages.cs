@@ -41,7 +41,7 @@ internal class Messages : IDisposable {
         }
 
         PluginLog.Log($"spawning vfx for {message.Id}");
-        if (this.Plugin.Vfx.SpawnStatic(VfxPath, message.Position) == null) {
+        if (this.Plugin.Vfx.SpawnStatic(message.Id, VfxPath, message.Position) == null) {
             PluginLog.Log("trying again");
             this.SpawnQueue.Enqueue(message);
         }

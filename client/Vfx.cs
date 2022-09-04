@@ -8,8 +8,6 @@ namespace OrangeGuidanceTomestone;
 internal unsafe class Vfx : IDisposable {
     private static readonly byte[] Pool = Encoding.UTF8.GetBytes("Client.System.Scheduler.Instance.VfxObject");
 
-    private Plugin Plugin { get; }
-
     [Signature("E8 ?? ?? ?? ?? F3 0F 10 35 ?? ?? ?? ?? 48 89 43 08")]
     private delegate* unmanaged<byte*, byte*, VfxStruct*> _staticVfxCreate;
 
@@ -19,10 +17,9 @@ internal unsafe class Vfx : IDisposable {
     [Signature("40 53 48 83 EC 20 48 8B D9 48 8B 89 ?? ?? ?? ?? 48 85 C9 74 28 33 D2 E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9")]
     private delegate* unmanaged<VfxStruct*, void> _staticVfxRemove;
 
-    private List<IntPtr> Spawned { get; } = new();
+    private Dictionary<Guid, IntPtr> Spawned { get; } = new();
 
-    internal Vfx(Plugin plugin) {
-        this.Plugin = plugin;
+    internal Vfx() {
         SignatureHelper.Initialise(this);
     }
 
@@ -31,14 +28,14 @@ internal unsafe class Vfx : IDisposable {
     }
 
     internal void RemoveAll() {
-        foreach (var spawned in this.Spawned) {
+        foreach (var spawned in this.Spawned.Values) {
             this.RemoveStatic((VfxStruct*) spawned);
         }
 
         this.Spawned.Clear();
     }
 
-    internal VfxStruct* SpawnStatic(string path, Vector3 pos) {
+    internal VfxStruct* SpawnStatic(Guid id, string path, Vector3 pos) {
         VfxStruct* vfx;
         fixed (byte* p = Encoding.UTF8.GetBytes(path)) {
             fixed (byte* pool = Pool) {
@@ -61,13 +58,19 @@ internal unsafe class Vfx : IDisposable {
         // update
         vfx->Flags |= 2;
 
-        this.Spawned.Add((IntPtr) vfx);
+        this.Spawned[id] = (IntPtr) vfx;
 
         return vfx;
     }
 
     internal void RemoveStatic(VfxStruct* vfx) {
         this._staticVfxRemove(vfx);
+    }
+
+    internal void RemoveStatic(Guid id) {
+        if (this.Spawned.TryGetValue(id, out var vfx)) {
+            this.RemoveStatic((VfxStruct*) vfx);
+        }
     }
 
     [StructLayout(LayoutKind.Explicit)]

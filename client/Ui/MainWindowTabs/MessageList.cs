@@ -24,11 +24,16 @@ internal class MessageList : ITab {
 
         foreach (var message in this.Messages) {
             ImGui.TextUnformatted(message.Text);
+            ImGui.TreePush();
             ImGui.TextUnformatted($"Likes: {message.PositiveVotes}");
             ImGui.TextUnformatted($"Dislikes: {message.NegativeVotes}");
             if (ImGui.Button($"Delete##{message.Id}")) {
                 this.Delete(message.Id);
             }
+
+            ImGui.TreePop();
+
+            ImGui.Separator();
         }
 
         this.MessagesMutex.Release();
@@ -60,14 +65,8 @@ internal class MessageList : ITab {
 
             if (resp.IsSuccessStatusCode) {
                 this.Refresh();
-                this.Plugin.Messages.SpawnVfx();
+                this.Plugin.Vfx.RemoveStatic(id);
             }
         });
-    }
-
-    internal void Add(MessageWithTerritory message) {
-        this.Messages.Clear();
-        this.Messages.Add(message);
-        this.MessagesMutex.Release();
     }
 }
