@@ -88,6 +88,10 @@ internal class Messages : IDisposable {
     }
 
     private void RemoveVfx(object? sender, EventArgs? e) {
+        this.RemoveVfx();
+    }
+
+    internal void RemoveVfx() {
         this.Plugin.Vfx.RemoveAll();
     }
 

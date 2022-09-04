@@ -22,7 +22,7 @@ internal class Commands : IDisposable {
             case "ban":
                 this.Plugin.Config.BannedTerritories.Add(this.Plugin.ClientState.TerritoryType);
                 this.Plugin.SaveConfig();
-                this.Plugin.Messages.SpawnVfx();
+                this.Plugin.Messages.RemoveVfx();
                 break;
             case "unban":
                 this.Plugin.Config.BannedTerritories.Remove(this.Plugin.ClientState.TerritoryType);
