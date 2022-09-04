@@ -13,11 +13,13 @@ pub fn get_location(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
         .and(warp::path("messages"))
         .and(warp::path::param())
         .and(warp::path::end())
-        .and_then(move |location: u32| logic(Arc::clone(&state), location))
+        .and(super::get_id(Arc::clone(&state)))
+        .and_then(move |location: u32, id: i64| logic(Arc::clone(&state), id, location))
         .boxed()
 }
 
-async fn logic(state: Arc<State>, location: u32) -> Result<impl Reply, Rejection> {
+async fn logic(state: Arc<State>, id: i64, location: u32) -> Result<impl Reply, Rejection> {
+    // TODO: when we're not just returning all results, make sure own messages are always present
     let id = location as i64;
     let messages = sqlx::query_as!(
         RetrievedMessage,
