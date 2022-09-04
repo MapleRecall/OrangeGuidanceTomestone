@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game;
 using Dalamud.Game.ClientState;
+using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 
@@ -15,12 +16,16 @@ public class Plugin : IDalamudPlugin {
     internal ClientState ClientState { get; init; }
 
     [PluginService]
+    internal CommandManager CommandManager { get; init; }
+
+    [PluginService]
     internal Framework Framework { get; init; }
 
     internal Configuration Config { get; }
     internal Vfx Vfx { get; }
     internal PluginUi Ui { get; }
     internal Messages Messages { get; }
+    internal Commands Commands { get; }
 
     public Plugin() {
         this.Config = this.Interface!.GetPluginConfig() as Configuration ?? new Configuration();
@@ -36,9 +41,11 @@ public class Plugin : IDalamudPlugin {
         this.Vfx = new Vfx();
         this.Ui = new PluginUi(this);
         this.Messages = new Messages(this);
+        this.Commands = new Commands(this);
     }
 
     public void Dispose() {
+        this.Commands.Dispose();
         this.Messages.Dispose();
         this.Ui.Dispose();
         this.Vfx.Dispose();
