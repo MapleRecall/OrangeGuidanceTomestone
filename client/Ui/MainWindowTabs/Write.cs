@@ -97,12 +97,15 @@ internal class Write : ITab {
 
             if (this._conj != -1) {
                 var conj = pack.Conjunctions[this._conj];
-                if (conj.Length != 1 || !char.IsPunctuation(conj[0])) {
+                var isPunc = conj.Length == 1 && char.IsPunctuation(conj[0]);
+                if (isPunc) {
+                    preview.Append(conj);
                     preview.Append('\n');
+                } else {
+                    preview.Append('\n');
+                    preview.Append(conj);
+                    preview.Append(' ');
                 }
-
-                preview.Append(conj);
-                preview.Append(' ');
 
                 if (this._part2 != -1) {
                     var template2 = pack.Templates[this._part2];
