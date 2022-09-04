@@ -21,6 +21,7 @@ internal class Viewer {
             return;
         }
 
+        ImGui.SetNextWindowSize(new Vector2(350, 175), ImGuiCond.FirstUseEver);
         if (!ImGui.Begin("Messages", ref this.Visible)) {
             ImGui.End();
             return;
