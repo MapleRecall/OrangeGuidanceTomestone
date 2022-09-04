@@ -10,9 +10,8 @@ internal class Messages : IDisposable {
     private Plugin Plugin { get; }
 
     private SemaphoreSlim CurrentMutex { get; } = new(1, 1);
-    private Message[] Current { get; set; } = Array.Empty<Message>();
+    private Dictionary<Guid, Message> Current { get; } = new();
     private Queue<Message> SpawnQueue { get; } = new();
-    private Queue<Message> RemoveQueue { get; } = new();
 
     internal Messages(Plugin plugin) {
         this.Plugin = plugin;
@@ -39,7 +38,9 @@ internal class Messages : IDisposable {
             return;
         }
 
-        this.Plugin.Vfx.SpawnStatic(VfxPath, message.Position);
+        if (this.Plugin.Vfx.SpawnStatic(VfxPath, message.Position) == null) {
+            this.SpawnQueue.Enqueue(message);
+        }
     }
 
     private void SpawnVfx(object? sender, EventArgs e) {
@@ -64,12 +65,14 @@ internal class Messages : IDisposable {
             var messages = JsonConvert.DeserializeObject<Message[]>(json)!;
 
             await this.CurrentMutex.WaitAsync();
-            this.Current = messages;
-            this.CurrentMutex.Release();
+            this.Current.Clear();
 
             foreach (var message in messages) {
+                this.Current[message.Id] = message;
                 this.SpawnQueue.Enqueue(message);
             }
+
+            this.CurrentMutex.Release();
         });
     }
 
@@ -77,16 +80,26 @@ internal class Messages : IDisposable {
         this.Plugin.Vfx.RemoveAll();
     }
 
-    internal Message[] Nearby() {
+    internal IEnumerable<Message> Nearby() {
         if (this.Plugin.ClientState.LocalPlayer is not { } player) {
             return Array.Empty<Message>();
         }
 
         var position = player.Position;
 
-        return this.Current
+        this.CurrentMutex.Wait();
+        var nearby = this.Current
+            .Values
             .Where(msg => Math.Abs(msg.Position.Y - position.Y) < 1f)
             .Where(msg => Vector3.Distance(msg.Position, position) < 5f)
-            .ToArray();
+            .ToList();
+        this.CurrentMutex.Release();
+
+        return nearby;
+    }
+
+    internal void Add(Message message) {
+        this.Current[message.Id] = message;
+        this.SpawnQueue.Enqueue(message);
     }
 }
