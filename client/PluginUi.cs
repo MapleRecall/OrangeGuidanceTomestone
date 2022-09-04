@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Numerics;
 using System.Text;
+using Dalamud.Interface;
 using Dalamud.Logging;
 using ImGuiNET;
 using Newtonsoft.Json;
@@ -9,6 +10,9 @@ namespace OrangeGuidanceTomestone;
 
 public class PluginUi : IDisposable {
     private Plugin Plugin { get; }
+
+    internal bool WriterVisible;
+    internal bool ViewerVisible;
 
     private int _pack;
 
@@ -31,7 +35,17 @@ public class PluginUi : IDisposable {
     }
 
     private void Draw() {
-        if (!ImGui.Begin("Orange Guidance Tomestone")) {
+        this.DrawWriter();
+        this.DrawViewerButton();
+        this.DrawViewer();
+    }
+
+    private void DrawWriter() {
+        if (!this.WriterVisible) {
+            return;
+        }
+
+        if (!ImGui.Begin(this.Plugin.Name, ref this.WriterVisible)) {
             ImGui.End();
             return;
         }
@@ -104,6 +118,7 @@ public class PluginUi : IDisposable {
 
         var pack = Pack.All.Value[this._pack];
 
+        var actualText = string.Empty;
         if (this._part1 == -1) {
             ImGui.TextUnformatted(placeholder);
         } else {
@@ -129,7 +144,8 @@ public class PluginUi : IDisposable {
                 }
             }
 
-            ImGui.TextUnformatted(preview.ToString());
+            actualText = preview.ToString();
+            ImGui.TextUnformatted(actualText);
         }
 
         ImGui.Separator();
@@ -181,7 +197,21 @@ public class PluginUi : IDisposable {
 
                 content.Headers.Add("X-Api-Key", this.Plugin.Config.ApiKey);
 
-                await new HttpClient().PostAsync("https://tryfingerbuthole.anna.lgbt/messages", content);
+                var resp = await new HttpClient().PostAsync("https://tryfingerbuthole.anna.lgbt/messages", content);
+                var id = await resp.Content.ReadAsStringAsync();
+                if (resp.IsSuccessStatusCode) {
+                    var newMsg = new Message {
+                        Id = Guid.Parse(id),
+                        X = player.Position.X,
+                        Y = player.Position.Y,
+                        Z = player.Position.Z,
+                        Text = actualText,
+                        NegativeVotes = 0,
+                        PositiveVotes = 0,
+                    };
+
+                    this.Plugin.Messages.Add(newMsg);
+                }
             });
         }
 
@@ -253,5 +283,112 @@ public class PluginUi : IDisposable {
         }
 
         return true;
+    }
+
+    private void DrawViewerButton() {
+        if (this.ViewerVisible) {
+            return;
+        }
+
+        var nearby = this.Plugin.Messages.Nearby().ToList();
+        if (nearby.Count == 0) {
+            return;
+        }
+
+        ImGui.SetNextWindowBgAlpha(0.5f);
+        if (!ImGui.Begin("##ogt-viewer-button", ImGuiWindowFlags.NoTitleBar)) {
+            ImGui.End();
+            return;
+        }
+
+        var label = "View message";
+        if (nearby.Count > 1) {
+            label += "s";
+        }
+
+        if (ImGui.Button(label)) {
+            this.ViewerVisible = true;
+        }
+
+        ImGui.End();
+    }
+
+    private int _viewerIdx;
+
+    private void DrawViewer() {
+        if (!this.ViewerVisible) {
+            return;
+        }
+
+        if (!ImGui.Begin("Messages", ref this.ViewerVisible)) {
+            ImGui.End();
+            return;
+        }
+
+        if (ImGui.IsWindowAppearing()) {
+            this._viewerIdx = 0;
+        }
+
+        var nearby = this.Plugin.Messages.Nearby()
+            .OrderBy(msg => msg.Id)
+            .ToList();
+        if (nearby.Count == 0) {
+            ImGui.TextUnformatted("No nearby messages");
+            goto End;
+        }
+
+        if (!ImGui.BeginTable("##viewer-table", 3)) {
+            goto End;
+        }
+
+        ImGui.TableSetupColumn("##prev-arrow", ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableSetupColumn("##content", ImGuiTableColumnFlags.WidthStretch);
+        ImGui.TableSetupColumn("##next-arrow", ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableNextRow();
+
+        if (ImGui.TableSetColumnIndex(0)) {
+            var height = ImGui.GetContentRegionAvail().Y;
+            var buttonHeight = ImGuiHelpers.GetButtonSize("<").Y;
+            ImGui.Dummy(new Vector2(1, height / 2 - buttonHeight / 2));
+            if (this._viewerIdx == 0) {
+                ImGui.BeginDisabled();
+            }
+
+            if (ImGui.Button("<")) {
+                this._viewerIdx -= 1;
+            }
+
+            if (this._viewerIdx == 0) {
+                ImGui.EndDisabled();
+            }
+        }
+
+        if (ImGui.TableSetColumnIndex(1) && this._viewerIdx > 0 && this._viewerIdx < nearby.Count) {
+            var message = nearby[this._viewerIdx];
+            ImGui.TextUnformatted(message.Text);
+        }
+
+        if (ImGui.TableSetColumnIndex(2)) {
+            var height = ImGui.GetContentRegionAvail().Y;
+            var buttonHeight = ImGuiHelpers.GetButtonSize(">").Y;
+            ImGui.Dummy(new Vector2(1, height / 2 - buttonHeight / 2));
+
+            if (this._viewerIdx == nearby.Count - 1) {
+                ImGui.BeginDisabled();
+            }
+
+            if (ImGui.Button(">")) {
+                this._viewerIdx += 1;
+            }
+
+            if (this._viewerIdx == nearby.Count - 1) {
+                ImGui.EndDisabled();
+            }
+        }
+
+        ImGui.EndTable();
+
+        End:
+        ImGui.End();
     }
 }
