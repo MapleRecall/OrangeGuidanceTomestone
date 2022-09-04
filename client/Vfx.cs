@@ -1,7 +1,6 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
-using Dalamud.Game;
 using Dalamud.Utility.Signatures;
 
 namespace OrangeGuidanceTomestone;
@@ -21,28 +20,14 @@ internal unsafe class Vfx : IDisposable {
     private delegate* unmanaged<VfxStruct*, void> _staticVfxRemove;
 
     private List<IntPtr> Spawned { get; } = new();
-    private Queue<IntPtr> NeedToRun { get; } = new();
 
     internal Vfx(Plugin plugin) {
         this.Plugin = plugin;
         SignatureHelper.Initialise(this);
-
-        this.Plugin.Framework.Update += this.Run;
     }
 
     public void Dispose() {
-        this.Plugin.Framework.Update -= this.Run;
         this.RemoveAll();
-    }
-
-    private void Run(Framework framework) {
-        if (!this.NeedToRun.TryDequeue(out var ptr)) {
-            return;
-        }
-
-        if (this._staticVfxRun((VfxStruct*) ptr, 0.0f, 0xFFFFFFFF) != 0) {
-            this.NeedToRun.Enqueue(ptr);
-        }
     }
 
     internal void RemoveAll() {
@@ -51,7 +36,6 @@ internal unsafe class Vfx : IDisposable {
         }
 
         this.Spawned.Clear();
-        this.NeedToRun.Clear();
     }
 
     internal VfxStruct* SpawnStatic(string path, Vector3 pos) {

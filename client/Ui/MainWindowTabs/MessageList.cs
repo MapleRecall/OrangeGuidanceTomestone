@@ -19,11 +19,16 @@ internal class MessageList : ITab {
         if (ImGui.Button("Refresh")) {
             this.Refresh();
         }
-        
+
         this.MessagesMutex.Wait();
 
         foreach (var message in this.Messages) {
             ImGui.TextUnformatted(message.Text);
+            ImGui.TextUnformatted($"Likes: {message.PositiveVotes}");
+            ImGui.TextUnformatted($"Dislikes: {message.NegativeVotes}");
+            if (ImGui.Button($"Delete##{message.Id}")) {
+                this.Delete(message.Id);
+            }
         }
 
         this.MessagesMutex.Release();
@@ -42,6 +47,21 @@ internal class MessageList : ITab {
             this.Messages.Clear();
             this.Messages.AddRange(messages);
             this.MessagesMutex.Release();
+        });
+    }
+
+    private void Delete(Guid id) {
+        Task.Run(async () => {
+            var resp = await ServerHelper.SendRequest(
+                this.Plugin.Config.ApiKey,
+                HttpMethod.Delete,
+                $"/messages/{id}"
+            );
+
+            if (resp.IsSuccessStatusCode) {
+                this.Refresh();
+                this.Plugin.Messages.SpawnVfx();
+            }
         });
     }
 
