@@ -10,6 +10,7 @@ public class MessageRequest {
     public float X { get; set; }
     public float Y { get; set; }
     public float Z { get; set; }
+    public float Yaw { get; set; }
     public Guid PackId { get; set; }
 
     [JsonProperty("template_1")]

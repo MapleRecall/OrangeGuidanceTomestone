@@ -43,7 +43,8 @@ internal class Messages : IDisposable {
         }
 
         PluginLog.Log($"spawning vfx for {message.Id}");
-        if (this.Plugin.Vfx.SpawnStatic(message.Id, VfxPath, message.Position) == null) {
+        var rotation = Quaternion.CreateFromYawPitchRoll(message.Yaw, 0, 0);
+        if (this.Plugin.Vfx.SpawnStatic(message.Id, VfxPath, message.Position, rotation) == null) {
             PluginLog.Log("trying again");
             this.SpawnQueue.Enqueue(message);
         }

@@ -147,6 +147,7 @@ internal class Write : ITab {
                 X = player.Position.X,
                 Y = player.Position.Y,
                 Z = player.Position.Z,
+                Yaw = player.Rotation,
                 PackId = pack.Id,
                 Template1 = this._part1,
                 Word1List = this._word1.Item1 == -1 ? null : this._word1.Item1,
