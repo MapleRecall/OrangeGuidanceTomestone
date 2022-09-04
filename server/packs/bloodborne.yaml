@@ -49,7 +49,7 @@ conjunctions:
   - or
   - therefore
   - eventually
-  - ,
+  - ','
 
 words:
   - name: Creatures
