@@ -49,6 +49,7 @@ internal class MessageWithTerritory {
             X = message.X,
             Y = message.Y,
             Z = message.Z,
+            Yaw = message.Yaw,
             Text = message.Text,
             PositiveVotes = message.PositiveVotes,
             NegativeVotes = message.NegativeVotes,
