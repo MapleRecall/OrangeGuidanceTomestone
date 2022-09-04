@@ -66,9 +66,12 @@ internal class Viewer {
 
         if (ImGui.TableSetColumnIndex(1) && this._idx > -1 && this._idx < nearby.Count) {
             var message = nearby[this._idx];
-            var size = ImGui.CalcTextSize(message.Text, ImGui.GetContentRegionAvail().X);
+            var size = ImGui.CalcTextSize(message.Text, ImGui.GetContentRegionAvail().X).Y;
+            size += ImGui.GetStyle().ItemSpacing.Y * 2;
+            size += ImGui.CalcTextSize("A").Y;
+            size += ImGuiHelpers.GetButtonSize("A").Y;
             var height = ImGui.GetContentRegionAvail().Y;
-            ImGui.Dummy(new Vector2(1, height / 2 - size.Y / 2 - ImGui.GetStyle().ItemSpacing.Y));
+            ImGui.Dummy(new Vector2(1, height / 2 - size / 2 - ImGui.GetStyle().ItemSpacing.Y));
 
             ImGui.PushTextWrapPos();
             ImGui.TextUnformatted(message.Text);
