@@ -18,6 +18,23 @@ internal class Commands : IDisposable {
     }
 
     private void OnCommand(string command, string arguments) {
-        this.Plugin.Ui.MainWindow.Visible ^= true;
+        switch (arguments) {
+            case "ban":
+                this.Plugin.Config.BannedTerritories.Add(this.Plugin.ClientState.TerritoryType);
+                this.Plugin.SaveConfig();
+                this.Plugin.Messages.SpawnVfx();
+                break;
+            case "unban":
+                this.Plugin.Config.BannedTerritories.Remove(this.Plugin.ClientState.TerritoryType);
+                this.Plugin.SaveConfig();
+                this.Plugin.Messages.SpawnVfx();
+                break;
+            case "refresh":
+                this.Plugin.Messages.SpawnVfx();
+                break;
+            default:
+                this.Plugin.Ui.MainWindow.Visible ^= true;
+                break;
+        }
     }
 }
