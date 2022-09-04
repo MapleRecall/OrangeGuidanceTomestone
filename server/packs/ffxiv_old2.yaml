@@ -1,5 +1,5 @@
-name: FINAL FANTASY XIV
-id: 43cf8e42-43fe-42cf-b989-6446e30fa914
+name: FINAL FANTASY XIV (v2)
+id: 7fe38343-efb5-477b-a17f-71d910ae075b
 
 templates:
   - '{0} ahead'
@@ -65,6 +65,26 @@ words:
       - Garlean
       - Allagan
       - Ascian
+      - paladin
+      - warrior
+      - dark knight
+      - gunbreaker
+      - white mage
+      - scholar
+      - astrologian
+      - sage
+      - monk
+      - ninja
+      - dragoon
+      - samurai
+      - reaper
+      - bard
+      - machinist
+      - dancer
+      - black mage
+      - summoner
+      - red mage
+      - blue mage
       - merchant
       - teacher
       - master
@@ -93,40 +113,6 @@ words:
       - thief
       - uplander
 
-  - name: Jobs
-    words:
-      - paladin
-      - warrior
-      - dark knight
-      - gunbreaker
-      - white mage
-      - scholar
-      - astrologian
-      - sage
-      - monk
-      - ninja
-      - dragoon
-      - samurai
-      - reaper
-      - bard
-      - machinist
-      - dancer
-      - black mage
-      - summoner
-      - red mage
-      - blue mage
-      - carpenter
-      - blacksmith
-      - armorer
-      - goldsmith
-      - leatherworker
-      - weaver
-      - alchemist
-      - culinarian
-      - miner
-      - botanist
-      - fisher
-
   - name: The Twelve
     words:
       - Halone
@@ -154,7 +140,6 @@ words:
       - map
       - Allagan tomestone
       - gil
-      - scrip
 
   - name: Battle Tactics
     words:
@@ -174,12 +159,11 @@ words:
       - jumping
       - casting
       - crafting
-      - gathering
-      - fishing
       - running
       - walking
       - skill
       - summoning
+      - fishing
 
   - name: Beings
     words:
@@ -190,20 +174,7 @@ words:
       - moogle
       - goblin
       - dragon
-      - ixal
-      - sahagin
-      - amalj'aa
-      - sylph
-      - kobold
-      - vanu vanu
-      - vath
-      - kojin
       - namazu
-      - ananta
-      - pixie
-      - qitari
-      - dwarf
-      - arkasodara
       - goat
       - mameshiba
 
@@ -232,9 +203,6 @@ words:
     words:
       - Eorzea
       - Garlemald
-      - the Source
-      - the First
-      - the Thirteenth
       - high road
       - bridge
       - castle
@@ -358,5 +326,3 @@ words:
       - you don't have the right
       - are you ready?
       - this was not my intention
-      - gobbie-boom
-      - please look forward to it
