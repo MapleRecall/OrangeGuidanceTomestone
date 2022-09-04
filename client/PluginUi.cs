@@ -372,7 +372,13 @@ public class PluginUi : IDisposable {
 
         if (ImGui.TableSetColumnIndex(1) && this._viewerIdx > -1 && this._viewerIdx < nearby.Count) {
             var message = nearby[this._viewerIdx];
+            var size = ImGui.CalcTextSize(message.Text, ImGui.GetContentRegionAvail().X);
+            var height = ImGui.GetContentRegionAvail().Y;
+            ImGui.Dummy(new Vector2(1, height / 2 - size.Y / 2 - ImGui.GetStyle().ItemSpacing.Y));
+
+            ImGui.PushTextWrapPos();
             ImGui.TextUnformatted(message.Text);
+            ImGui.PopTextWrapPos();
         }
 
         if (ImGui.TableSetColumnIndex(2)) {
