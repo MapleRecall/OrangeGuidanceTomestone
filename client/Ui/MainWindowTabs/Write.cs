@@ -1,4 +1,5 @@
 using System.Text;
+using Dalamud.Game.ClientState.Conditions;
 using ImGuiNET;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
@@ -141,7 +142,10 @@ internal class Write : ITab {
             ImGui.BeginDisabled();
         }
 
-        if (ImGui.Button("Write") && valid && this.Plugin.ClientState.LocalPlayer is { } player) {
+        var inAir = this.Plugin.Condition[ConditionFlag.Jumping]
+                    || this.Plugin.Condition[ConditionFlag.Jumping61]
+                    || this.Plugin.Condition[ConditionFlag.InFlight];
+        if (ImGui.Button("Write") && valid && !inAir && this.Plugin.ClientState.LocalPlayer is { } player) {
             var req = new MessageRequest {
                 Territory = this.Plugin.ClientState.TerritoryType,
                 X = player.Position.X,
