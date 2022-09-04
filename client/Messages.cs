@@ -1,5 +1,6 @@
 using System.Numerics;
 using Dalamud.Game;
+using Dalamud.Logging;
 using Newtonsoft.Json;
 
 namespace OrangeGuidanceTomestone;
@@ -38,7 +39,9 @@ internal class Messages : IDisposable {
             return;
         }
 
+        PluginLog.Log($"spawning vfx for {message.Id}");
         if (this.Plugin.Vfx.SpawnStatic(VfxPath, message.Position) == null) {
+            PluginLog.Log("trying again");
             this.SpawnQueue.Enqueue(message);
         }
     }
@@ -91,7 +94,7 @@ internal class Messages : IDisposable {
         var nearby = this.Current
             .Values
             .Where(msg => Math.Abs(msg.Position.Y - position.Y) < 1f)
-            .Where(msg => Vector3.Distance(msg.Position, position) < 5f)
+            .Where(msg => Vector3.Distance(msg.Position, position) < 2f)
             .ToList();
         this.CurrentMutex.Release();
 

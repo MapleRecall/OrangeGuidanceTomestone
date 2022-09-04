@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Numerics;
 using System.Text;
 using Dalamud.Interface;
-using Dalamud.Logging;
 using ImGuiNET;
 using Newtonsoft.Json;
 
@@ -223,7 +222,7 @@ public class PluginUi : IDisposable {
 
         if (this.Plugin.ClientState.LocalPlayer is { } player2) {
             foreach (var msg in this.Plugin.Messages.Nearby()) {
-                PluginLog.Log($"{msg.Text}: {Vector3.Distance(msg.Position, player2.Position):N2}");
+                ImGui.TextUnformatted($"{msg.Text}: {Vector3.Distance(msg.Position, player2.Position):N2}");
             }
         }
 
