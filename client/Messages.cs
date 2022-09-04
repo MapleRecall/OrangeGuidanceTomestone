@@ -9,7 +9,10 @@ internal class Messages : IDisposable {
 
     private Plugin Plugin { get; }
 
+    private SemaphoreSlim CurrentMutex { get; } = new(1, 1);
+    private Message[] Current { get; set; } = Array.Empty<Message>();
     private Queue<Message> SpawnQueue { get; } = new();
+    private Queue<Message> RemoveQueue { get; } = new();
 
     internal Messages(Plugin plugin) {
         this.Plugin = plugin;
@@ -36,7 +39,7 @@ internal class Messages : IDisposable {
             return;
         }
 
-        this.Plugin.Vfx.SpawnStatic(VfxPath, new Vector3(message.X, message.Y, message.Z));
+        this.Plugin.Vfx.SpawnStatic(VfxPath, message.Position);
     }
 
     private void SpawnVfx(object? sender, EventArgs e) {
@@ -59,6 +62,11 @@ internal class Messages : IDisposable {
             var resp = await new HttpClient().GetAsync($"https://tryfingerbuthole.anna.lgbt/messages/{territory}");
             var json = await resp.Content.ReadAsStringAsync();
             var messages = JsonConvert.DeserializeObject<Message[]>(json)!;
+
+            await this.CurrentMutex.WaitAsync();
+            this.Current = messages;
+            this.CurrentMutex.Release();
+
             foreach (var message in messages) {
                 this.SpawnQueue.Enqueue(message);
             }
@@ -67,5 +75,18 @@ internal class Messages : IDisposable {
 
     private void RemoveVfx(object? sender, EventArgs? e) {
         this.Plugin.Vfx.RemoveAll();
+    }
+
+    internal Message[] Nearby() {
+        if (this.Plugin.ClientState.LocalPlayer is not { } player) {
+            return Array.Empty<Message>();
+        }
+
+        var position = player.Position;
+
+        return this.Current
+            .Where(msg => Math.Abs(msg.Position.Y - position.Y) < 1f)
+            .Where(msg => Vector3.Distance(msg.Position, position) < 5f)
+            .ToArray();
     }
 }
