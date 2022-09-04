@@ -38,7 +38,7 @@ public class Plugin : IDalamudPlugin {
             });
         }
 
-        this.Vfx = new Vfx(this);
+        this.Vfx = new Vfx();
         this.Ui = new PluginUi(this);
         this.Messages = new Messages(this);
         this.Commands = new Commands(this);
