@@ -15,8 +15,8 @@ internal class Message {
     [JsonProperty("message")]
     public string Text { get; init; }
 
-    public int PositiveVotes { get; init; }
-    public int NegativeVotes { get; init; }
+    public int PositiveVotes { get; set; }
+    public int NegativeVotes { get; set; }
     public int UserVote { get; set; }
 
     internal Vector3 Position => new(this.X, this.Y, this.Z);
