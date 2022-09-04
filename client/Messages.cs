@@ -18,7 +18,9 @@ internal class Messages : IDisposable {
     internal Messages(Plugin plugin) {
         this.Plugin = plugin;
 
-        this.SpawnVfx();
+        if (this.Plugin.Config.ApiKey != string.Empty) {
+            this.SpawnVfx();
+        }
 
         this.Plugin.Framework.Update += this.HandleSpawnQueue;
         this.Plugin.ClientState.Login += this.SpawnVfx;
