@@ -33,19 +33,20 @@ public class Plugin : IDalamudPlugin {
 
     public Plugin() {
         this.Config = this.Interface!.GetPluginConfig() as Configuration ?? new Configuration();
+        this.Vfx = new Vfx();
+        this.Messages = new Messages(this);
+        this.Ui = new PluginUi(this);
+        this.Commands = new Commands(this);
+
         if (this.Config.ApiKey == string.Empty) {
             Task.Run(async () => {
                 var resp = await new HttpClient().PostAsync("https://tryfingerbuthole.anna.lgbt/account", null);
                 var key = await resp.Content.ReadAsStringAsync();
                 this.Config.ApiKey = key;
                 this.SaveConfig();
+                this.Messages.SpawnVfx();
             });
         }
-
-        this.Vfx = new Vfx();
-        this.Messages = new Messages(this);
-        this.Ui = new PluginUi(this);
-        this.Commands = new Commands(this);
     }
 
     public void Dispose() {
