@@ -32,7 +32,7 @@ internal class MessageList : ITab {
             ImGui.TreePush();
             ImGui.TextUnformatted($"Location: {territoryName}");
             var appraisals = Math.Max(0, message.PositiveVotes - message.NegativeVotes);
-            ImGui.TextUnformatted($"Appraisals: {appraisals} ({message.PositiveVotes} - {message.NegativeVotes}");
+            ImGui.TextUnformatted($"Appraisals: {appraisals:N0} ({message.PositiveVotes:N0} - {message.NegativeVotes:N0})");
             if (ImGui.Button($"Delete##{message.Id}")) {
                 this.Delete(message.Id);
             }

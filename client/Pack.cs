@@ -10,9 +10,9 @@ public class Pack {
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
             .Build();
         return new[] {
-                "ffxiv",
+                // "ffxiv",
                 "elden-ring",
-                "dark-souls",
+                // "dark-souls",
             }
             .Select(name => {
                 try {

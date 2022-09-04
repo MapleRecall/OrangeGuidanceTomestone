@@ -91,6 +91,25 @@ internal class Viewer {
                     );
 
                     if (resp.IsSuccessStatusCode) {
+                        var oldWay = message.UserVote;
+                        switch (oldWay) {
+                            case 1:
+                                message.PositiveVotes -= 1;
+                                break;
+                            case -1:
+                                message.NegativeVotes -= 1;
+                                break;
+                        }
+
+                        switch (way) {
+                            case 1:
+                                message.PositiveVotes += 1;
+                                break;
+                            case -1:
+                                message.NegativeVotes += 1;
+                                break;
+                        }
+
                         message.UserVote = way;
                     }
                 });
