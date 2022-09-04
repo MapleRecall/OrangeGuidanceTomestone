@@ -12,6 +12,7 @@ public class Pack {
         return new[] {
                 "ffxiv",
                 "elden-ring",
+                "bloodborne",
                 "dark-souls",
             }
             .Select(name => {
