@@ -349,7 +349,7 @@ public class PluginUi : IDisposable {
         if (ImGui.TableSetColumnIndex(0)) {
             var height = ImGui.GetContentRegionAvail().Y;
             var buttonHeight = ImGuiHelpers.GetButtonSize("<").Y;
-            ImGui.Dummy(new Vector2(1, height / 2 - buttonHeight / 2));
+            ImGui.Dummy(new Vector2(1, height / 2 - buttonHeight / 2 - ImGui.GetStyle().ItemSpacing.Y));
             if (this._viewerIdx == 0) {
                 ImGui.BeginDisabled();
             }
@@ -363,7 +363,7 @@ public class PluginUi : IDisposable {
             }
         }
 
-        if (ImGui.TableSetColumnIndex(1) && this._viewerIdx > 0 && this._viewerIdx < nearby.Count) {
+        if (ImGui.TableSetColumnIndex(1) && this._viewerIdx > -1 && this._viewerIdx < nearby.Count) {
             var message = nearby[this._viewerIdx];
             ImGui.TextUnformatted(message.Text);
         }
@@ -371,7 +371,7 @@ public class PluginUi : IDisposable {
         if (ImGui.TableSetColumnIndex(2)) {
             var height = ImGui.GetContentRegionAvail().Y;
             var buttonHeight = ImGuiHelpers.GetButtonSize(">").Y;
-            ImGui.Dummy(new Vector2(1, height / 2 - buttonHeight / 2));
+            ImGui.Dummy(new Vector2(1, height / 2 - buttonHeight / 2 - ImGui.GetStyle().ItemSpacing.Y));
 
             if (this._viewerIdx == nearby.Count - 1) {
                 ImGui.BeginDisabled();
