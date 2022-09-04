@@ -211,6 +211,8 @@ public class PluginUi : IDisposable {
                     };
 
                     this.Plugin.Messages.Add(newMsg);
+                    this.ResetWriter();
+                    this.WriterVisible = false;
                 }
             });
         }
@@ -226,6 +228,12 @@ public class PluginUi : IDisposable {
         }
 
         ImGui.End();
+    }
+
+    private void ResetWriter() {
+        this._part1 = this._part2 = this._conj = -1;
+        this._word1 = (-1, -1);
+        this._word2 = (-1, -1);
     }
 
     private void ClearIfNecessary() {
