@@ -7,6 +7,8 @@ pub struct Message {
     pub x: f32,
     pub y: f32,
     pub z: f32,
+    #[serde(default)]
+    pub yaw: f32,
 
     pub pack_id: Uuid,
     pub template_1: usize,
@@ -24,6 +26,7 @@ pub struct RetrievedMessage {
     pub x: f64,
     pub y: f64,
     pub z: f64,
+    pub yaw: f64,
     pub message: String,
     pub positive_votes: i32,
     pub negative_votes: i32,
@@ -37,6 +40,7 @@ pub struct RetrievedMessageTerritory {
     pub x: f64,
     pub y: f64,
     pub z: f64,
+    pub yaw: f64,
     pub message: String,
     pub positive_votes: i32,
     pub negative_votes: i32,
