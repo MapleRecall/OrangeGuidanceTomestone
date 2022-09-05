@@ -8,7 +8,7 @@ using OrangeGuidanceTomestone.Helpers;
 namespace OrangeGuidanceTomestone;
 
 internal class Messages : IDisposable {
-    private const string VfxPath = "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1d_o.avfx";
+    internal const string VfxPath = "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1d_o.avfx";
 
     private Plugin Plugin { get; }
 
