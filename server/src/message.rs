@@ -48,4 +48,6 @@ pub struct RetrievedMessageTerritory {
     pub positive_votes: i32,
     pub negative_votes: i32,
     pub user_vote: i64,
+    #[serde(skip)]
+    pub created: NaiveDateTime,
 }

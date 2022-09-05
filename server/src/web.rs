@@ -16,6 +16,7 @@ mod get_location;
 mod vote;
 mod get_mine;
 mod get_message;
+mod claim;
 
 pub fn routes(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
     register::register(Arc::clone(&state))
@@ -26,6 +27,7 @@ pub fn routes(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
         .or(get_message::get_message(Arc::clone(&state)))
         .or(get_location::get_location(Arc::clone(&state)))
         .or(get_mine::get_mine(Arc::clone(&state)))
+        .or(claim::claim(Arc::clone(&state)))
         .recover(handle_rejection)
         .boxed()
 }
@@ -62,6 +64,7 @@ pub enum WebError {
     InvalidIndex,
     TooManyMessages,
     NoSuchMessage,
+    InvalidExtraCode,
 }
 
 impl Reject for WebError {}
@@ -72,21 +75,41 @@ pub struct AnyhowRejection(anyhow::Error);
 impl Reject for AnyhowRejection {}
 
 async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
-    let status = if let Some(AnyhowRejection(e)) = err.find::<AnyhowRejection>() {
+    let (status, name, desc) = if let Some(AnyhowRejection(e)) = err.find::<AnyhowRejection>() {
         eprintln!("{:#?}", e);
-        StatusCode::INTERNAL_SERVER_ERROR
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "internal_error",
+            "an internal logic error occured",
+        )
     } else if let Some(e) = err.find::<WebError>() {
         match e {
-            WebError::InvalidAuthToken => StatusCode::BAD_REQUEST,
-            WebError::InvalidPackId => StatusCode::NOT_FOUND,
-            WebError::InvalidIndex => StatusCode::NOT_FOUND,
-            WebError::TooManyMessages => StatusCode::BAD_REQUEST,
-            WebError::NoSuchMessage => StatusCode::NOT_FOUND,
+            WebError::InvalidAuthToken => (StatusCode::BAD_REQUEST, "invalid_auth_token", "the auth token was not valid"),
+            WebError::InvalidPackId => (StatusCode::NOT_FOUND, "invalid_pack_id", "the server does not have a pack registered with that id"),
+            WebError::InvalidIndex => (StatusCode::NOT_FOUND, "invalid_index", "one of the provided indices was out of range"),
+            WebError::TooManyMessages => (StatusCode::BAD_REQUEST, "too_many_messages", "you have run out of messages - delete one and try again"),
+            WebError::NoSuchMessage => (StatusCode::NOT_FOUND, "no_such_message", "no message with that id was found"),
+            WebError::InvalidExtraCode => (StatusCode::BAD_REQUEST, "invalid_extra_code", "that extra code was not found"),
         }
     } else {
         eprintln!("{:#?}", err);
-        StatusCode::INTERNAL_SERVER_ERROR
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "internal_error",
+            "an unhandled error was encountered",
+        )
     };
 
-    Ok(warp::reply::with_status(warp::reply(), status))
+    #[derive(serde::Serialize)]
+    struct ErrorMessage {
+        code: &'static str,
+        message: &'static str,
+    }
+
+    let message = ErrorMessage {
+        code: name,
+        message: desc,
+    };
+
+    Ok(warp::reply::with_status(warp::reply::json(&message), status))
 }

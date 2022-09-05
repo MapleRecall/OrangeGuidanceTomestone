@@ -15,6 +15,7 @@ internal class MainWindow {
         this.Tabs = new List<ITab> {
             new Write(this.Plugin),
             new MessageList(this.Plugin),
+            new Settings(this.Plugin),
         };
     }
 
