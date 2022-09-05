@@ -41,7 +41,7 @@ public class PluginUi : IDisposable {
         var toRemove = -1;
         for (var i = 0; i < this.Modals.Count; i++) {
             var (id, text) = this.Modals[i];
-            if (!ImGui.BeginPopupModal(id)) {
+            if (!ImGui.BeginPopupModal($"{this.Plugin.Name}###{id}")) {
                 continue;
             }
 
