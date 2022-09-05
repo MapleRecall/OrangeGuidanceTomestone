@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::sync::Arc;
 
 use anyhow::Context;
@@ -16,15 +15,13 @@ pub fn get_location(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
         .and(warp::path("messages"))
         .and(warp::path::param())
         .and(warp::path::end())
-        .and(warp::query::<HashMap<String, String>>())
         .and(super::get_id(Arc::clone(&state)))
-        .and_then(move |location: u32, query: HashMap<String, String>, (id, _)| logic(Arc::clone(&state), id, location, query))
+        .and_then(move |location: u32, (id, _)| logic(Arc::clone(&state), id, location))
         .boxed()
 }
 
-async fn logic(state: Arc<State>, id: i64, location: u32, query: HashMap<String, String>) -> Result<impl Reply, Rejection> {
+async fn logic(state: Arc<State>, id: i64, location: u32) -> Result<impl Reply, Rejection> {
     // TODO: when we're not just returning all results, make sure own messages are always present
-    let filter = query.contains_key("filter");
     let location = location as i64;
     let mut messages = sqlx::query_as!(
         RetrievedMessage,
@@ -39,7 +36,8 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: HashMap<String,
                    coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                    coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
                    v2.vote                                   as user_vote,
-                   m.created
+                   m.created,
+                   m.user
             from messages m
                      left join votes v on m.id = v.message
                      left join votes v2 on m.id = v2.message and v2.user = ?
@@ -53,13 +51,14 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: HashMap<String,
         .context("could not get messages from database")
         .map_err(AnyhowRejection)
         .map_err(warp::reject::custom)?;
-    if filter {
-        filter_messages(&mut messages);
-    }
+    filter_messages(&mut messages, id);
     Ok(warp::reply::json(&messages))
 }
 
-fn filter_messages(messages: &mut Vec<RetrievedMessage>) {
+fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
+    // FIXME: make a migration to fix this, smh I'm dumb
+    let id_str = id.to_string();
+
     // just count nearby messages. this is O(n^2) but alternatives are hard
     let mut ids = Vec::with_capacity(messages.len());
     for a in messages.iter() {
@@ -81,9 +80,7 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>) {
             nearby += 1;
         }
 
-        println!("{} ({} nearby)", a.id, nearby);
-
-        if nearby <= 2 {
+        if a.user == id_str || nearby <= 2 {
             // always include groups of three or fewer
             ids.push(a.id.clone());
             continue;
@@ -91,8 +88,6 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>) {
 
         let score = (a.positive_votes - a.negative_votes).max(0);
         let time_since_creation = Utc::now().naive_utc().signed_duration_since(a.created) - Duration::weeks(score as i64);
-        println!("  time_since_creation: {}", Utc::now().naive_utc().signed_duration_since(a.created));
-        println!("  modified: {}", time_since_creation);
         if time_since_creation > Duration::weeks(1) {
             continue;
         }
@@ -114,7 +109,6 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>) {
             numerator += rounded.max(nearby / 2);
         }
 
-        println!("  chance: {}/{}", numerator, nearby * 2);
         if rand::thread_rng().gen_ratio(numerator.min(nearby), nearby * 2) {
             ids.push(a.id.clone());
         }

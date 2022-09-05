@@ -19,6 +19,11 @@ internal class ViewerButton {
             return;
         }
 
+        if (this.Plugin.Config.AutoViewer) {
+            this.Plugin.Ui.Viewer.Visible = true;
+            return;
+        }
+
         ImGui.SetNextWindowBgAlpha(0.5f);
         if (!ImGui.Begin("##ogt-viewer-button", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize)) {
             ImGui.End();

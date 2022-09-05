@@ -34,6 +34,8 @@ pub struct RetrievedMessage {
     pub user_vote: i64,
     #[serde(skip)]
     pub created: NaiveDateTime,
+    #[serde(skip)]
+    pub user: String,
 }
 
 #[derive(Debug, Serialize)]
