@@ -11,6 +11,7 @@ public class PluginUi : IDisposable {
     internal ViewerButton ViewerButton { get; }
 
     private List<(string, string)> Modals { get; } = new();
+    private Queue<string> ToShow { get; } = new();
 
     internal PluginUi(Plugin plugin) {
         this.Plugin = plugin;
@@ -33,6 +34,10 @@ public class PluginUi : IDisposable {
     }
 
     private void DrawModals() {
+        while (this.ToShow.TryDequeue(out var toShow)) {
+            ImGui.OpenPopup(toShow);
+        }
+
         var toRemove = -1;
         for (var i = 0; i < this.Modals.Count; i++) {
             var (id, text) = this.Modals[i];
@@ -57,11 +62,12 @@ public class PluginUi : IDisposable {
         }
     }
 
-    internal void AddModal(string text) {
-        this.AddModal(Guid.NewGuid().ToString(), text);
+    internal void ShowModal(string text) {
+        this.ShowModal(Guid.NewGuid().ToString(), text);
     }
 
-    internal void AddModal(string id, string text) {
+    internal void ShowModal(string id, string text) {
         this.Modals.Add((id, text));
+        this.ToShow.Enqueue(id);
     }
 }
