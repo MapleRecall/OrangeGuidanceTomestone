@@ -92,7 +92,7 @@ internal class Messages : IDisposable {
             var resp = await ServerHelper.SendRequest(
                 this.Plugin.Config.ApiKey,
                 HttpMethod.Get,
-                $"/messages/{territory}?filter=1"
+                $"/messages/{territory}"
             );
             var json = await resp.Content.ReadAsStringAsync();
             var messages = JsonConvert.DeserializeObject<Message[]>(json)!;
