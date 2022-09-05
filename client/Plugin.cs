@@ -6,6 +6,7 @@ using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using OrangeGuidanceTomestone.MiniPenumbra;
 
 namespace OrangeGuidanceTomestone;
 
@@ -37,13 +38,19 @@ public class Plugin : IDalamudPlugin {
     internal Vfx Vfx { get; }
     internal PluginUi Ui { get; }
     internal Messages Messages { get; }
+    internal VfxReplacer VfxReplacer { get; }
     internal Commands Commands { get; }
 
+    internal string AvfxFilePath { get; }
+
     public Plugin() {
+        this.AvfxFilePath = this.CopyAvfxFile();
+
         this.Config = this.Interface!.GetPluginConfig() as Configuration ?? new Configuration();
         this.Vfx = new Vfx();
         this.Messages = new Messages(this);
         this.Ui = new PluginUi(this);
+        this.VfxReplacer = new VfxReplacer(this);
         this.Commands = new Commands(this);
 
         if (this.Config.ApiKey == string.Empty) {
@@ -59,6 +66,7 @@ public class Plugin : IDalamudPlugin {
 
     public void Dispose() {
         this.Commands.Dispose();
+        this.VfxReplacer.Dispose();
         this.Ui.Dispose();
         this.Messages.Dispose();
         this.Vfx.Dispose();
@@ -66,5 +74,14 @@ public class Plugin : IDalamudPlugin {
 
     internal void SaveConfig() {
         this.Interface.SavePluginConfig(this.Config);
+    }
+
+    private string CopyAvfxFile() {
+        var configDir = this.Interface!.GetPluginConfigDirectory();
+        Directory.CreateDirectory(configDir);
+        var stream = Resourcer.Resource.AsStream("MiniPenumbra/b0941trp1d_o.avfx");
+        var path = Path.Join(configDir, "sign.avfx");
+        stream.CopyTo(File.Create(path));
+        return path;
     }
 }
