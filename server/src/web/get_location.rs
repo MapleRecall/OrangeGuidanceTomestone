@@ -3,7 +3,6 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use chrono::{Duration, Utc};
-use rand::distributions::WeightedIndex;
 use rand::Rng;
 use warp::{Filter, Rejection, Reply};
 use warp::filters::BoxedFilter;
@@ -120,7 +119,5 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>) {
         }
     }
 
-    messages.drain_filter(|msg| {
-        return !ids.contains(&msg.id);
-    });
+    messages.drain_filter(|msg| !ids.contains(&msg.id));
 }

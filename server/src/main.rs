@@ -106,7 +106,7 @@ async fn main() -> Result<()> {
     println!("adding packs");
     state.update_packs().await?;
 
-    let address = state.config.address.clone();
+    let address = state.config.address;
     println!("listening at {}", address);
     warp::serve(web::routes(state)).run(address).await;
     Ok(())

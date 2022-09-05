@@ -2,11 +2,9 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use bytes::Bytes;
-use uuid::Uuid;
 use warp::{Filter, Rejection, Reply};
 use warp::filters::BoxedFilter;
 
-use crate::message::RetrievedMessageTerritory;
 use crate::State;
 use crate::web::{AnyhowRejection, WebError};
 
