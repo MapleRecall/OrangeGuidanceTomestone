@@ -13,7 +13,7 @@ pub fn get_mine(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
         .and(warp::path("messages"))
         .and(warp::path::end())
         .and(super::get_id(Arc::clone(&state)))
-        .and_then(move |id: i64| logic(Arc::clone(&state), id))
+        .and_then(move |(id, _)| logic(Arc::clone(&state), id))
         .boxed()
 }
 

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use sqlx::types::chrono::NaiveDateTime;
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
@@ -31,6 +32,8 @@ pub struct RetrievedMessage {
     pub positive_votes: i32,
     pub negative_votes: i32,
     pub user_vote: i64,
+    #[serde(skip)]
+    pub created: NaiveDateTime,
 }
 
 #[derive(Debug, Serialize)]
