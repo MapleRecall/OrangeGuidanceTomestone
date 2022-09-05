@@ -30,7 +30,7 @@ pub fn routes(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
         .boxed()
 }
 
-pub fn get_id(state: Arc<State>) -> BoxedFilter<(i64, )> {
+pub fn get_id(state: Arc<State>) -> BoxedFilter<((i64, i64), )> {
     warp::cookie("access_token")
         .or(warp::header("x-api-key"))
         .unify()
@@ -40,13 +40,13 @@ pub fn get_id(state: Arc<State>) -> BoxedFilter<(i64, )> {
                 let hashed = crate::util::hash(&access_token);
                 let id = sqlx::query!(
                     // language=sqlite
-                    "select id from users where auth = ?",
+                    "select id, extra from users where auth = ?",
                     hashed,
                 )
                     .fetch_optional(&state.db)
                     .await;
                 match id {
-                    Ok(Some(i)) => Ok(i.id),
+                    Ok(Some(i)) => Ok((i.id, i.extra)),
                     Ok(None) => Err(warp::reject::custom(WebError::InvalidAuthToken)),
                     Err(e) => Err(warp::reject::custom(AnyhowRejection(e.into()))),
                 }

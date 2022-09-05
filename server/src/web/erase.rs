@@ -14,7 +14,7 @@ pub fn erase(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
         .and(warp::path::param())
         .and(warp::path::end())
         .and(super::get_id(Arc::clone(&state)))
-        .and_then(move |post_id: Uuid, id: i64| logic(Arc::clone(&state), id, post_id))
+        .and_then(move |post_id: Uuid, (id, _)| logic(Arc::clone(&state), id, post_id))
         .boxed()
 }
 

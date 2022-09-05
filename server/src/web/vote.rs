@@ -16,7 +16,7 @@ pub fn vote(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
         .and(warp::path::end())
         .and(super::get_id(Arc::clone(&state)))
         .and(warp::body::json())
-        .and_then(move |message_id: Uuid, id: i64, vote: i8| logic(Arc::clone(&state), id, message_id, vote))
+        .and_then(move |message_id: Uuid, (id, _), vote: i8| logic(Arc::clone(&state), id, message_id, vote))
         .boxed()
 }
 

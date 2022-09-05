@@ -15,11 +15,11 @@ pub fn write(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
         .and(warp::path::end())
         .and(super::get_id(Arc::clone(&state)))
         .and(warp::body::json())
-        .and_then(move |id: i64, message: Message| logic(Arc::clone(&state), id, message))
+        .and_then(move |(id, extra), message: Message| logic(Arc::clone(&state), id, extra, message))
         .boxed()
 }
 
-async fn logic(state: Arc<State>, id: i64, message: Message) -> Result<impl Reply, Rejection> {
+async fn logic(state: Arc<State>, id: i64, extra: i64, message: Message) -> Result<impl Reply, Rejection> {
     let text = {
         let packs = state.packs.read().await;
         let pack = packs.get(&message.pack_id)
@@ -47,7 +47,7 @@ async fn logic(state: Arc<State>, id: i64, message: Message) -> Result<impl Repl
         .map_err(AnyhowRejection)
         .map_err(warp::reject::custom)?;
 
-    if existing.count >= 10 {
+    if existing.count >= 10 + extra as i32 {
         return Err(warp::reject::custom(WebError::TooManyMessages));
     }
 
