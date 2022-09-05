@@ -22,6 +22,7 @@ internal class Viewer {
         }
 
         ImGui.SetNextWindowSize(new Vector2(350, 175), ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowBgAlpha(this.Plugin.Config.ViewerOpacity);
         if (!ImGui.Begin("Messages", ref this.Visible)) {
             ImGui.End();
             return;
