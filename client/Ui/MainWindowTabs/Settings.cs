@@ -32,6 +32,7 @@ internal class Settings : ITab {
         if (vfx) {
             this.Plugin.Messages.RemoveVfx();
             this.Plugin.Messages.Clear();
+            this.Plugin.Messages.SpawnVfx();
         }
 
         this.ExtraCodeInput();
