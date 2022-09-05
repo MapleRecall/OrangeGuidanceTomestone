@@ -189,7 +189,7 @@ internal class Write : ITab {
                     this.Plugin.Ui.MainWindow.Visible = false;
                 } else {
                     var error = JsonConvert.DeserializeObject<ErrorMessage>(content);
-                    this.Plugin.Ui.AddModal($"Error writing message.\n\nMessage from server:\n{error?.Message}");
+                    this.Plugin.Ui.ShowModal($"Error writing message.\n\nMessage from server:\n{error?.Message}");
                 }
             });
         }

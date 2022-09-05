@@ -54,12 +54,12 @@ internal class Settings : ITab {
                 var text = await resp.Content.ReadAsStringAsync();
                 if (uint.TryParse(text, out var extra)) {
                     this.Plugin.Ui.MainWindow.ExtraMessages = extra;
-                    this.Plugin.Ui.AddModal($"Code claimed.\n\nYou can now post up to {10 + extra:N0} messages.");
+                    this.Plugin.Ui.ShowModal($"Code claimed.\n\nYou can now post up to {10 + extra:N0} messages.");
                 } else {
-                    this.Plugin.Ui.AddModal("Code claimed but the server gave an unexpected response.");
+                    this.Plugin.Ui.ShowModal("Code claimed but the server gave an unexpected response.");
                 }
             } else {
-                this.Plugin.Ui.AddModal("Invalid code.");
+                this.Plugin.Ui.ShowModal("Invalid code.");
             }
         });
     }
