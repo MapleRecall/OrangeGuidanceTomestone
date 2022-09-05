@@ -37,9 +37,10 @@ internal class Viewer {
         if (nearby.Count == 0) {
             if (this.Plugin.Config.AutoViewer) {
                 this.Visible = false;
+            } else {
+                ImGui.TextUnformatted("No nearby messages");
             }
 
-            ImGui.TextUnformatted("No nearby messages");
             goto End;
         }
 
