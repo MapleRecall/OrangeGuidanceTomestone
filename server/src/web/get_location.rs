@@ -97,8 +97,9 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>) {
             continue;
         }
 
-        let brand_new = time_since_creation < Duration::hours(6);
-        let new = time_since_creation < Duration::days(2);
+        // originally thresholds were 6 hours and 2 days
+        let brand_new = time_since_creation < Duration::minutes(30);
+        let new = time_since_creation < Duration::hours(2);
 
         let mut numerator = 1;
         if brand_new {
@@ -113,8 +114,8 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>) {
             numerator += rounded.max(nearby / 2);
         }
 
-        println!("  chance: {}/{}", numerator, nearby);
-        if rand::thread_rng().gen_ratio(numerator.min(nearby), nearby) {
+        println!("  chance: {}/{}", numerator, nearby * 2);
+        if rand::thread_rng().gen_ratio(numerator.min(nearby), nearby * 2) {
             ids.push(a.id.clone());
         }
     }
