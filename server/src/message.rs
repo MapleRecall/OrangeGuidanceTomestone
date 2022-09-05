@@ -1,3 +1,4 @@
+use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::NaiveDateTime;
 use uuid::Uuid;
@@ -36,6 +37,13 @@ pub struct RetrievedMessage {
     pub created: NaiveDateTime,
     #[serde(skip)]
     pub user: String,
+}
+
+impl RetrievedMessage {
+    pub fn adjusted_time_since_posting(&self) -> Duration {
+        let score = (self.positive_votes - self.negative_votes).max(0);
+        Utc::now().naive_utc().signed_duration_since(a.created) - Duration::weeks(score as i64)
+    }
 }
 
 #[derive(Debug, Serialize)]

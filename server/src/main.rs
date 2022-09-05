@@ -19,6 +19,7 @@ mod message;
 mod web;
 mod util;
 mod config;
+mod task;
 
 static MIGRATOR: Migrator = sqlx::migrate!();
 
