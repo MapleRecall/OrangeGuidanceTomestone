@@ -1,4 +1,5 @@
 #![feature(let_chains)]
+#![feature(drain_filter)]
 
 use std::collections::HashMap;
 use std::sync::Arc;
