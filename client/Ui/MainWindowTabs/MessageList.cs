@@ -24,6 +24,10 @@ internal class MessageList : ITab {
 
         this.MessagesMutex.Wait();
 
+        ImGui.TextUnformatted($"Messages: {this.Messages.Count:N0} / {10 + this.Plugin.Ui.MainWindow.ExtraMessages:N0}");
+
+        ImGui.Separator();
+
         foreach (var message in this.Messages) {
             var territory = this.Plugin.DataManager.GetExcelSheet<TerritoryType>()?.GetRow(message.Territory);
             var territoryName = territory?.PlaceName.Value?.Name?.ToDalamudString().TextValue ?? "???";
@@ -50,13 +54,14 @@ internal class MessageList : ITab {
             var resp = await ServerHelper.SendRequest(
                 this.Plugin.Config.ApiKey,
                 HttpMethod.Get,
-                "/messages"
+                "/messages?v=2"
             );
             var json = await resp.Content.ReadAsStringAsync();
-            var messages = JsonConvert.DeserializeObject<MessageWithTerritory[]>(json)!;
+            var messages = JsonConvert.DeserializeObject<MyMessages>(json)!;
             await this.MessagesMutex.WaitAsync();
+            this.Plugin.Ui.MainWindow.ExtraMessages = messages.Extra;
             this.Messages.Clear();
-            this.Messages.AddRange(messages);
+            this.Messages.AddRange(messages.Messages);
             this.MessagesMutex.Release();
         });
     }

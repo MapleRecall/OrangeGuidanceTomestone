@@ -171,10 +171,10 @@ internal class Write : ITab {
                     "application/json",
                     new StringContent(json)
                 );
-                var id = await resp.Content.ReadAsStringAsync();
+                var content = await resp.Content.ReadAsStringAsync();
                 if (resp.IsSuccessStatusCode) {
                     var newMsg = new Message {
-                        Id = Guid.Parse(id),
+                        Id = Guid.Parse(content),
                         X = player.Position.X,
                         Y = player.Position.Y,
                         Z = player.Position.Z,
@@ -187,6 +187,9 @@ internal class Write : ITab {
                     this.Plugin.Messages.Add(newMsg);
                     this.ResetWriter();
                     this.Plugin.Ui.MainWindow.Visible = false;
+                } else {
+                    var error = JsonConvert.DeserializeObject<ErrorMessage>(content);
+                    this.Plugin.Ui.AddModal($"Error writing message.\n\nMessage from server:\n{error?.Message}");
                 }
             });
         }

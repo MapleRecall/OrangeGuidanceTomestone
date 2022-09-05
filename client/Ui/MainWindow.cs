@@ -9,6 +9,7 @@ internal class MainWindow {
     private List<ITab> Tabs { get; }
 
     internal bool Visible;
+    internal uint ExtraMessages;
 
     internal MainWindow(Plugin plugin) {
         this.Plugin = plugin;
