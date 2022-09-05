@@ -1,6 +1,7 @@
 using System.Numerics;
 using Dalamud.Game;
 using Dalamud.Logging;
+using Lumina.Excel.GeneratedSheets;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
 
@@ -15,8 +16,21 @@ internal class Messages : IDisposable {
     private Dictionary<Guid, Message> Current { get; } = new();
     private Queue<Message> SpawnQueue { get; } = new();
 
+    private HashSet<uint> Trials { get; } = new();
+    private HashSet<uint> DeepDungeons { get; } = new();
+
     internal Messages(Plugin plugin) {
         this.Plugin = plugin;
+
+        foreach (var cfc in this.Plugin.DataManager.GetExcelSheet<ContentFinderCondition>()!) {
+            if (cfc.ContentType.Row == 4) {
+                this.Trials.Add(cfc.TerritoryType.Row);
+            }
+
+            if (cfc.ContentType.Row == 21) {
+                this.DeepDungeons.Add(cfc.TerritoryType.Row);
+            }
+        }
 
         if (this.Plugin.Config.ApiKey != string.Empty) {
             this.SpawnVfx();
@@ -34,7 +48,7 @@ internal class Messages : IDisposable {
         this.Plugin.ClientState.Login -= this.SpawnVfx;
         this.Plugin.Framework.Update -= this.HandleSpawnQueue;
 
-        this.RemoveVfx(null, null);
+        this.RemoveVfx();
     }
 
     private unsafe void HandleSpawnQueue(Framework framework) {
@@ -42,10 +56,10 @@ internal class Messages : IDisposable {
             return;
         }
 
-        PluginLog.Log($"spawning vfx for {message.Id}");
+        PluginLog.Debug($"spawning vfx for {message.Id}");
         var rotation = Quaternion.CreateFromYawPitchRoll(message.Yaw, 0, 0);
         if (this.Plugin.Vfx.SpawnStatic(message.Id, VfxPath, message.Position, rotation) == null) {
-            PluginLog.Log("trying again");
+            PluginLog.Debug("trying again");
             this.SpawnQueue.Enqueue(message);
         }
     }
@@ -61,6 +75,14 @@ internal class Messages : IDisposable {
     internal void SpawnVfx() {
         var territory = this.Plugin.ClientState.TerritoryType;
         if (territory == 0 || this.Plugin.Config.BannedTerritories.Contains(territory)) {
+            return;
+        }
+
+        if (this.Plugin.Config.DisableTrials && this.Trials.Contains(territory)) {
+            return;
+        }
+
+        if (this.Plugin.Config.DisableDeepDungeon && this.DeepDungeons.Contains(territory)) {
             return;
         }
 
@@ -93,6 +115,12 @@ internal class Messages : IDisposable {
 
     internal void RemoveVfx() {
         this.Plugin.Vfx.RemoveAll();
+    }
+
+    internal void Clear() {
+        this.CurrentMutex.Wait();
+        this.Current.Clear();
+        this.CurrentMutex.Release();
     }
 
     internal IEnumerable<Message> Nearby() {

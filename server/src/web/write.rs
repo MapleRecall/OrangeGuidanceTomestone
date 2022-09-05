@@ -14,6 +14,7 @@ pub fn write(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
         .and(warp::path("messages"))
         .and(warp::path::end())
         .and(super::get_id(Arc::clone(&state)))
+        .and(warp::body::content_length_limit(1024))
         .and(warp::body::json())
         .and_then(move |(id, extra), message: Message| logic(Arc::clone(&state), id, extra, message))
         .boxed()

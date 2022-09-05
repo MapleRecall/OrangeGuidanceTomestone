@@ -34,7 +34,8 @@ async fn logic(state: Arc<State>, id: i64, message_id: Uuid) -> Result<impl Repl
                    m.message,
                    coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                    coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
-                   v2.vote                                   as user_vote
+                   v2.vote                                   as user_vote,
+                   m.created
             from messages m
                      left join votes v on m.id = v.message
                      left join votes v2 on m.id = v2.message and v2.user = ?

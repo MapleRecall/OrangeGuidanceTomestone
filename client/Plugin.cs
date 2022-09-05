@@ -3,6 +3,7 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Command;
+using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 
@@ -13,6 +14,9 @@ public class Plugin : IDalamudPlugin {
 
     [PluginService]
     internal DalamudPluginInterface Interface { get; init; }
+
+    [PluginService]
+    internal ChatGui ChatGui { get; init; }
 
     [PluginService]
     internal ClientState ClientState { get; init; }

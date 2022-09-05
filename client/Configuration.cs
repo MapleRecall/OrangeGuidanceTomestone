@@ -8,4 +8,7 @@ public class Configuration : IPluginConfiguration {
 
     public string ApiKey { get; set; } = string.Empty;
     public HashSet<uint> BannedTerritories { get; set; } = new();
+    public bool DisableTrials = true;
+    public bool DisableDeepDungeon = true;
+    public bool RemoveGlow = true;
 }
