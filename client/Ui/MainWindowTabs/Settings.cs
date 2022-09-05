@@ -14,12 +14,15 @@ internal class Settings : ITab {
     }
 
     public void Draw() {
+        ImGui.PushTextWrapPos();
+
         var anyChanged = false;
         var vfx = false;
 
         anyChanged |= vfx |= ImGui.Checkbox("Disable in trials", ref this.Plugin.Config.DisableTrials);
         anyChanged |= vfx |= ImGui.Checkbox("Disable in Deep Dungeons", ref this.Plugin.Config.DisableDeepDungeon);
         anyChanged |= vfx |= ImGui.Checkbox("Remove glow effect from signs", ref this.Plugin.Config.RemoveGlow);
+        anyChanged |= ImGui.Checkbox("Open the viewer automatically when near a sign", ref this.Plugin.Config.AutoViewer);
 
         if (anyChanged) {
             this.Plugin.SaveConfig();
@@ -31,6 +34,8 @@ internal class Settings : ITab {
         }
 
         this.ExtraCodeInput();
+
+        ImGui.PopTextWrapPos();
     }
 
     private void ExtraCodeInput() {

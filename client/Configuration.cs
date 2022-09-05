@@ -11,4 +11,5 @@ public class Configuration : IPluginConfiguration {
     public bool DisableTrials = true;
     public bool DisableDeepDungeon = true;
     public bool RemoveGlow = true;
+    public bool AutoViewer;
 }
