@@ -35,15 +35,17 @@ public class PluginUi : IDisposable {
 
     private void DrawModals() {
         while (this.ToShow.TryDequeue(out var toShow)) {
-            ImGui.OpenPopup(toShow);
+            ImGui.OpenPopup($"{this.Plugin.Name}##{toShow}");
         }
 
         var toRemove = -1;
         for (var i = 0; i < this.Modals.Count; i++) {
             var (id, text) = this.Modals[i];
-            if (!ImGui.BeginPopupModal($"{this.Plugin.Name}###{id}")) {
+            if (!ImGui.BeginPopupModal($"{this.Plugin.Name}##{id}")) {
                 continue;
             }
+
+            ImGui.PushID(id);
 
             ImGui.TextUnformatted(text);
             ImGui.Separator();
@@ -53,6 +55,8 @@ public class PluginUi : IDisposable {
                 ImGui.CloseCurrentPopup();
                 toRemove = i;
             }
+
+            ImGui.PopID();
 
             ImGui.EndPopup();
         }
