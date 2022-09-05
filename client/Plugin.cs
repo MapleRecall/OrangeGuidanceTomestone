@@ -54,13 +54,7 @@ public class Plugin : IDalamudPlugin {
         this.Commands = new Commands(this);
 
         if (this.Config.ApiKey == string.Empty) {
-            Task.Run(async () => {
-                var resp = await new HttpClient().PostAsync("https://tryfingerbuthole.anna.lgbt/account", null);
-                var key = await resp.Content.ReadAsStringAsync();
-                this.Config.ApiKey = key;
-                this.SaveConfig();
-                this.Messages.SpawnVfx();
-            });
+            this.GetApiKey();
         }
     }
 
@@ -83,5 +77,15 @@ public class Plugin : IDalamudPlugin {
         var path = Path.Join(configDir, "sign.avfx");
         stream.CopyTo(File.Create(path));
         return path;
+    }
+
+    internal void GetApiKey() {
+        Task.Run(async () => {
+            var resp = await new HttpClient().PostAsync("https://tryfingerbuthole.anna.lgbt/account", null);
+            var key = await resp.Content.ReadAsStringAsync();
+            this.Config.ApiKey = key;
+            this.SaveConfig();
+            this.Messages.SpawnVfx();
+        });
     }
 }

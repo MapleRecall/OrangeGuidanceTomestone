@@ -12,5 +12,6 @@ public class Configuration : IPluginConfiguration {
     public bool DisableDeepDungeon = true;
     public bool RemoveGlow = true;
     public bool AutoViewer;
+    public bool AutoViewerClose = true;
     public float ViewerOpacity = 100.0f;
 }

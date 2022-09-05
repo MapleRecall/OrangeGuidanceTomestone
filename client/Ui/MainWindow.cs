@@ -31,20 +31,43 @@ internal class MainWindow {
             return;
         }
 
-        if (ImGui.BeginTabBar("##ogt-main-tabs")) {
-            foreach (var tab in this.Tabs) {
-                if (!ImGui.BeginTabItem(tab.Name)) {
-                    continue;
-                }
-
-                tab.Draw();
-
-                ImGui.EndTabItem();
-            }
-
-            ImGui.EndTabBar();
+        if (this.Plugin.Config.ApiKey == string.Empty) {
+            this.DrawApiKey();
+        } else {
+            this.DrawTabs();
         }
 
         ImGui.End();
+    }
+
+    private void DrawTabs() {
+        if (!ImGui.BeginTabBar("##ogt-main-tabs")) {
+            return;
+        }
+
+        foreach (var tab in this.Tabs) {
+            if (!ImGui.BeginTabItem(tab.Name)) {
+                continue;
+            }
+
+            tab.Draw();
+
+            ImGui.EndTabItem();
+        }
+
+        ImGui.EndTabBar();
+    }
+
+    private void DrawApiKey() {
+        ImGui.PushTextWrapPos();
+
+        ImGui.TextUnformatted($"Somehow, {this.Plugin.Name} wasn't able to register you an account automatically.");
+        ImGui.TextUnformatted("Click the button below to try again.");
+
+        ImGui.PopTextWrapPos();
+
+        if (ImGui.Button("Register")) {
+            this.Plugin.GetApiKey();
+        }
     }
 }

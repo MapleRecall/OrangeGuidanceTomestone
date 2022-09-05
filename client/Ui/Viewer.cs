@@ -36,7 +36,7 @@ internal class Viewer {
             .OrderBy(msg => msg.Id)
             .ToList();
         if (nearby.Count == 0) {
-            if (this.Plugin.Config.AutoViewer) {
+            if (this.Plugin.Config.AutoViewerClose) {
                 this.Visible = false;
             } else {
                 ImGui.TextUnformatted("No nearby messages");

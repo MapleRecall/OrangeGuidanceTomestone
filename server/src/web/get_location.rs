@@ -87,7 +87,7 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
         }
 
         let score = (a.positive_votes - a.negative_votes).max(0);
-        let time_since_creation = Utc::now().naive_utc().signed_duration_since(a.created) - Duration::weeks(score as i64);
+        let time_since_creation = a.adjusted_time_since_posting();
         if time_since_creation > Duration::weeks(1) {
             continue;
         }
