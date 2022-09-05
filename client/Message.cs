@@ -57,3 +57,17 @@ internal class MessageWithTerritory {
         };
     }
 }
+
+[Serializable]
+[JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
+internal class ErrorMessage {
+    public string Code { get; set; }
+    public string Message { get; set; }
+}
+
+[Serializable]
+[JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
+internal class MyMessages {
+    public uint Extra { get; set; }
+    public MessageWithTerritory[] Messages { get; set; }
+}
