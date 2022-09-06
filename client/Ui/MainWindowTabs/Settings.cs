@@ -13,6 +13,9 @@ internal class Settings : ITab {
         this.Plugin = plugin;
     }
 
+    public void Dispose() {
+    }
+
     public void Draw() {
         ImGui.PushTextWrapPos();
 
