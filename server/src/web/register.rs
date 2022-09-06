@@ -21,7 +21,7 @@ async fn logic(state: Arc<State>) -> Result<impl Reply, Rejection> {
     let hashed = crate::util::hash(&auth);
     sqlx::query!(
         // language=sqlite
-        "insert into users (auth) values (?)",
+        "insert into users (auth, last_seen) values (?, current_timestamp)",
         hashed,
     )
         .execute(&state.db)

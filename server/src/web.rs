@@ -17,6 +17,7 @@ mod vote;
 mod get_mine;
 mod get_message;
 mod claim;
+mod ping;
 
 pub fn routes(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
     register::register(Arc::clone(&state))
@@ -28,6 +29,7 @@ pub fn routes(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
         .or(get_location::get_location(Arc::clone(&state)))
         .or(get_mine::get_mine(Arc::clone(&state)))
         .or(claim::claim(Arc::clone(&state)))
+        .or(ping::ping(Arc::clone(&state)))
         .recover(handle_rejection)
         .boxed()
 }

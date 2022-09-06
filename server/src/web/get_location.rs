@@ -38,10 +38,12 @@ async fn logic(state: Arc<State>, id: i64, location: u32) -> Result<impl Reply, 
                    v2.vote                                   as user_vote,
                    m.glyph,
                    m.created,
-                   m.user
+                   m.user,
+                   cast((julianday(current_timestamp) - julianday(created)) * 1440 as int) as last_seen_minutes
             from messages m
                      left join votes v on m.id = v.message
                      left join votes v2 on m.id = v2.message and v2.user = ?
+                     inner join users u on m.user = u.id
             where m.territory = ?
             group by m.id"#,
         id,
@@ -63,8 +65,17 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
     // just count nearby messages. this is O(n^2) but alternatives are hard
     let mut ids = Vec::with_capacity(messages.len());
     for a in messages.iter() {
-        let mut nearby = 0;
+        if a.user == id_str {
+            // always include own messages
+            ids.push(a.id.clone());
+            continue;
+        }
 
+        if a.last_seen_minutes >= 35 {
+            continue;
+        }
+
+        let mut nearby = 0;
         for b in messages.iter() {
             if a.id == b.id {
                 continue;
@@ -81,36 +92,39 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
             nearby += 1;
         }
 
-        if a.user == id_str || nearby <= 2 {
-            // always include groups of three or fewer
-            ids.push(a.id.clone());
-            continue;
-        }
+        let (numerator, denominator) = if nearby <= 2 {
+            // no need to do calculations for groups of three or fewer
+            (17, 20)
+        } else {
+            let time_since_creation = a.created.signed_duration_since(Utc::now().naive_utc());
+            let brand_new = time_since_creation < Duration::minutes(30);
+            let new = time_since_creation < Duration::hours(2);
 
-        let score = (a.positive_votes - a.negative_votes).max(0);
-        let time_since_creation = a.adjusted_time_since_posting();
-        if time_since_creation > Duration::weeks(1) {
-            continue;
-        }
+            let mut numerator = 1;
+            if brand_new {
+                numerator = nearby;
+            } else if new {
+                numerator += (nearby / 3).min(1);
+            }
 
-        // originally thresholds were 6 hours and 2 days
-        let brand_new = time_since_creation < Duration::minutes(30);
-        let new = time_since_creation < Duration::hours(2);
+            let score = (a.positive_votes - a.negative_votes).max(0);
+            if score > 0 {
+                let pad = score as f32 / nearby as f32;
+                let rounded = pad.round() as u32;
+                numerator += rounded.max(nearby / 2);
+            }
 
-        let mut numerator = 1;
-        if brand_new {
-            numerator = nearby;
-        } else if new {
-            numerator += (nearby / 3).min(1);
-        }
+            nearby *= 2;
 
-        if score > 0 {
-            let pad = score as f32 / nearby as f32;
-            let rounded = pad.round() as u32;
-            numerator += rounded.max(nearby / 2);
-        }
+            if numerator * 20 > nearby * 17 {
+                numerator = 17;
+                nearby = 20;
+            }
 
-        if rand::thread_rng().gen_ratio(numerator.min(nearby), nearby * 2) {
+            (numerator, nearby)
+        };
+
+        if rand::thread_rng().gen_ratio(numerator.min(denominator), denominator) {
             ids.push(a.id.clone());
         }
     }
