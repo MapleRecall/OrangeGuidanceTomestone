@@ -35,11 +35,14 @@ internal unsafe class VfxReplacer : IDisposable {
         }
 
         var path = fileDescriptor->ResourceHandle->FileName.ToString();
-        if (path != Messages.VfxPath) {
+        var index = Array.IndexOf(Messages.VfxPaths, path);
+        if (index == -1) {
             goto Original;
         }
 
-        return this.DefaultRootedResourceLoad(this.Plugin.AvfxFilePath, resourceManager, fileDescriptor, priority, isSync);
+        var letter = (char) ('a' + index);
+        var newPath = Path.Join(this.Plugin.AvfxFilePath, $"sign_{letter}.avfx");
+        return this.DefaultRootedResourceLoad(newPath, resourceManager, fileDescriptor, priority, isSync);
 
         Original:
         return this._readSqPackHook.Original(resourceManager, fileDescriptor, priority, isSync);

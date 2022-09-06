@@ -73,10 +73,14 @@ public class Plugin : IDalamudPlugin {
     private string CopyAvfxFile() {
         var configDir = this.Interface!.GetPluginConfigDirectory();
         Directory.CreateDirectory(configDir);
-        var stream = Resourcer.Resource.AsStream("MiniPenumbra/b0941trp1d_o.avfx");
-        var path = Path.Join(configDir, "sign.avfx");
-        stream.CopyTo(File.Create(path));
-        return path;
+        for (var i = 0; i < 5; i++) {
+            var letter = (char) ('a' + i);
+            var stream = Resourcer.Resource.AsStreamUnChecked($"OrangeGuidancetomestone.vfx.b0941trp1{letter}_o.avfx");
+            var path = Path.Join(configDir, $"sign_{letter}.avfx");
+            stream.CopyTo(File.Create(path));
+        }
+
+        return configDir;
     }
 
     internal void GetApiKey() {

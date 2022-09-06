@@ -67,7 +67,7 @@
     <ItemGroup>
         <EmbeddedResource Include="../server/packs/*.yaml" LinkBase="packs"/>
         <EmbeddedResource Remove="../server/packs/*_old*.yaml"/>
-        <EmbeddedResource Include="MiniPenumbra\b0941trp1d_o.avfx"/>
+        <EmbeddedResource Include="vfx/b0941trp1*_o.avfx"/>
     </ItemGroup>
 
 </Project>
