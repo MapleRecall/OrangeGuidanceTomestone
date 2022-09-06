@@ -23,7 +23,13 @@ internal class Messages : IDisposable {
         this.Plugin = plugin;
 
         foreach (var cfc in this.Plugin.DataManager.GetExcelSheet<ContentFinderCondition>()!) {
-            if (cfc.ContentType.Row == 4) {
+            // Trials, Raids, and Ultimate Raids
+            if (cfc.ContentType.Row is 4 or 5 or 28) {
+                // "Raids" - but we only want non-alliance raids
+                if (cfc.ContentType.Row == 5 && cfc.ContentMemberType.Row == 4) {
+                    continue;
+                }
+
                 this.Trials.Add(cfc.TerritoryType.Row);
             }
 
