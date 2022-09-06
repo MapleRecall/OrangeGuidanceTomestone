@@ -108,10 +108,14 @@ internal class Write : ITab {
 
         var pack = Pack.All.Value[this._pack];
 
+        var lineHeight = ImGui.CalcTextSize("A").Y;
+        var imageHeight = lineHeight * 4;
+
+        var glyphImage = this.GlyphImages[this._glyph];
+        ImGui.Image(glyphImage.ImGuiHandle, new Vector2(imageHeight));
+
         var actualText = string.Empty;
-        if (this._part1 == -1) {
-            ImGui.TextUnformatted(placeholder);
-        } else {
+        if (this._part1 != -1) {
             var preview = new StringBuilder();
 
             var template1 = pack.Templates[this._part1];
@@ -138,6 +142,8 @@ internal class Write : ITab {
             }
 
             actualText = preview.ToString();
+            var actualSize = ImGui.CalcTextSize(actualText);
+            ImGui.SameLine(0, imageHeight / 2 - actualSize.Y / 2);
             ImGui.TextUnformatted(actualText);
         }
 
@@ -169,7 +175,7 @@ internal class Write : ITab {
 
                 ImGui.BeginTooltip();
                 var image = this.GlyphImages[i];
-                ImGui.Image(image.ImGuiHandle, new Vector2(image.Width, image.Height));
+                ImGui.Image(image.ImGuiHandle, new Vector2(imageHeight));
                 ImGui.EndTooltip();
             }
 
