@@ -21,8 +21,12 @@ pub struct Message {
     pub word_2_list: Option<usize>,
     pub word_2_word: Option<usize>,
 
-    #[serde(default)]
+    #[serde(default = "glyph_default")]
     pub glyph: i8,
+}
+
+fn glyph_default() -> i8 {
+    3
 }
 
 #[derive(Debug, Serialize)]
