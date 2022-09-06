@@ -17,6 +17,9 @@ internal class MessageList : ITab {
         this.Plugin = plugin;
     }
 
+    public void Dispose() {
+    }
+
     public void Draw() {
         if (ImGui.Button("Refresh")) {
             this.Refresh();

@@ -1,5 +1,5 @@
 name: FINAL FANTASY XIV
-id: 120e0e08-9533-454b-bfab-f8774a5b6d80
+id: 43cf8e42-43fe-42cf-b989-6446e30fa914
 
 templates:
   - '{0} ahead'
@@ -58,10 +58,12 @@ words:
       - goblin
       - primal
 
-  - name: People 1
+  - name: People
     words:
       - Warrior of Light
       - Warrior of Darkness
+      - Garlean
+      - Allagan
       - Ascian
       - merchant
       - teacher
@@ -90,22 +92,6 @@ words:
       - trio
       - thief
       - uplander
-
-  - name: People 2
-    words:
-      - Garlean
-      - Allagan
-      - Eorzean
-      - Doman
-      - Hingan
-      - Ala Mhigan
-      - lalafell
-      - miqo'te
-      - hyur
-      - elezen
-      - au ra
-      - hrothgar
-      - viera
 
   - name: Jobs
     words:
@@ -170,7 +156,6 @@ words:
       - gil
       - scrip
       - third-party tool
-      - currency
 
   - name: Battle Tactics
     words:
@@ -341,10 +326,6 @@ words:
       - secret
       - faith
       - loyalty
-      - trust
-      - suffering
-      - sadness
-      - happiness
 
   - name: Phrases
     words:

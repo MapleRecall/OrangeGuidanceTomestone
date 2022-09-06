@@ -1,6 +1,8 @@
+using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
 using ImGuiNET;
+using ImGuiScene;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
 
@@ -19,8 +21,27 @@ internal class Write : ITab {
     private (int, int) _word2 = (-1, -1);
     private int _glyph;
 
+    private List<TextureWrap> GlyphImages { get; } = new();
+
+    private void LoadSignImages() {
+        for (var i = 0; i < 5; i++) {
+            var stream = Resourcer.Resource.AsStreamUnChecked($"OrangeGuidanceTomestone.img.sign_{i}.jpg");
+            using var mem = new MemoryStream();
+            stream.CopyTo(mem);
+            var wrap = this.Plugin.Interface.UiBuilder.LoadImage(mem.ToArray());
+            this.GlyphImages.Add(wrap);
+        }
+    }
+
     internal Write(Plugin plugin) {
         this.Plugin = plugin;
+        this.LoadSignImages();
+    }
+
+    public void Dispose() {
+        foreach (var wrap in this.GlyphImages) {
+            wrap.Dispose();
+        }
     }
 
     public void Draw() {
@@ -138,9 +159,18 @@ internal class Write : ITab {
 
         if (ImGui.BeginCombo("Glyph", this._glyph.ToString())) {
             for (var i = 0; i < 5; i++) {
-                if (ImGui.Selectable($"{i}", this._glyph == i)) {
+                if (ImGui.Selectable($"{i + 1}", this._glyph == i)) {
                     this._glyph = i;
                 }
+
+                if (!ImGui.IsItemHovered()) {
+                    continue;
+                }
+
+                ImGui.BeginTooltip();
+                var image = this.GlyphImages[i];
+                ImGui.Image(image.ImGuiHandle, new Vector2(image.Width, image.Height));
+                ImGui.EndTooltip();
             }
 
             ImGui.EndCombo();
