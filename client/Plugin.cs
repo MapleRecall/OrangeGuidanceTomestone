@@ -40,6 +40,7 @@ public class Plugin : IDalamudPlugin {
     internal Messages Messages { get; }
     internal VfxReplacer VfxReplacer { get; }
     internal Commands Commands { get; }
+    internal Pinger Pinger { get; }
 
     internal string AvfxFilePath { get; }
 
@@ -52,6 +53,7 @@ public class Plugin : IDalamudPlugin {
         this.Ui = new PluginUi(this);
         this.VfxReplacer = new VfxReplacer(this);
         this.Commands = new Commands(this);
+        this.Pinger = new Pinger(this);
 
         if (this.Config.ApiKey == string.Empty) {
             this.GetApiKey();
@@ -59,6 +61,7 @@ public class Plugin : IDalamudPlugin {
     }
 
     public void Dispose() {
+        this.Pinger.Dispose();
         this.Commands.Dispose();
         this.VfxReplacer.Dispose();
         this.Ui.Dispose();
