@@ -36,6 +36,8 @@ internal class Write : ITab {
     internal Write(Plugin plugin) {
         this.Plugin = plugin;
         this.LoadSignImages();
+
+        this._glyph = this.Plugin.Config.DefaultGlyph;
     }
 
     public void Dispose() {
@@ -175,12 +177,14 @@ internal class Write : ITab {
         }
 
         if (ImGui.BeginCombo("Glyph", this._glyph.ToString())) {
+            var tooltipShown = false;
+
             for (var i = 0; i < 5; i++) {
                 if (ImGui.Selectable($"{i + 1}", this._glyph == i)) {
                     this._glyph = i;
                 }
 
-                if (!ImGui.IsItemHovered()) {
+                if (tooltipShown || !ImGui.IsItemHovered()) {
                     continue;
                 }
 
@@ -188,6 +192,7 @@ internal class Write : ITab {
                 var image = this.GlyphImages[i];
                 ImGui.Image(image.ImGuiHandle, new Vector2(imageHeight));
                 ImGui.EndTooltip();
+                tooltipShown = true;
             }
 
             ImGui.EndCombo();
@@ -263,7 +268,7 @@ internal class Write : ITab {
         this._part1 = this._part2 = this._conj = -1;
         this._word1 = (-1, -1);
         this._word2 = (-1, -1);
-        this._glyph = 0;
+        this._glyph = this.Plugin.Config.DefaultGlyph;
     }
 
     private void ClearIfNecessary() {

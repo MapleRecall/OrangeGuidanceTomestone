@@ -29,6 +29,12 @@ internal class Settings : ITab {
         anyChanged |= ImGui.Checkbox("Close the viewer automatically when no signs are nearby", ref this.Plugin.Config.AutoViewerClose);
         anyChanged |= ImGui.SliderFloat("Viewer opacity", ref this.Plugin.Config.ViewerOpacity, 0f, 100.0f, $"{this.Plugin.Config.ViewerOpacity:N3}%%");
 
+        var glyph = this.Plugin.Config.DefaultGlyph + 1;
+        if (ImGui.InputInt("Default glyph", ref glyph)) {
+            this.Plugin.Config.DefaultGlyph = Math.Min(4, Math.Max(0, glyph - 1));
+            anyChanged = true;
+        }
+
         if (anyChanged) {
             this.Plugin.SaveConfig();
         }
