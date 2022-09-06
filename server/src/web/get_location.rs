@@ -39,7 +39,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32) -> Result<impl Reply, 
                    m.glyph,
                    m.created,
                    m.user,
-                   cast((julianday(current_timestamp) - julianday(created)) * 1440 as int) as last_seen_minutes
+                   cast((julianday(current_timestamp) - julianday(u.last_seen)) * 1440 as int) as last_seen_minutes
             from messages m
                      left join votes v on m.id = v.message
                      left join votes v2 on m.id = v2.message and v2.user = ?
