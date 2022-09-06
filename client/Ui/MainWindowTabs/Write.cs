@@ -153,7 +153,7 @@ internal class Write : ITab {
 
                 actualText = preview.ToString();
                 var actualSize = ImGui.CalcTextSize(actualText);
-                ImGui.Dummy(new Vector2(1, imageHeight / 2 - actualSize.Y / 2));
+                ImGui.Dummy(new Vector2(1, imageHeight / 2 - actualSize.Y / 2 - ImGui.GetStyle().ItemSpacing.Y));
                 ImGui.TextUnformatted(actualText);
             }
 
@@ -176,7 +176,7 @@ internal class Write : ITab {
             }
         }
 
-        if (ImGui.BeginCombo("Glyph", this._glyph.ToString())) {
+        if (ImGui.BeginCombo("Glyph", $"{this._glyph + 1}")) {
             var tooltipShown = false;
 
             for (var i = 0; i < 5; i++) {

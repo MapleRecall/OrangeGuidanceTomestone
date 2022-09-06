@@ -25,7 +25,7 @@ internal class MainWindow {
             return;
         }
 
-        ImGui.SetNextWindowSize(new Vector2(475, 300), ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSize(new Vector2(475, 350), ImGuiCond.FirstUseEver);
         if (!ImGui.Begin(this.Plugin.Name, ref this.Visible)) {
             ImGui.End();
             return;
