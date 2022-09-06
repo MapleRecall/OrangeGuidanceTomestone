@@ -20,6 +20,8 @@ internal class Message {
     public int NegativeVotes { get; set; }
     public int UserVote { get; set; }
 
+    public int Glyph { get; set; }
+
     internal Vector3 Position => new(this.X, this.Y, this.Z);
 }
 
@@ -40,6 +42,8 @@ internal class MessageWithTerritory {
     public int NegativeVotes { get; init; }
     public int UserVote { get; set; }
 
+    public int Glyph { get; set; }
+
     internal Vector3 Position => new(this.X, this.Y, this.Z);
 
     internal static MessageWithTerritory From(Message message, uint territory) {
@@ -54,6 +58,7 @@ internal class MessageWithTerritory {
             PositiveVotes = message.PositiveVotes,
             NegativeVotes = message.NegativeVotes,
             UserVote = message.UserVote,
+            Glyph = message.Glyph,
         };
     }
 }

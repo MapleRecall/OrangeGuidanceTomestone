@@ -17,6 +17,7 @@ internal class Write : ITab {
     private int _conj = -1;
     private int _part2 = -1;
     private (int, int) _word2 = (-1, -1);
+    private int _glyph;
 
     internal Write(Plugin plugin) {
         this.Plugin = plugin;
@@ -135,6 +136,16 @@ internal class Write : ITab {
             }
         }
 
+        if (ImGui.BeginCombo("Glyph", this._glyph.ToString())) {
+            for (var i = 0; i < 5; i++) {
+                if (ImGui.Selectable($"{i}", this._glyph == i)) {
+                    this._glyph = i;
+                }
+            }
+
+            ImGui.EndCombo();
+        }
+
         this.ClearIfNecessary();
 
         var valid = this.ValidSetup();
@@ -160,6 +171,7 @@ internal class Write : ITab {
                 Template2 = this._part2 == -1 ? null : this._part2,
                 Word2List = this._word2.Item1 == -1 ? null : this._word2.Item1,
                 Word2Word = this._word2.Item2 == -1 ? null : this._word2.Item2,
+                Glyph = this._glyph,
             };
 
             var json = JsonConvert.SerializeObject(req);
@@ -182,6 +194,7 @@ internal class Write : ITab {
                         Text = actualText,
                         NegativeVotes = 0,
                         PositiveVotes = 0,
+                        Glyph = this._glyph,
                     };
 
                     this.Plugin.Messages.Add(newMsg);
@@ -203,6 +216,7 @@ internal class Write : ITab {
         this._part1 = this._part2 = this._conj = -1;
         this._word1 = (-1, -1);
         this._word2 = (-1, -1);
+        this._glyph = 0;
     }
 
     private void ClearIfNecessary() {

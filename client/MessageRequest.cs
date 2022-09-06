@@ -32,4 +32,6 @@ public class MessageRequest {
 
     [JsonProperty("word_2_word")]
     public int? Word2Word { get; set; }
+
+    public int Glyph { get; set; }
 }

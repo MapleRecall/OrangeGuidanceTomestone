@@ -8,7 +8,13 @@ using OrangeGuidanceTomestone.Helpers;
 namespace OrangeGuidanceTomestone;
 
 internal class Messages : IDisposable {
-    internal const string VfxPath = "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1d_o.avfx";
+    internal static readonly string[] VfxPaths = {
+        "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1a_o.avfx",
+        "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1b_o.avfx",
+        "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1c_o.avfx",
+        "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1d_o.avfx",
+        "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1e_o.avfx",
+    };
 
     private Plugin Plugin { get; }
 
@@ -64,7 +70,10 @@ internal class Messages : IDisposable {
 
         PluginLog.Debug($"spawning vfx for {message.Id}");
         var rotation = Quaternion.CreateFromYawPitchRoll(message.Yaw, 0, 0);
-        if (this.Plugin.Vfx.SpawnStatic(message.Id, VfxPath, message.Position, rotation) == null) {
+        var path = message.Glyph < 0 || message.Glyph >= VfxPaths.Length
+            ? VfxPaths[0]
+            : VfxPaths[message.Glyph];
+        if (this.Plugin.Vfx.SpawnStatic(message.Id, path, message.Position, rotation) == null) {
             PluginLog.Debug("trying again");
             this.SpawnQueue.Enqueue(message);
         }

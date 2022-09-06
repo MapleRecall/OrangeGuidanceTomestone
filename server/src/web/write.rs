@@ -57,7 +57,7 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, message: Message) -> Resu
 
     sqlx::query!(
         // language=sqlite
-        "insert into messages (id, user, territory, x, y, z, yaw, message) values (?, ?, ?, ?, ?, ?, ?, ?)",
+        "insert into messages (id, user, territory, x, y, z, yaw, message, glyph) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         message_id,
         id,
         territory,
@@ -66,6 +66,7 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, message: Message) -> Resu
         message.z,
         message.yaw,
         text,
+        message.glyph,
     )
         .execute(&state.db)
         .await

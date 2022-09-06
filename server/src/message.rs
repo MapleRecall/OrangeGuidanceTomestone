@@ -20,6 +20,9 @@ pub struct Message {
     pub template_2: Option<usize>,
     pub word_2_list: Option<usize>,
     pub word_2_word: Option<usize>,
+
+    #[serde(default)]
+    pub glyph: i8,
 }
 
 #[derive(Debug, Serialize)]
@@ -33,6 +36,7 @@ pub struct RetrievedMessage {
     pub positive_votes: i32,
     pub negative_votes: i32,
     pub user_vote: i64,
+    pub glyph: i64,
     #[serde(skip)]
     pub created: NaiveDateTime,
     #[serde(skip)]
@@ -58,6 +62,7 @@ pub struct RetrievedMessageTerritory {
     pub positive_votes: i32,
     pub negative_votes: i32,
     pub user_vote: i64,
+    pub glyph: i64,
     #[serde(skip)]
     pub created: NaiveDateTime,
 }

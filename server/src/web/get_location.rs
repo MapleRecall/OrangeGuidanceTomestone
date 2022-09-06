@@ -36,6 +36,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32) -> Result<impl Reply, 
                    coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                    coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
                    v2.vote                                   as user_vote,
+                   m.glyph,
                    m.created,
                    m.user
             from messages m
