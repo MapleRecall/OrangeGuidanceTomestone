@@ -46,7 +46,7 @@ pub struct RetrievedMessage {
 impl RetrievedMessage {
     pub fn adjusted_time_since_posting(&self) -> Duration {
         let score = (self.positive_votes - self.negative_votes).max(0);
-        Utc::now().naive_utc().signed_duration_since(a.created) - Duration::weeks(score as i64)
+        Utc::now().naive_utc().signed_duration_since(self.created) - Duration::weeks(score as i64)
     }
 }
 
