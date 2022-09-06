@@ -111,40 +111,51 @@ internal class Write : ITab {
         var lineHeight = ImGui.CalcTextSize("A").Y;
         var imageHeight = lineHeight * 4;
 
-        var glyphImage = this.GlyphImages[this._glyph];
-        ImGui.Image(glyphImage.ImGuiHandle, new Vector2(imageHeight));
-
         var actualText = string.Empty;
-        if (this._part1 != -1) {
-            var preview = new StringBuilder();
 
-            var template1 = pack.Templates[this._part1];
-            var word1 = this._word1 == (-1, -1) ? placeholder : pack.Words[this._word1.Item1].Words[this._word1.Item2];
-            preview.Append(string.Format(template1, word1));
+        if (ImGui.BeginTable("##message-preview", 2)) {
+            ImGui.TableSetupColumn("##image", ImGuiTableColumnFlags.WidthFixed);
+            ImGui.TableSetupColumn("##message", ImGuiTableColumnFlags.WidthStretch);
+            ImGui.TableNextRow();
 
-            if (this._conj != -1) {
-                var conj = pack.Conjunctions[this._conj];
-                var isPunc = conj.Length == 1 && char.IsPunctuation(conj[0]);
-                if (isPunc) {
-                    preview.Append(conj);
-                    preview.Append('\n');
-                } else {
-                    preview.Append('\n');
-                    preview.Append(conj);
-                    preview.Append(' ');
-                }
-
-                if (this._part2 != -1) {
-                    var template2 = pack.Templates[this._part2];
-                    var word2 = this._word2 == (-1, -1) ? placeholder : pack.Words[this._word2.Item1].Words[this._word2.Item2];
-                    preview.Append(string.Format(template2, word2));
-                }
+            if (ImGui.TableSetColumnIndex(0)) {
+                var glyphImage = this.GlyphImages[this._glyph];
+                ImGui.Image(glyphImage.ImGuiHandle, new Vector2(imageHeight));
             }
 
-            actualText = preview.ToString();
-            var actualSize = ImGui.CalcTextSize(actualText);
-            ImGui.SameLine(0, imageHeight / 2 - actualSize.Y / 2);
-            ImGui.TextUnformatted(actualText);
+            if (ImGui.TableSetColumnIndex(1) && this._part1 != -1) {
+                var preview = new StringBuilder();
+
+                var template1 = pack.Templates[this._part1];
+                var word1 = this._word1 == (-1, -1) ? placeholder : pack.Words[this._word1.Item1].Words[this._word1.Item2];
+                preview.Append(string.Format(template1, word1));
+
+                if (this._conj != -1) {
+                    var conj = pack.Conjunctions[this._conj];
+                    var isPunc = conj.Length == 1 && char.IsPunctuation(conj[0]);
+                    if (isPunc) {
+                        preview.Append(conj);
+                        preview.Append('\n');
+                    } else {
+                        preview.Append('\n');
+                        preview.Append(conj);
+                        preview.Append(' ');
+                    }
+
+                    if (this._part2 != -1) {
+                        var template2 = pack.Templates[this._part2];
+                        var word2 = this._word2 == (-1, -1) ? placeholder : pack.Words[this._word2.Item1].Words[this._word2.Item2];
+                        preview.Append(string.Format(template2, word2));
+                    }
+                }
+
+                actualText = preview.ToString();
+                var actualSize = ImGui.CalcTextSize(actualText);
+                ImGui.Dummy(new Vector2(1, imageHeight / 2 - actualSize.Y / 2));
+                ImGui.TextUnformatted(actualText);
+            }
+
+            ImGui.EndTable();
         }
 
         ImGui.Separator();
