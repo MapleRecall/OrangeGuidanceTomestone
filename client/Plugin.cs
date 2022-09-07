@@ -34,6 +34,9 @@ public class Plugin : IDalamudPlugin {
     [PluginService]
     internal Framework Framework { get; init; }
 
+    [PluginService]
+    internal GameGui GameGui { get; init; }
+
     internal Configuration Config { get; }
     internal Vfx Vfx { get; }
     internal PluginUi Ui { get; }
