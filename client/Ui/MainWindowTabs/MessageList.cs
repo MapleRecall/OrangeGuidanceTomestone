@@ -52,11 +52,11 @@ internal class MessageList : ITab {
                 messages.Sort((a, b) => {
                     return this.Sort switch {
                         SortMode.Date => 0,
-                        SortMode.Appraisals => Math.Max(a.PositiveVotes - a.NegativeVotes, 0)
-                            .CompareTo(Math.Max(b.PositiveVotes - b.NegativeVotes, 0)),
-                        SortMode.Likes => a.PositiveVotes.CompareTo(b.PositiveVotes),
-                        SortMode.Dislikes => a.NegativeVotes.CompareTo(b.NegativeVotes),
-                        SortMode.Location => a.Territory.CompareTo(b.Territory),
+                        SortMode.Appraisals => Math.Max(b.PositiveVotes - b.NegativeVotes, 0)
+                            .CompareTo(Math.Max(a.PositiveVotes - a.NegativeVotes, 0)),
+                        SortMode.Likes => b.PositiveVotes.CompareTo(a.PositiveVotes),
+                        SortMode.Dislikes => b.NegativeVotes.CompareTo(a.NegativeVotes),
+                        SortMode.Location => b.Territory.CompareTo(a.Territory),
                         _ => throw new ArgumentOutOfRangeException(),
                     };
                 });
