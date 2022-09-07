@@ -1,3 +1,4 @@
+using System.Numerics;
 using ImGuiNET;
 using OrangeGuidanceTomestone.Helpers;
 
@@ -40,6 +41,7 @@ internal class Settings : ITab {
             .Max();
 
         var leftOver = ImGui.GetContentRegionAvail().X - widestTabName - ImGui.GetStyle().ItemSpacing.X - ImGui.GetStyle().FrameBorderSize;
+        var childHeight = ImGui.GetContentRegionAvail().Y - ImGui.GetStyle().ItemSpacing.Y * 2;
         if (ImGui.BeginTable("##settings-tabs", 2)) {
             ImGui.TableSetupColumn("##names", ImGuiTableColumnFlags.None, widestTabName + ImGui.GetStyle().ItemSpacing.X);
             ImGui.TableSetupColumn("##content", ImGuiTableColumnFlags.None, leftOver);
@@ -56,7 +58,7 @@ internal class Settings : ITab {
             }
 
             if (ImGui.TableSetColumnIndex(1)) {
-                if (ImGui.BeginChild("##tab-content-child")) {
+                if (ImGui.BeginChild("##tab-content-child", new Vector2(-1, childHeight))) {
                     var (_, draw) = this.Tabs[this._tab];
                     draw(ref anyChanged, ref vfx);
                 }
