@@ -1,4 +1,5 @@
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Interface;
 using Dalamud.Utility;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
@@ -71,7 +72,7 @@ internal class MessageList : ITab {
                 ImGui.TextUnformatted($"Location: {territoryName}");
                 ImGui.SameLine();
 
-                if (ImGui.SmallButton($"Open map##{message.Id}") && territory != null) {
+                if (ImGuiExt.SmallIconButton(FontAwesomeIcon.MapMarkerAlt, $"{message.Id}") && territory != null) {
                     this.Plugin.GameGui.OpenMapWithMapLink(new MapLinkPayload(
                         territory.RowId,
                         territory.Map.Row,
@@ -80,11 +81,25 @@ internal class MessageList : ITab {
                     ));
                 }
 
+                var ctrl = ImGui.GetIO().KeyCtrl;
+
                 var appraisals = Math.Max(0, message.PositiveVotes - message.NegativeVotes);
                 ImGui.TextUnformatted($"Appraisals: {appraisals:N0} ({message.PositiveVotes:N0} - {message.NegativeVotes:N0})");
+
+                if (!ctrl) {
+                    ImGui.BeginDisabled();
+                }
+
                 if (ImGui.Button($"Delete##{message.Id}")) {
                     this.Delete(message.Id);
                 }
+
+                if (!ctrl) {
+                    ImGui.EndDisabled();
+                }
+
+                ImGui.SameLine();
+                ImGuiExt.HelpIcon("Hold Ctrl to enable the delete button.");
 
                 ImGui.TreePop();
 
