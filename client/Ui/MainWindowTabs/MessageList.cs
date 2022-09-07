@@ -56,7 +56,7 @@ internal class MessageList : ITab {
                             .CompareTo(Math.Max(a.PositiveVotes - a.NegativeVotes, 0)),
                         SortMode.Likes => b.PositiveVotes.CompareTo(a.PositiveVotes),
                         SortMode.Dislikes => b.NegativeVotes.CompareTo(a.NegativeVotes),
-                        SortMode.Location => b.Territory.CompareTo(a.Territory),
+                        SortMode.Location => a.Territory.CompareTo(b.Territory),
                         _ => throw new ArgumentOutOfRangeException(),
                     };
                 });
@@ -71,12 +71,12 @@ internal class MessageList : ITab {
                 ImGui.TextUnformatted($"Location: {territoryName}");
                 ImGui.SameLine();
 
-                if (ImGui.SmallButton("Open map") && territory != null) {
+                if (ImGui.SmallButton($"Open map##{message.Id}") && territory != null) {
                     this.Plugin.GameGui.OpenMapWithMapLink(new MapLinkPayload(
                         territory.RowId,
                         territory.Map.Row,
-                        message.X,
-                        message.Y
+                        (int) (message.X * 1_000),
+                        (int) (message.Z * 1_000)
                     ));
                 }
 
