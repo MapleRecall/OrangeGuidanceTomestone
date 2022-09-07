@@ -50,7 +50,11 @@ internal class MainWindow {
                 continue;
             }
 
-            tab.Draw();
+            if (ImGui.BeginChild("##tab-content")) {
+                tab.Draw();
+            }
+
+            ImGui.EndChild();
 
             ImGui.EndTabItem();
         }
