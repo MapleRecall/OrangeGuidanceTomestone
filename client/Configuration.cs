@@ -13,6 +13,7 @@ public class Configuration : IPluginConfiguration {
     public bool RemoveGlow = true;
     public bool AutoViewer;
     public bool AutoViewerClose = true;
+    public bool HideTitlebar;
     public float ViewerOpacity = 100.0f;
     public int DefaultGlyph = 3;
 }
