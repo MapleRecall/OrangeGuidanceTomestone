@@ -4,17 +4,25 @@ using ImGuiNET;
 namespace OrangeGuidanceTomestone.Ui;
 
 internal static class ImGuiExt {
-    internal static bool SmallIconButton(FontAwesomeIcon icon, string? id = null) {
+    private static bool InternalIconButton(Func<string, bool> func, FontAwesomeIcon icon, string? id = null) {
         var label = icon.ToIconString();
         if (id != null) {
             label += $"##{id}";
         }
 
         ImGui.PushFont(UiBuilder.IconFont);
-        var ret = ImGui.SmallButton(label);
+        var ret = func(label);
         ImGui.PopFont();
 
         return ret;
+    }
+
+    internal static bool SmallIconButton(FontAwesomeIcon icon, string? id = null) {
+        return InternalIconButton(ImGui.SmallButton, icon, id);
+    }
+
+    internal static bool IconButton(FontAwesomeIcon icon, string? id = null) {
+        return InternalIconButton(ImGui.Button, icon, id);
     }
 
     internal static void HelpIcon(string text) {
