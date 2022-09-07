@@ -25,21 +25,26 @@ internal class Settings : ITab {
         anyChanged |= vfx |= ImGui.Checkbox("Disable in trials", ref this.Plugin.Config.DisableTrials);
         anyChanged |= vfx |= ImGui.Checkbox("Disable in Deep Dungeons", ref this.Plugin.Config.DisableDeepDungeon);
         anyChanged |= vfx |= ImGui.Checkbox("Remove glow effect from signs", ref this.Plugin.Config.RemoveGlow);
-        anyChanged |= ImGui.Checkbox("Open the viewer automatically when near a sign", ref this.Plugin.Config.AutoViewer);
-        anyChanged |= ImGui.Checkbox("Close the viewer automatically when no signs are nearby", ref this.Plugin.Config.AutoViewerClose);
-
-        if (this.Plugin.Config.AutoViewerClose) {
-            ImGui.TreePush();
-            anyChanged |= ImGui.Checkbox("Hide viewer titlebar", ref this.Plugin.Config.HideTitlebar);
-            ImGui.TreePop();
-        }
-
-        anyChanged |= ImGui.SliderFloat("Viewer opacity", ref this.Plugin.Config.ViewerOpacity, 0f, 100.0f, $"{this.Plugin.Config.ViewerOpacity:N3}%%");
 
         var glyph = this.Plugin.Config.DefaultGlyph + 1;
         if (ImGui.InputInt("Default glyph", ref glyph)) {
             this.Plugin.Config.DefaultGlyph = Math.Min(4, Math.Max(0, glyph - 1));
             anyChanged = true;
+        }
+
+        if (ImGui.CollapsingHeader("Viewer settings")) {
+            anyChanged |= ImGui.SliderFloat("Viewer opacity", ref this.Plugin.Config.ViewerOpacity, 0f, 100.0f, $"{this.Plugin.Config.ViewerOpacity:N3}%%");
+            anyChanged |= ImGui.Checkbox("Open the viewer automatically when near a sign", ref this.Plugin.Config.AutoViewer);
+            anyChanged |= ImGui.Checkbox("Close the viewer automatically when no signs are nearby", ref this.Plugin.Config.AutoViewerClose);
+
+            if (this.Plugin.Config.AutoViewerClose) {
+                ImGui.TreePush();
+                anyChanged |= ImGui.Checkbox("Hide viewer titlebar", ref this.Plugin.Config.HideTitlebar);
+                ImGui.TreePop();
+            }
+
+            anyChanged |= ImGui.Checkbox("Lock viewer in place", ref this.Plugin.Config.LockViewer);
+            anyChanged |= ImGui.Checkbox("Click through viewer", ref this.Plugin.Config.ClickThroughViewer);
         }
 
         if (anyChanged) {

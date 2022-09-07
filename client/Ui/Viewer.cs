@@ -21,9 +21,10 @@ internal class Viewer {
             return;
         }
 
-        var flags = this.Plugin.Config.HideTitlebar
-            ? ImGuiWindowFlags.NoTitleBar
-            : ImGuiWindowFlags.None;
+        var flags = ImGuiWindowFlags.NoBringToFrontOnFocus;
+        flags |= this.Plugin.Config.HideTitlebar ? ImGuiWindowFlags.NoTitleBar : ImGuiWindowFlags.None;
+        flags |= this.Plugin.Config.LockViewer ? ImGuiWindowFlags.NoMove : ImGuiWindowFlags.None;
+        flags |= this.Plugin.Config.ClickThroughViewer ? ImGuiWindowFlags.NoInputs : ImGuiWindowFlags.None;
         ImGui.SetNextWindowSize(new Vector2(350, 175), ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowBgAlpha(this.Plugin.Config.ViewerOpacity / 100.0f);
         if (!ImGui.Begin("Messages", ref this.Visible, flags)) {
