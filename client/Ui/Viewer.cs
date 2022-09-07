@@ -21,7 +21,7 @@ internal class Viewer {
             return;
         }
 
-        var flags = ImGuiWindowFlags.NoBringToFrontOnFocus;
+        var flags = ImGuiWindowFlags.NoFocusOnAppearing;
         flags |= this.Plugin.Config.HideTitlebar ? ImGuiWindowFlags.NoTitleBar : ImGuiWindowFlags.None;
         flags |= this.Plugin.Config.LockViewer ? ImGuiWindowFlags.NoMove : ImGuiWindowFlags.None;
         flags |= this.Plugin.Config.ClickThroughViewer ? ImGuiWindowFlags.NoInputs : ImGuiWindowFlags.None;
