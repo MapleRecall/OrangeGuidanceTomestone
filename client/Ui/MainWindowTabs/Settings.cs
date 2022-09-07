@@ -46,6 +46,7 @@ internal class Settings : ITab {
         }
 
         this.ExtraCodeInput();
+        this.DeleteAccountButton();
 
         ImGui.PopTextWrapPos();
     }
@@ -79,5 +80,36 @@ internal class Settings : ITab {
                 this.Plugin.Ui.ShowModal("Invalid code.");
             }
         });
+    }
+
+    private void DeleteAccountButton() {
+        var ctrl = ImGui.GetIO().KeyCtrl;
+        if (!ctrl) {
+            ImGui.BeginDisabled();
+        }
+
+        if (ImGui.Button("Delete account")) {
+            Task.Run(async () => {
+                var resp = await ServerHelper.SendRequest(
+                    this.Plugin.Config.ApiKey,
+                    HttpMethod.Delete,
+                    "/account"
+                );
+
+                if (resp.IsSuccessStatusCode) {
+                    this.Plugin.Config.ApiKey = string.Empty;
+                    this.Plugin.SaveConfig();
+                }
+            });
+        }
+
+        if (!ctrl) {
+            ImGui.EndDisabled();
+        }
+
+        ImGui.SameLine();
+        ImGuiExt.HelpIcon("Hold Ctrl to enable delete button.");
+
+        ImGui.TextUnformatted("This will delete all your messages and votes.");
     }
 }
