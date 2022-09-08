@@ -18,7 +18,7 @@ async fn logic(state: Arc<State>) -> Result<impl Reply, Rejection> {
         .await
         .values()
         .filter(|pack| pack.visible)
-        .map(|pack| pack.clone())
+        .cloned()
         .collect();
     visible.sort_unstable_by_key(|pack| pack.order);
 
