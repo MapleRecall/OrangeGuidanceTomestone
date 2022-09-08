@@ -38,6 +38,7 @@ internal class Write : ITab {
         this.LoadSignImages();
 
         this._glyph = this.Plugin.Config.DefaultGlyph;
+        Pack.UpdatePacks();
     }
 
     public void Dispose() {
@@ -47,10 +48,29 @@ internal class Write : ITab {
     }
 
     public void Draw() {
-        var packPrev = Pack.All.Value[this._pack].Name;
+        Pack.AllMutex.Wait();
+
+        try {
+            this.DrawInner();
+        } finally {
+            Pack.AllMutex.Release();
+        }
+    }
+
+    private void DrawInner() {
+        if (Pack.All.Length == 0) {
+            ImGui.TextUnformatted("Please refresh the packs from the settings.");
+            return;
+        }
+
+        if (this._pack < 0 || this._pack >= Pack.All.Length) {
+            this._pack = 0;
+        }
+
+        var packPrev = Pack.All[this._pack].Name;
         if (ImGui.BeginCombo("Pack", packPrev)) {
-            for (var i = 0; i < Pack.All.Value.Length; i++) {
-                var selPack = Pack.All.Value[i];
+            for (var i = 0; i < Pack.All.Length; i++) {
+                var selPack = Pack.All[i];
                 if (!ImGui.Selectable(selPack.Name)) {
                     continue;
                 }
@@ -108,7 +128,7 @@ internal class Write : ITab {
             ImGui.EndCombo();
         }
 
-        var pack = Pack.All.Value[this._pack];
+        var pack = Pack.All[this._pack];
 
         var lineHeight = ImGui.CalcTextSize("A").Y;
         var imageHeight = lineHeight * 4;
@@ -276,7 +296,7 @@ internal class Write : ITab {
             this._part1 = -1;
         }
 
-        var pack = Pack.All.Value[this._pack];
+        var pack = Pack.All[this._pack];
 
         if (this._part1 == -1 || !pack.Templates[this._part1].Contains("{0}")) {
             this._word1 = (-1, -1);
@@ -296,7 +316,7 @@ internal class Write : ITab {
             return false;
         }
 
-        var pack = Pack.All.Value[this._pack];
+        var pack = Pack.All[this._pack];
         var template1 = pack.Templates[this._part1];
         var temp1Variable = template1.Contains("{0}");
 

@@ -1,37 +1,29 @@
-using Dalamud.Logging;
-using YamlDotNet.Serialization.NamingConventions;
+using Newtonsoft.Json;
+using OrangeGuidanceTomestone.Helpers;
 
 namespace OrangeGuidanceTomestone;
 
 [Serializable]
 public class Pack {
-    internal static Lazy<Pack[]> All { get; } = new(() => {
-        var des = new YamlDotNet.Serialization.DeserializerBuilder()
-            .WithNamingConvention(UnderscoredNamingConvention.Instance)
-            .Build();
-        return new[] {
-                "ffxiv",
-                "elden-ring",
-                "bloodborne",
-                "dark-souls",
-            }
-            .Select(name => {
-                try {
-                    return des.Deserialize<Pack>(Resourcer.Resource.AsStringUnChecked($"OrangeGuidanceTomestone.packs.{name}.yaml"));
-                } catch (Exception ex) {
-                    PluginLog.LogError(ex, name);
-                    return null;
-                }
-            })
-            .Where(pack => pack != null)
-            .ToArray()!;
-    });
+    internal static SemaphoreSlim AllMutex { get; } = new(1, 1);
+    internal static Pack[] All { get; set; } = Array.Empty<Pack>();
 
     public string Name { get; init; }
     public Guid Id { get; init; }
     public string[] Templates { get; init; }
     public string[] Conjunctions { get; init; }
     public List<WordList> Words { get; init; }
+
+    internal static void UpdatePacks() {
+        Task.Run(async () => {
+            var resp = await ServerHelper.SendRequest(null, HttpMethod.Get, "/packs");
+            var json = await resp.Content.ReadAsStringAsync();
+            var packs = JsonConvert.DeserializeObject<Pack[]>(json)!;
+            await AllMutex.WaitAsync();
+            All = packs;
+            AllMutex.Release();
+        });
+    }
 }
 
 [Serializable]
