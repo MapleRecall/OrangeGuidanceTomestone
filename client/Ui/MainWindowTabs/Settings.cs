@@ -1,5 +1,7 @@
 using System.Numerics;
+using Dalamud.Utility;
 using ImGuiNET;
+using Lumina.Excel.GeneratedSheets;
 using OrangeGuidanceTomestone.Helpers;
 
 namespace OrangeGuidanceTomestone.Ui.MainWindowTabs;
@@ -8,7 +10,7 @@ internal class Settings : ITab {
     public string Name => "Settings";
 
     private Plugin Plugin { get; }
-    private int _tab = 0;
+    private int _tab;
     private string _extraCode = string.Empty;
 
     private delegate void DrawSettingsDelegate(ref bool anyChanged, ref bool vfx);
@@ -86,13 +88,70 @@ internal class Settings : ITab {
         anyChanged |= vfx |= ImGui.Checkbox("Disable in trials", ref this.Plugin.Config.DisableTrials);
         anyChanged |= vfx |= ImGui.Checkbox("Disable in Deep Dungeons", ref this.Plugin.Config.DisableDeepDungeon);
         anyChanged |= vfx |= ImGui.Checkbox("Remove glow effect from signs", ref this.Plugin.Config.RemoveGlow);
+
+        var tt = this.Plugin.DataManager.GetExcelSheet<TerritoryType>();
+        if (tt == null) {
+            return;
+        }
+
+        ImGui.Spacing();
+        ImGui.TextUnformatted("Ban list");
+        ImGui.TreePush();
+        ImGui.TextUnformatted("Click to ban or unban.");
+        ImGui.TreePop();
+
+        if (ImGui.BeginChild("##ban-list", new Vector2(-1, -1), true)) {
+            var toAdd = -1L;
+            var toRemove = -1L;
+            foreach (var bannedId in this.Plugin.Config.BannedTerritories) {
+                var territory = tt.GetRow(bannedId)?.PlaceName.Value?.Name?.ToDalamudString().TextValue ?? $"{bannedId}";
+                if (ImGui.Selectable($"{territory}##{bannedId}", true)) {
+                    toRemove = bannedId;
+                }
+            }
+
+            ImGui.Separator();
+
+            var clipper = ImGuiExt.Clipper((int) (tt.RowCount - this.Plugin.Config.BannedTerritories.Count));
+            while (clipper.Step()) {
+                for (var i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                    var territory = tt.GetRow((uint) i);
+                    if (territory == null || territory.RowId == 0 || this.Plugin.Config.BannedTerritories.Contains(territory.RowId)) {
+                        continue;
+                    }
+
+                    var name = territory.PlaceName.Value?.Name?.ToDalamudString().TextValue;
+                    if (name == null) {
+                        continue;
+                    }
+
+                    if (ImGui.Selectable($"{name}##{territory.RowId}")) {
+                        toAdd = territory.RowId;
+                    }
+                }
+            }
+
+            if (toRemove > -1) {
+                this.Plugin.Config.BannedTerritories.Remove((uint) toRemove);
+            }
+
+            if (toAdd > -1) {
+                this.Plugin.Config.BannedTerritories.Add((uint) toAdd);
+            }
+
+            if (toRemove > -1 || toAdd > -1) {
+                this.Plugin.SaveConfig();
+            }
+        }
+
+        ImGui.EndChild();
     }
 
     private void DrawWriter(ref bool anyChanged, ref bool vfx) {
         if (ImGui.Button("Refresh packs")) {
             Pack.UpdatePacks();
         }
-        
+
         var glyph = this.Plugin.Config.DefaultGlyph + 1;
         if (ImGui.InputInt("Default glyph", ref glyph)) {
             this.Plugin.Config.DefaultGlyph = Math.Min(4, Math.Max(0, glyph - 1));

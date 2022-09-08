@@ -42,4 +42,11 @@ internal static class ImGuiExt {
         ImGui.PopTextWrapPos();
         ImGui.EndTooltip();
     }
+
+    internal static unsafe ImGuiListClipperPtr Clipper(int itemsCount) {
+        var clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+        clipper.Begin(itemsCount);
+
+        return clipper;
+    }
 }
