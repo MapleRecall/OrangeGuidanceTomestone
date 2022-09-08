@@ -1,16 +1,20 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Pack {
     pub name: String,
     pub id: Uuid,
+    #[serde(skip_serializing)]
+    pub visible: bool,
+    #[serde(default, skip_serializing)]
+    pub order: u8,
     pub templates: Vec<String>,
     pub conjunctions: Vec<String>,
     pub words: Vec<WordList>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct WordList {
     pub name: String,
     pub words: Vec<String>,

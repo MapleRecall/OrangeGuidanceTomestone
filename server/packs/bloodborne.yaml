@@ -1,5 +1,7 @@
 name: Bloodborne
 id: bd4f9382-4ec7-4457-ba40-bdf5e5ee7fd0
+visible: true
+order: 3
 
 templates:
   - 'fear {0}'
