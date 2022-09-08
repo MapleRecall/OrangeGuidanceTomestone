@@ -80,6 +80,11 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
             continue;
         }
 
+        let raw_score = a.positive_votes - a.negative_votes;
+        if raw_score < -1 {
+            continue;
+        }
+
         let mut nearby_ids = Vec::new();
         for b in messages.iter() {
             if a.id == b.id {
@@ -102,11 +107,6 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
             // no need to do calculations for groups of three or fewer
             (17, 20)
         } else {
-            let raw_score = a.positive_votes - a.negative_votes;
-            if raw_score < -1 {
-                continue;
-            }
-
             let already_visible = nearby_ids.iter()
                 .filter(|id| ids.contains(id))
                 .count();
