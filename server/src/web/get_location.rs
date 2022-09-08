@@ -22,7 +22,6 @@ pub fn get_location(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
 }
 
 async fn logic(state: Arc<State>, id: i64, location: u32) -> Result<impl Reply, Rejection> {
-    // TODO: when we're not just returning all results, make sure own messages are always present
     let location = location as i64;
     let mut messages = sqlx::query_as!(
         RetrievedMessage,
