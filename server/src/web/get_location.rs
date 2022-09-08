@@ -63,6 +63,10 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
     // FIXME: make a migration to fix this, smh I'm dumb
     let id_str = id.to_string();
 
+    // remove messages where the user has been offline for over 35 minutes
+    // also remove messages with low score
+    messages.drain_filter(|msg| msg.last_seen_minutes >= 35 || (msg.positive_votes - msg.negative_votes) < -1);
+
     // shuffle messages since we'll be excluding later based on messages
     // that have already been included, so this will be more fair
     messages.shuffle(&mut rand::thread_rng());
@@ -73,15 +77,6 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
         if a.user == id_str {
             // always include own messages
             ids.push(a.id.clone());
-            continue;
-        }
-
-        if a.last_seen_minutes >= 35 {
-            continue;
-        }
-
-        let raw_score = a.positive_votes - a.negative_votes;
-        if raw_score < -1 {
             continue;
         }
 
@@ -125,7 +120,7 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
                 numerator += (nearby / 3).min(1);
             }
 
-            let score = raw_score.max(0);
+            let score = (a.positive_votes - a.negative_votes).max(0);
             if score > 0 {
                 let pad = score as f32 / nearby as f32;
                 let rounded = pad.floor() as u32;
