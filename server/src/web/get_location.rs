@@ -3,6 +3,7 @@ use std::sync::Arc;
 use anyhow::Context;
 use chrono::{Duration, Utc};
 use rand::Rng;
+use rand::seq::SliceRandom;
 use warp::{Filter, Rejection, Reply};
 use warp::filters::BoxedFilter;
 
@@ -62,6 +63,10 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
     // FIXME: make a migration to fix this, smh I'm dumb
     let id_str = id.to_string();
 
+    // shuffle messages since we'll be excluding later based on messages
+    // that have already been included, so this will be more fair
+    messages.shuffle(&mut rand::thread_rng());
+
     // just count nearby messages. this is O(n^2) but alternatives are hard
     let mut ids = Vec::with_capacity(messages.len());
     for a in messages.iter() {
@@ -75,7 +80,7 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
             continue;
         }
 
-        let mut nearby = 0;
+        let mut nearby_ids = Vec::new();
         for b in messages.iter() {
             if a.id == b.id {
                 continue;
@@ -84,18 +89,31 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
             let distance = (a.x - b.x).powi(2)
                 + (a.y - b.y).powi(2)
                 + (a.z - b.z).powi(2);
-            // 7.5 squared
-            if distance >= 56.25 {
+            // 10 squared
+            if distance >= 100.0 {
                 continue;
             }
 
-            nearby += 1;
+            nearby_ids.push(&b.id);
         }
 
+        let mut nearby = nearby_ids.len() as u32;
         let (numerator, denominator) = if nearby <= 2 {
             // no need to do calculations for groups of three or fewer
             (17, 20)
         } else {
+            let raw_score = a.positive_votes - a.negative_votes;
+            if raw_score < -1 {
+                continue;
+            }
+
+            let already_visible = nearby_ids.iter()
+                .filter(|id| ids.contains(id))
+                .count();
+            if already_visible >= 3 {
+                continue;
+            }
+
             let time_since_creation = a.created.signed_duration_since(Utc::now().naive_utc());
             let brand_new = time_since_creation < Duration::minutes(30);
             let new = time_since_creation < Duration::hours(2);
@@ -107,18 +125,18 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
                 numerator += (nearby / 3).min(1);
             }
 
-            let score = (a.positive_votes - a.negative_votes).max(0);
+            let score = raw_score.max(0);
             if score > 0 {
                 let pad = score as f32 / nearby as f32;
-                let rounded = pad.round() as u32;
+                let rounded = pad.floor() as u32;
                 numerator += rounded.max(nearby / 2);
             }
 
             nearby *= 2;
 
-            if numerator * 20 > nearby * 17 {
-                numerator = 17;
-                nearby = 20;
+            if numerator * 5 > nearby * 4 {
+                numerator = 4;
+                nearby = 5;
             }
 
             (numerator, nearby)
