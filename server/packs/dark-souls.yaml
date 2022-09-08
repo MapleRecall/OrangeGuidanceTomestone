@@ -1,5 +1,7 @@
 name: Dark Souls
 id: d8be51e4-ddce-4c91-9adf-a7a42457da28
+visible: true
+order: 4
 
 templates:
   - '{0} ahead'

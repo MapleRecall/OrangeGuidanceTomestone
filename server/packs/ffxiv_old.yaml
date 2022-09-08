@@ -1,5 +1,6 @@
 name: FINAL FANTASY XIV (v1)
 id: 7cd9e479-080a-4fec-9511-41a53034c2ad
+visible: false
 
 templates:
   - '{0} ahead'

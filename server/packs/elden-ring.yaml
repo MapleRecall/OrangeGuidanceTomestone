@@ -1,5 +1,7 @@
 name: Elden Ring
 id: 8169c792-3d7c-44eb-aeee-9823c8521ae6
+visible: true
+order: 2
 
 templates:
   - '{0} ahead'

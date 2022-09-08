@@ -1,5 +1,7 @@
 name: FINAL FANTASY XIV
 id: 120e0e08-9533-454b-bfab-f8774a5b6d80
+visible: true
+order: 1
 
 templates:
   - '{0} ahead'
