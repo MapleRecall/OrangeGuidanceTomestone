@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 namespace OrangeGuidanceTomestone.Helpers;
 
 internal static class ServerHelper {
-    internal static HttpRequestMessage GetRequest(string apiKey, HttpMethod method, string tail, string? contentType = null, HttpContent? content = null) {
+    internal static HttpRequestMessage GetRequest(string? apiKey, HttpMethod method, string tail, string? contentType = null, HttpContent? content = null) {
         if (!tail.StartsWith('/')) {
             tail = '/' + tail;
         }
@@ -18,12 +18,14 @@ internal static class ServerHelper {
             }
         }
 
-        req.Headers.Add("X-Api-Key", apiKey);
+        if (apiKey != null) {
+            req.Headers.Add("X-Api-Key", apiKey);
+        }
 
         return req;
     }
 
-    internal static async Task<HttpResponseMessage> SendRequest(string apiKey, HttpMethod method, string tail, string? contentType = null, HttpContent? content = null) {
+    internal static async Task<HttpResponseMessage> SendRequest(string? apiKey, HttpMethod method, string tail, string? contentType = null, HttpContent? content = null) {
         var req = GetRequest(apiKey, method, tail, contentType, content);
         return await new HttpClient().SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
     }

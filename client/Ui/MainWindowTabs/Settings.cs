@@ -89,6 +89,10 @@ internal class Settings : ITab {
     }
 
     private void DrawWriter(ref bool anyChanged, ref bool vfx) {
+        if (ImGui.Button("Refresh packs")) {
+            Pack.UpdatePacks();
+        }
+        
         var glyph = this.Plugin.Config.DefaultGlyph + 1;
         if (ImGui.InputInt("Default glyph", ref glyph)) {
             this.Plugin.Config.DefaultGlyph = Math.Min(4, Math.Max(0, glyph - 1));
