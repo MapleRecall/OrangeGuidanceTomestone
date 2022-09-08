@@ -12,6 +12,7 @@ internal class Settings : ITab {
     private Plugin Plugin { get; }
     private int _tab;
     private string _extraCode = string.Empty;
+    private List<(uint, string)> Territories { get; }
 
     private delegate void DrawSettingsDelegate(ref bool anyChanged, ref bool vfx);
 
@@ -19,6 +20,12 @@ internal class Settings : ITab {
 
     internal Settings(Plugin plugin) {
         this.Plugin = plugin;
+
+        this.Territories = this.Plugin.DataManager.GetExcelSheet<TerritoryType>()!
+            .Where(row => row.RowId != 0)
+            .Select(row => (row.RowId, row.PlaceName.Value?.Name?.ToDalamudString().TextValue))
+            .Where(entry => entry.TextValue != null && !string.IsNullOrWhiteSpace(entry.TextValue))
+            .ToList()!;
 
         this.Tabs = new List<(string, DrawSettingsDelegate)> {
             ("General", this.DrawGeneral),
@@ -112,21 +119,16 @@ internal class Settings : ITab {
 
             ImGui.Separator();
 
-            var clipper = ImGuiExt.Clipper((int) (tt.RowCount - this.Plugin.Config.BannedTerritories.Count));
+            var clipper = ImGuiExt.Clipper(this.Territories.Count - this.Plugin.Config.BannedTerritories.Count);
             while (clipper.Step()) {
                 for (var i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-                    var territory = tt.GetRow((uint) i);
-                    if (territory == null || territory.RowId == 0 || this.Plugin.Config.BannedTerritories.Contains(territory.RowId)) {
+                    var (rowId, name) = this.Territories[i];
+                    if (this.Plugin.Config.BannedTerritories.Contains(rowId)) {
                         continue;
                     }
 
-                    var name = territory.PlaceName.Value?.Name?.ToDalamudString().TextValue;
-                    if (name == null) {
-                        continue;
-                    }
-
-                    if (ImGui.Selectable($"{name}##{territory.RowId}")) {
-                        toAdd = territory.RowId;
+                    if (ImGui.Selectable($"{name}##{rowId}")) {
+                        toAdd = rowId;
                     }
                 }
             }
