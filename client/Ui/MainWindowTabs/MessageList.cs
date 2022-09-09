@@ -82,7 +82,7 @@ internal class MessageList : ITab {
                 }
 
                 if (message.IsHidden) {
-                    ImGuiHelper.WarningText("This message's score is too low and will not be shown to other players.");
+                    ImGuiHelper.WarningText("This message will not be shown to other players due to its low score.");
                 }
 
                 var ctrl = ImGui.GetIO().KeyCtrl;
