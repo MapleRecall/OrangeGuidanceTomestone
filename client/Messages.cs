@@ -1,5 +1,6 @@
 using System.Numerics;
 using Dalamud.Game;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Logging;
 using Lumina.Excel.GeneratedSheets;
 using Newtonsoft.Json;
@@ -17,6 +18,7 @@ internal class Messages : IDisposable {
         "bg/ex2/02_est_e3/common/vfx/eff/b0941trp1f_o.avfx",
     };
 
+
     private Plugin Plugin { get; }
 
     private SemaphoreSlim CurrentMutex { get; } = new(1, 1);
@@ -25,6 +27,21 @@ internal class Messages : IDisposable {
 
     private HashSet<uint> Trials { get; } = new();
     private HashSet<uint> DeepDungeons { get; } = new();
+
+    private bool CutsceneActive {
+        get {
+            var condition = this.Plugin.Condition;
+            return condition[ConditionFlag.OccupiedInCutSceneEvent]
+                   || condition[ConditionFlag.WatchingCutscene78];
+        }
+    }
+
+    private bool GposeActive {
+        get {
+            var condition = this.Plugin.Condition;
+            return condition[ConditionFlag.WatchingCutscene];
+        }
+    }
 
     internal Messages(Plugin plugin) {
         this.Plugin = plugin;
@@ -99,6 +116,14 @@ internal class Messages : IDisposable {
         }
 
         if (this.Plugin.Config.DisableDeepDungeon && this.DeepDungeons.Contains(territory)) {
+            return;
+        }
+
+        if (this.Plugin.Config.DisableInCutscene && this.CutsceneActive) {
+            return;
+        }
+
+        if (this.Plugin.Config.DisableInGpose && this.GposeActive) {
             return;
         }
 
