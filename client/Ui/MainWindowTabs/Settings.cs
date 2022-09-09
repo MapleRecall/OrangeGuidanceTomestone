@@ -122,15 +122,13 @@ internal class Settings : ITab {
             return;
         }
 
+        ImGui.SetNextItemWidth(-1);
         if (ImGui.InputTextWithHint("##filter", "Search...", ref this._filter, 128)) {
             this.FilterTerritories(this._filter);
         }
 
         ImGui.Spacing();
-        ImGui.TextUnformatted("Ban list");
-        ImGui.TreePush();
-        ImGui.TextUnformatted("Click to ban or unban.");
-        ImGui.TreePop();
+        ImGui.TextUnformatted("Ban list (click to ban or unban)");
 
         if (ImGui.BeginChild("##ban-list", new Vector2(-1, -1), true)) {
             var toAdd = -1L;
@@ -160,6 +158,7 @@ internal class Settings : ITab {
 
             if (toRemove > -1 || toAdd > -1) {
                 this.Plugin.SaveConfig();
+                this.FilterTerritories(this._filter);
             }
         }
 
