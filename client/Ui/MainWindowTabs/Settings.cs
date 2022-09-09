@@ -124,13 +124,13 @@ internal class Settings : ITab {
             return;
         }
 
+        ImGui.Spacing();
+        ImGui.TextUnformatted("Ban list (click to ban or unban)");
+
         ImGui.SetNextItemWidth(-1);
         if (ImGui.InputTextWithHint("##filter", "Search...", ref this._filter, 128)) {
             this.FilterTerritories(this._filter);
         }
-
-        ImGui.Spacing();
-        ImGui.TextUnformatted("Ban list (click to ban or unban)");
 
         if (ImGui.BeginChild("##ban-list", new Vector2(-1, -1), true)) {
             var toAdd = -1L;
