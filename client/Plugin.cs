@@ -79,7 +79,7 @@ public class Plugin : IDalamudPlugin {
     private string CopyAvfxFile() {
         var configDir = this.Interface!.GetPluginConfigDirectory();
         Directory.CreateDirectory(configDir);
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < Messages.VfxPaths.Length; i++) {
             var letter = (char) ('a' + i);
             var stream = Resourcer.Resource.AsStreamUnChecked($"OrangeGuidanceTomestone.vfx.b0941trp1{letter}_o.avfx");
             var path = Path.Join(configDir, $"sign_{letter}.avfx");
