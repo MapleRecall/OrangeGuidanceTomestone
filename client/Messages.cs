@@ -99,7 +99,7 @@ internal class Messages : IDisposable {
 
         var nowGpose = this.GposeActive;
         var gposeChanged = this._inGpose != nowGpose;
-        if (this.Plugin.Config.DisableInGpose && this.GposeActive) {
+        if (this.Plugin.Config.DisableInGpose && gposeChanged) {
             if (nowGpose) {
                 this.RemoveVfx();
             } else {
