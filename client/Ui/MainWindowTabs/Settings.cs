@@ -15,7 +15,7 @@ internal class Settings : ITab {
     private int _tab;
     private string _extraCode = string.Empty;
     private IReadOnlyList<(uint, string)> Territories { get; }
-    private List<(uint, string)> FilteredTerritories { get; set; }
+    private List<(uint, bool, string)> FilteredTerritories { get; set; }
 
     private delegate void DrawSettingsDelegate(ref bool anyChanged, ref bool vfx);
 
@@ -48,9 +48,16 @@ internal class Settings : ITab {
     private void FilterTerritories(string? text) {
         var filter = !string.IsNullOrWhiteSpace(text);
 
-        this.FilteredTerritories = this.Territories
+        var territories = this.Territories
             .Where(terr => !this.Plugin.Config.BannedTerritories.Contains(terr.Item1))
-            .Where(terr => filter && CultureInfo.InvariantCulture.CompareInfo.IndexOf(terr.Item2, text!, CompareOptions.OrdinalIgnoreCase) != -1)
+            .Select(terr => (terr.Item1, false, terr.Item2));
+
+        var tt = this.Plugin.DataManager.GetExcelSheet<TerritoryType>()!;
+        this.FilteredTerritories = this.Plugin.Config.BannedTerritories
+            .OrderBy(terr => terr)
+            .Select(terr => (terr, true, tt.GetRow(terr)?.PlaceName.Value?.Name.ToDalamudString().TextValue ?? $"{terr}"))
+            .Concat(territories)
+            .Where(terr => !filter || CultureInfo.InvariantCulture.CompareInfo.IndexOf(terr.Item3, text!, CompareOptions.OrdinalIgnoreCase) != -1)
             .ToList();
     }
 
@@ -135,11 +142,11 @@ internal class Settings : ITab {
             var clipper = ImGuiExt.Clipper(this.FilteredTerritories.Count + banned.Count);
             while (clipper.Step()) {
                 for (var i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-                    if (i < banned.Count) {
+                    var (terrId, isBanned, name) = this.FilteredTerritories[i];
+                    if (isBanned) {
                         this.DrawBannedTerritory(tt, banned[i], ref toRemove);
                     } else {
-                        var idx = i - banned.Count;
-                        this.DrawTerritory(idx, ref toAdd);
+                        this.DrawTerritory(terrId, name, ref toAdd);
                     }
                 }
             }
@@ -162,8 +169,7 @@ internal class Settings : ITab {
         ImGui.EndChild();
     }
 
-    private void DrawTerritory(int i, ref long toAdd) {
-        var (rowId, name) = this.Territories[i];
+    private void DrawTerritory(uint rowId, string name, ref long toAdd) {
         if (this.Plugin.Config.BannedTerritories.Contains(rowId)) {
             return;
         }
