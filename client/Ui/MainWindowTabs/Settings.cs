@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Numerics;
 using Dalamud.Utility;
 using ImGuiNET;
-using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
 using OrangeGuidanceTomestone.Helpers;
 
@@ -134,17 +133,15 @@ internal class Settings : ITab {
         ImGui.TreePop();
 
         if (ImGui.BeginChild("##ban-list", new Vector2(-1, -1), true)) {
-            var banned = this.Plugin.Config.BannedTerritories.ToList();
-
             var toAdd = -1L;
             var toRemove = -1L;
 
-            var clipper = ImGuiExt.Clipper(this.FilteredTerritories.Count + banned.Count);
+            var clipper = ImGuiExt.Clipper(this.FilteredTerritories.Count);
             while (clipper.Step()) {
                 for (var i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
                     var (terrId, isBanned, name) = this.FilteredTerritories[i];
                     if (isBanned) {
-                        this.DrawBannedTerritory(tt, banned[i], ref toRemove);
+                        this.DrawBannedTerritory(terrId, name, ref toRemove);
                     } else {
                         this.DrawTerritory(terrId, name, ref toAdd);
                     }
@@ -179,14 +176,9 @@ internal class Settings : ITab {
         }
     }
 
-    private void DrawBannedTerritory(ExcelSheet<TerritoryType> tt, uint bannedId, ref long toRemove) {
-        var territory = tt.GetRow(bannedId)?.PlaceName.Value?.Name?.ToDalamudString().TextValue ?? $"{bannedId}";
-        if (string.IsNullOrWhiteSpace(this._filter) || CultureInfo.InvariantCulture.CompareInfo.IndexOf(territory, this._filter) == -1) {
-            return;
-        }
-
-        if (ImGui.Selectable($"{territory}##{bannedId}", true)) {
-            toRemove = bannedId;
+    private void DrawBannedTerritory(uint terrId, string name, ref long toRemove) {
+        if (ImGui.Selectable($"{name}##{terrId}", true)) {
+            toRemove = terrId;
         }
     }
 
