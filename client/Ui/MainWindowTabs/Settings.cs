@@ -188,7 +188,7 @@ internal class Settings : ITab {
 
         var glyph = this.Plugin.Config.DefaultGlyph + 1;
         if (ImGui.InputInt("Default glyph", ref glyph)) {
-            this.Plugin.Config.DefaultGlyph = Math.Min(4, Math.Max(0, glyph - 1));
+            this.Plugin.Config.DefaultGlyph = Math.Min(Messages.VfxPaths.Length - 1, Math.Max(0, glyph - 1));
             anyChanged = true;
         }
     }
