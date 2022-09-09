@@ -5,7 +5,7 @@ use anyhow::Context;
 use warp::{Filter, Rejection, Reply};
 use warp::filters::BoxedFilter;
 
-use crate::message::RetrievedMessageTerritory;
+use crate::message::OwnMessage;
 use crate::State;
 use crate::web::AnyhowRejection;
 
@@ -26,7 +26,7 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, mut query: HashMap<String
         .unwrap_or(1);
 
     let mut messages = sqlx::query_as!(
-        RetrievedMessageTerritory,
+        OwnMessage,
         // language=sqlite
         r#"
             select m.id,
@@ -40,7 +40,8 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, mut query: HashMap<String
                    coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
                    v2.vote                                   as user_vote,
                    m.glyph,
-                   m.created
+                   m.created,
+                   0 as "is_hidden: bool"
             from messages m
                      left join votes v on m.id = v.message
                      left join votes v2 on m.id = v2.message and v2.user = ?
@@ -58,13 +59,17 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, mut query: HashMap<String
     messages.sort_by_key(|msg| msg.created);
     messages.reverse();
 
+    for msg in &mut messages {
+        msg.is_hidden = msg.positive_votes - msg.negative_votes < crate::consts::VOTE_THRESHOLD_HIDE;
+    }
+
     if version == 1 {
         return Ok(warp::reply::json(&messages));
     }
 
     #[derive(serde::Serialize)]
     struct Mine {
-        messages: Vec<RetrievedMessageTerritory>,
+        messages: Vec<OwnMessage>,
         extra: i64,
     }
 
