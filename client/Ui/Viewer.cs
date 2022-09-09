@@ -70,7 +70,7 @@ internal class Viewer {
                 ImGui.BeginDisabled();
             }
 
-            if (ImGuiExt.IconButton(FontAwesomeIcon.AngleLeft)) {
+            if (ImGuiHelper.IconButton(FontAwesomeIcon.AngleLeft)) {
                 this._idx -= 1;
             }
 
@@ -167,7 +167,7 @@ internal class Viewer {
                 ImGui.BeginDisabled();
             }
 
-            if (ImGuiExt.IconButton(FontAwesomeIcon.AngleRight)) {
+            if (ImGuiHelper.IconButton(FontAwesomeIcon.AngleRight)) {
                 this._idx += 1;
             }
 

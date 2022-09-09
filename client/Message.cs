@@ -43,6 +43,7 @@ internal class MessageWithTerritory {
     public int UserVote { get; set; }
 
     public int Glyph { get; set; }
+    public bool IsHidden { get; set; }
 
     internal Vector3 Position => new(this.X, this.Y, this.Z);
 
@@ -59,6 +60,7 @@ internal class MessageWithTerritory {
             NegativeVotes = message.NegativeVotes,
             UserVote = message.UserVote,
             Glyph = message.Glyph,
+            IsHidden = false,
         };
     }
 }

@@ -72,13 +72,17 @@ internal class MessageList : ITab {
                 ImGui.TextUnformatted($"Location: {territoryName}");
                 ImGui.SameLine();
 
-                if (ImGuiExt.SmallIconButton(FontAwesomeIcon.MapMarkerAlt, $"{message.Id}") && territory != null) {
+                if (ImGuiHelper.SmallIconButton(FontAwesomeIcon.MapMarkerAlt, $"{message.Id}") && territory != null) {
                     this.Plugin.GameGui.OpenMapWithMapLink(new MapLinkPayload(
                         territory.RowId,
                         territory.Map.Row,
                         (int) (message.X * 1_000),
                         (int) (message.Z * 1_000)
                     ));
+                }
+
+                if (message.IsHidden) {
+                    ImGuiHelper.WarningText("This message's score is too low and will not be shown to other players.");
                 }
 
                 var ctrl = ImGui.GetIO().KeyCtrl;
@@ -99,7 +103,7 @@ internal class MessageList : ITab {
                 }
 
                 ImGui.SameLine();
-                ImGuiExt.HelpIcon("Hold Ctrl to enable the delete button.");
+                ImGuiHelper.HelpIcon("Hold Ctrl to enable the delete button.");
 
                 ImGui.TreePop();
 
