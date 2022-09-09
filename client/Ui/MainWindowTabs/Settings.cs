@@ -136,7 +136,7 @@ internal class Settings : ITab {
             var toAdd = -1L;
             var toRemove = -1L;
 
-            var clipper = ImGuiExt.Clipper(this.FilteredTerritories.Count);
+            var clipper = ImGuiHelper.Clipper(this.FilteredTerritories.Count);
             while (clipper.Step()) {
                 for (var i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
                     var (terrId, isBanned, name) = this.FilteredTerritories[i];
@@ -275,7 +275,7 @@ internal class Settings : ITab {
         }
 
         ImGui.SameLine();
-        ImGuiExt.HelpIcon("Hold Ctrl to enable delete button.");
+        ImGuiHelper.HelpIcon("Hold Ctrl to enable delete button.");
 
         ImGui.TextUnformatted("This will delete all your messages and votes.");
     }

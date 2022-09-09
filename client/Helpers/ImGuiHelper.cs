@@ -1,9 +1,10 @@
 using Dalamud.Interface;
+using Dalamud.Interface.Style;
 using ImGuiNET;
 
 namespace OrangeGuidanceTomestone.Helpers;
 
-internal static class ImGuiExt {
+internal static class ImGuiHelper {
     private static bool InternalIconButton(Func<string, bool> func, FontAwesomeIcon icon, string? id = null) {
         var label = icon.ToIconString();
         if (id != null) {
@@ -31,16 +32,7 @@ internal static class ImGuiExt {
         ImGui.TextUnformatted("(?)");
         ImGui.PopStyleColor();
 
-        if (!ImGui.IsItemHovered()) {
-            return;
-        }
-
-        var width = ImGui.CalcTextSize("m") * 40;
-        ImGui.BeginTooltip();
-        ImGui.PushTextWrapPos(width.X);
-        ImGui.TextUnformatted(text);
-        ImGui.PopTextWrapPos();
-        ImGui.EndTooltip();
+        TextTooltip(text);
     }
 
     internal static unsafe ImGuiListClipperPtr Clipper(int itemsCount) {
@@ -48,5 +40,34 @@ internal static class ImGuiExt {
         clipper.Begin(itemsCount);
 
         return clipper;
+    }
+
+    internal static void TextTooltip(string tooltip) {
+        if (!ImGui.IsItemHovered()) {
+            return;
+        }
+
+        var width = ImGui.CalcTextSize("m") * 40;
+        ImGui.BeginTooltip();
+        ImGui.PushTextWrapPos(width.X);
+        ImGui.TextUnformatted(tooltip);
+        ImGui.PopTextWrapPos();
+        ImGui.EndTooltip();
+    }
+
+    internal static void WarningText(string text) {
+        var style = StyleModel.GetConfiguredStyle() ?? StyleModel.GetFromCurrent();
+        var dalamudOrange = style.BuiltInColors?.DalamudOrange;
+        if (dalamudOrange != null) {
+            ImGui.PushStyleColor(ImGuiCol.Text, dalamudOrange.Value);
+        }
+
+        ImGui.PushTextWrapPos();
+        ImGui.TextUnformatted(text);
+        ImGui.PopTextWrapPos();
+
+        if (dalamudOrange != null) {
+            ImGui.PopStyleColor();
+        }
     }
 }
