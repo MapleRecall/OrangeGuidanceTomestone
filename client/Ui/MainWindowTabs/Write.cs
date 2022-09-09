@@ -24,7 +24,7 @@ internal class Write : ITab {
     private List<TextureWrap> GlyphImages { get; } = new();
 
     private void LoadSignImages() {
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < Messages.VfxPaths.Length; i++) {
             var stream = Resourcer.Resource.AsStreamUnChecked($"OrangeGuidanceTomestone.img.sign_{i}.jpg");
             using var mem = new MemoryStream();
             stream.CopyTo(mem);
@@ -199,7 +199,7 @@ internal class Write : ITab {
         if (ImGui.BeginCombo("Glyph", $"{this._glyph + 1}")) {
             var tooltipShown = false;
 
-            for (var i = 0; i < 5; i++) {
+            for (var i = 0; i < Messages.VfxPaths.Length; i++) {
                 if (ImGui.Selectable($"{i + 1}", this._glyph == i)) {
                     this._glyph = i;
                 }
