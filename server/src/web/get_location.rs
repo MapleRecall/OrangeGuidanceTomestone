@@ -63,8 +63,8 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
     let id_str = id.to_string();
 
     // remove messages where the user has been offline for over 35 minutes
-    // also remove messages with low score
-    messages.drain_filter(|msg| msg.last_seen_minutes >= 35 || (msg.positive_votes - msg.negative_votes) < -1);
+    // also remove messages with low score (that aren't the from the user)
+    messages.drain_filter(|msg| msg.last_seen_minutes >= 35 || (msg.user != id_str && (msg.positive_votes - msg.negative_votes) < -1));
 
     // shuffle messages since we'll be excluding later based on messages
     // that have already been included, so this will be more fair
