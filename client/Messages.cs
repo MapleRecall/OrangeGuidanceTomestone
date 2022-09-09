@@ -14,6 +14,7 @@ internal class Messages : IDisposable {
         "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1c_o.avfx",
         "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1d_o.avfx",
         "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1e_o.avfx",
+        "bg/ex2/02_est_e3/common/vfx/eff/b0941trp1f_o.avfx",
     };
 
     private Plugin Plugin { get; }
