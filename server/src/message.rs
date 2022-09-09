@@ -64,3 +64,21 @@ pub struct RetrievedMessageTerritory {
     #[serde(skip)]
     pub created: NaiveDateTime,
 }
+
+#[derive(Debug, Serialize)]
+pub struct OwnMessage {
+    pub id: String,
+    pub territory: i64,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+    pub yaw: f64,
+    pub message: String,
+    pub positive_votes: i32,
+    pub negative_votes: i32,
+    pub user_vote: i64,
+    pub glyph: i64,
+    #[serde(skip)]
+    pub created: NaiveDateTime,
+    pub is_hidden: bool,
+}
