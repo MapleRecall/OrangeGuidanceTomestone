@@ -10,6 +10,8 @@ public class Configuration : IPluginConfiguration {
     public HashSet<uint> BannedTerritories { get; set; } = new();
     public bool DisableTrials = true;
     public bool DisableDeepDungeon = true;
+    public bool DisableInCutscene = true;
+    public bool DisableInGpose = true;
     public bool RemoveGlow = true;
     public bool AutoViewer;
     public bool AutoViewerClose = true;

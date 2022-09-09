@@ -115,6 +115,8 @@ internal class Settings : ITab {
     private void DrawGeneral(ref bool anyChanged, ref bool vfx) {
         anyChanged |= vfx |= ImGui.Checkbox("Disable in trials", ref this.Plugin.Config.DisableTrials);
         anyChanged |= vfx |= ImGui.Checkbox("Disable in Deep Dungeons", ref this.Plugin.Config.DisableDeepDungeon);
+        anyChanged |= vfx |= ImGui.Checkbox("Disable in cutscenes", ref this.Plugin.Config.DisableInCutscene);
+        anyChanged |= vfx |= ImGui.Checkbox("Disable in /gpose", ref this.Plugin.Config.DisableInGpose);
         anyChanged |= vfx |= ImGui.Checkbox("Remove glow effect from signs", ref this.Plugin.Config.RemoveGlow);
 
         var tt = this.Plugin.DataManager.GetExcelSheet<TerritoryType>();
