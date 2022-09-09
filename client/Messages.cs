@@ -43,6 +43,9 @@ internal class Messages : IDisposable {
         }
     }
 
+    private bool _inCutscene;
+    private bool _inGpose;
+
     internal Messages(Plugin plugin) {
         this.Plugin = plugin;
 
@@ -66,6 +69,7 @@ internal class Messages : IDisposable {
             this.SpawnVfx();
         }
 
+        this.Plugin.Framework.Update += this.RemoveConditionally;
         this.Plugin.Framework.Update += this.HandleSpawnQueue;
         this.Plugin.ClientState.Login += this.SpawnVfx;
         this.Plugin.ClientState.Logout += this.RemoveVfx;
@@ -77,8 +81,34 @@ internal class Messages : IDisposable {
         this.Plugin.ClientState.Logout -= this.RemoveVfx;
         this.Plugin.ClientState.Login -= this.SpawnVfx;
         this.Plugin.Framework.Update -= this.HandleSpawnQueue;
+        this.Plugin.Framework.Update -= this.RemoveConditionally;
 
         this.RemoveVfx();
+    }
+
+    private void RemoveConditionally(Framework framework) {
+        var nowCutscene = this.CutsceneActive;
+        var cutsceneChanged = this._inCutscene != nowCutscene;
+        if (this.Plugin.Config.DisableInCutscene && cutsceneChanged) {
+            if (nowCutscene) {
+                this.RemoveVfx();
+            } else {
+                this.SpawnVfx();
+            }
+        }
+
+        var nowGpose = this.GposeActive;
+        var gposeChanged = this._inGpose != nowGpose;
+        if (this.Plugin.Config.DisableInGpose && this.GposeActive) {
+            if (nowGpose) {
+                this.RemoveVfx();
+            } else {
+                this.SpawnVfx();
+            }
+        }
+
+        this._inCutscene = nowCutscene;
+        this._inGpose = nowGpose;
     }
 
     private unsafe void HandleSpawnQueue(Framework framework) {
