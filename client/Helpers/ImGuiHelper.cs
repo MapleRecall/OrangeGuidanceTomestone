@@ -1,7 +1,7 @@
 using Dalamud.Interface;
 using ImGuiNET;
 
-namespace OrangeGuidanceTomestone.Ui;
+namespace OrangeGuidanceTomestone.Helpers;
 
 internal static class ImGuiExt {
     private static bool InternalIconButton(Func<string, bool> func, FontAwesomeIcon icon, string? id = null) {

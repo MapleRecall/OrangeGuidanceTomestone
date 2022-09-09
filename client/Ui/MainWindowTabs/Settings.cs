@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.Numerics;
 using Dalamud.Utility;
 using ImGuiNET;
+using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
 using OrangeGuidanceTomestone.Helpers;
 
@@ -12,11 +14,14 @@ internal class Settings : ITab {
     private Plugin Plugin { get; }
     private int _tab;
     private string _extraCode = string.Empty;
-    private List<(uint, string)> Territories { get; }
+    private IReadOnlyList<(uint, string)> Territories { get; }
+    private List<(uint, string)> FilteredTerritories { get; set; }
 
     private delegate void DrawSettingsDelegate(ref bool anyChanged, ref bool vfx);
 
     private IReadOnlyList<(string, DrawSettingsDelegate)> Tabs { get; }
+
+    private string _filter = string.Empty;
 
     internal Settings(Plugin plugin) {
         this.Plugin = plugin;
@@ -26,6 +31,7 @@ internal class Settings : ITab {
             .Select(row => (row.RowId, row.PlaceName.Value?.Name?.ToDalamudString().TextValue))
             .Where(entry => entry.TextValue != null && !string.IsNullOrWhiteSpace(entry.TextValue))
             .ToList()!;
+        this.FilterTerritories(null);
 
         this.Tabs = new List<(string, DrawSettingsDelegate)> {
             ("General", this.DrawGeneral),
@@ -37,6 +43,15 @@ internal class Settings : ITab {
     }
 
     public void Dispose() {
+    }
+
+    private void FilterTerritories(string? text) {
+        var filter = !string.IsNullOrWhiteSpace(text);
+
+        this.FilteredTerritories = this.Territories
+            .Where(terr => !this.Plugin.Config.BannedTerritories.Contains(terr.Item1))
+            .Where(terr => filter && CultureInfo.InvariantCulture.CompareInfo.IndexOf(terr.Item2, text!, CompareOptions.OrdinalIgnoreCase) != -1)
+            .ToList();
     }
 
     public void Draw() {
@@ -101,6 +116,10 @@ internal class Settings : ITab {
             return;
         }
 
+        if (ImGui.InputTextWithHint("##filter", "Search...", ref this._filter, 128)) {
+            this.FilterTerritories(this._filter);
+        }
+
         ImGui.Spacing();
         ImGui.TextUnformatted("Ban list");
         ImGui.TreePush();
@@ -108,30 +127,24 @@ internal class Settings : ITab {
         ImGui.TreePop();
 
         if (ImGui.BeginChild("##ban-list", new Vector2(-1, -1), true)) {
+            var banned = this.Plugin.Config.BannedTerritories.ToList();
+
             var toAdd = -1L;
             var toRemove = -1L;
-            foreach (var bannedId in this.Plugin.Config.BannedTerritories) {
-                var territory = tt.GetRow(bannedId)?.PlaceName.Value?.Name?.ToDalamudString().TextValue ?? $"{bannedId}";
-                if (ImGui.Selectable($"{territory}##{bannedId}", true)) {
-                    toRemove = bannedId;
+
+            var clipper = ImGuiExt.Clipper(this.FilteredTerritories.Count + banned.Count);
+            while (clipper.Step()) {
+                for (var i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                    if (i < banned.Count) {
+                        this.DrawBannedTerritory(tt, banned[i], ref toRemove);
+                    } else {
+                        var idx = i - banned.Count;
+                        this.DrawTerritory(idx, ref toAdd);
+                    }
                 }
             }
 
             ImGui.Separator();
-
-            var clipper = ImGuiExt.Clipper(this.Territories.Count - this.Plugin.Config.BannedTerritories.Count);
-            while (clipper.Step()) {
-                for (var i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-                    var (rowId, name) = this.Territories[i];
-                    if (this.Plugin.Config.BannedTerritories.Contains(rowId)) {
-                        continue;
-                    }
-
-                    if (ImGui.Selectable($"{name}##{rowId}")) {
-                        toAdd = rowId;
-                    }
-                }
-            }
 
             if (toRemove > -1) {
                 this.Plugin.Config.BannedTerritories.Remove((uint) toRemove);
@@ -147,6 +160,28 @@ internal class Settings : ITab {
         }
 
         ImGui.EndChild();
+    }
+
+    private void DrawTerritory(int i, ref long toAdd) {
+        var (rowId, name) = this.Territories[i];
+        if (this.Plugin.Config.BannedTerritories.Contains(rowId)) {
+            return;
+        }
+
+        if (ImGui.Selectable($"{name}##{rowId}")) {
+            toAdd = rowId;
+        }
+    }
+
+    private void DrawBannedTerritory(ExcelSheet<TerritoryType> tt, uint bannedId, ref long toRemove) {
+        var territory = tt.GetRow(bannedId)?.PlaceName.Value?.Name?.ToDalamudString().TextValue ?? $"{bannedId}";
+        if (string.IsNullOrWhiteSpace(this._filter) || CultureInfo.InvariantCulture.CompareInfo.IndexOf(territory, this._filter) == -1) {
+            return;
+        }
+
+        if (ImGui.Selectable($"{territory}##{bannedId}", true)) {
+            toRemove = bannedId;
+        }
     }
 
     private void DrawWriter(ref bool anyChanged, ref bool vfx) {
