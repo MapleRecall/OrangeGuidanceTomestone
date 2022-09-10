@@ -1,10 +1,12 @@
 use std::convert::Infallible;
+use std::error::Error;
 use std::sync::Arc;
 
 use warp::{Filter, Rejection, Reply};
+use warp::body::BodyDeserializeError;
 use warp::filters::BoxedFilter;
 use warp::http::StatusCode;
-use warp::reject::Reject;
+use warp::reject::{MethodNotAllowed, Reject};
 
 use crate::State;
 
@@ -79,7 +81,13 @@ pub struct AnyhowRejection(anyhow::Error);
 impl Reject for AnyhowRejection {}
 
 async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
-    let (status, name, desc) = if let Some(AnyhowRejection(e)) = err.find::<AnyhowRejection>() {
+    let (status, name, desc) = if err.is_not_found() {
+        (StatusCode::NOT_FOUND, "not_found", "route was unknown to the server")
+    } else if let Some(e) = err.find::<BodyDeserializeError>() {
+        (StatusCode::BAD_REQUEST, "invalid_body", format!("invalid body: {}", e))
+    } else if let Some(_) = err.find::<MethodNotAllowed>() {
+        (StatusCode::METHOD_NOT_ALLOWED, "method_not_allowed", "that http method is not allowed on that route")
+    } else if let Some(AnyhowRejection(e)) = err.find::<AnyhowRejection>() {
         eprintln!("{:#?}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
