@@ -28,11 +28,15 @@ impl Pack {
             return None;
         }
 
-        let mut formatted = if template_1.contains("{0}") && let Some((w1_list, w1_word)) = word_1_idx {
-            let word_1 = self.words.get(w1_list)?.words.get(w1_word)?;
-            template_1.replace("{0}", word_1)
-        } else {
-            template_1.clone()
+        let mut formatted = if_chain::if_chain! {
+            if template_1.contains("{0}");
+            if let Some((w1_list, w1_word)) = word_1_idx;
+            then {
+                let word_1 = self.words.get(w1_list)?.words.get(w1_word)?;
+                template_1.replace("{0}", word_1)
+            } else {
+                template_1.clone()
+            }
         };
 
         if let Some(conj_idx) = conjunction {
@@ -49,15 +53,15 @@ impl Pack {
                 }
 
                 let template_2 = self.templates.get(template_2_idx)?;
-                if template_2.contains("{0}") && word_2_idx.is_none() {
-                    return None;
-                }
-
-                let append = if let Some((w2_list, w2_word)) = word_2_idx {
-                    let word_2 = self.words.get(w2_list)?.words.get(w2_word)?;
-                    template_2.replace("{0}", word_2)
-                } else {
-                    template_2.clone()
+                let append = if_chain::if_chain! {
+                    if template_2.contains("{0}");
+                    if let Some((w2_list, w2_word)) = word_2_idx;
+                    then {
+                        let word_2 = self.words.get(w2_list)?.words.get(w2_word)?;
+                        template_2.replace("{0}", word_2)
+                    } else {
+                        template_2.clone()
+                    }
                 };
 
                 formatted.push_str(&append);

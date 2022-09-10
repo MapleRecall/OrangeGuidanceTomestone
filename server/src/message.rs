@@ -43,7 +43,7 @@ pub struct RetrievedMessage {
     #[serde(skip)]
     pub created: NaiveDateTime,
     #[serde(skip)]
-    pub user: String,
+    pub user: i64,
     #[serde(skip)]
     pub last_seen_minutes: i64,
 }

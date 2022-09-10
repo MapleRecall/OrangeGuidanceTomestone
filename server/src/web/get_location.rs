@@ -59,12 +59,9 @@ async fn logic(state: Arc<State>, id: i64, location: u32) -> Result<impl Reply, 
 }
 
 fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
-    // FIXME: make a migration to fix this, smh I'm dumb
-    let id_str = id.to_string();
-
     // remove messages where the user has been offline for over 35 minutes
     // also remove messages with low score (that aren't the from the user)
-    messages.drain_filter(|msg| msg.last_seen_minutes >= 35 || (msg.user != id_str && (msg.positive_votes - msg.negative_votes) < crate::consts::VOTE_THRESHOLD_HIDE));
+    messages.drain_filter(|msg| msg.last_seen_minutes >= 35 || (msg.user != id && (msg.positive_votes - msg.negative_votes) < crate::consts::VOTE_THRESHOLD_HIDE));
 
     // shuffle messages since we'll be excluding later based on messages
     // that have already been included, so this will be more fair
@@ -73,7 +70,7 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
     // just count nearby messages. this is O(n^2) but alternatives are hard
     let mut ids = Vec::with_capacity(messages.len());
     for a in messages.iter() {
-        if a.user == id_str {
+        if a.user == id {
             // always include own messages
             ids.push(a.id.clone());
             continue;

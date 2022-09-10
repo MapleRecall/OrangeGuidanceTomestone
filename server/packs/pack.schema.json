@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anna.lgbt/schemas/orange-guidance-tomestone/pack.schema.json",
+  "title": "Orange Guidance Tomestone Pack",
+  "description": "A pack of templates, conjunctions, and word lists for use in the Dalamud plugin Orange Guidance Tomestone.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The user-friendly name of this pack."
+    },
+    "id": {
+      "type": "string",
+      "description": "A UUID for this pack.",
+      "format": "uuid",
+      "pattern": "^([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}|[a-fA-F0-9]{32})$"
+    },
+    "visible": {
+      "type": "boolean",
+      "description": "Whether this pack is visible to users or archived for backwards-compatibility reasons."
+    },
+    "order": {
+      "type": "integer",
+      "description": "The order in a client's UI that this pack should appear, 1 being first, 2 second, etc. 0 should be used for archived packs.",
+      "minimum": 0
+    },
+    "templates": {
+      "type": "array",
+      "description": "An array of template strings, using {0} for where the chosen word should be inserted (if any).",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "conjunctions": {
+      "type": "array",
+      "description": "An array of conjunctions, one of which may be inserted between two templates to form a longer message.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "words": {
+      "type": "array",
+      "description": "An array of word lists for using with the templates.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The user-friendly name of this word list."
+          },
+          "words": {
+            "type": "array",
+            "description": "The words in this word list.",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "name",
+          "words"
+        ]
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "name",
+    "id",
+    "conjunctions",
+    "words"
+  ]
+}
