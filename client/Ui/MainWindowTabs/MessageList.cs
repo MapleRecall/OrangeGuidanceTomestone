@@ -73,12 +73,18 @@ internal class MessageList : ITab {
                 ImGui.SameLine();
 
                 if (ImGuiHelper.SmallIconButton(FontAwesomeIcon.MapMarkerAlt, $"{message.Id}") && territory != null) {
-                    this.Plugin.GameGui.OpenMapWithMapLink(new MapLinkPayload(
-                        territory.RowId,
-                        territory.Map.Row,
-                        (int) (message.X * 1_000),
-                        (int) (message.Z * 1_000)
-                    ));
+                    var map = this.Plugin.DataManager.GetExcelSheet<Map>()!
+                        .Where(map => map.TerritoryType.Row == territory.RowId)
+                        .Where(map => message.X >= map.OffsetX && message.Y >= map.OffsetY)
+                        .MaxBy(map => Math.Max(map.OffsetX, map.OffsetY));
+                    if (map != null) {
+                        this.Plugin.GameGui.OpenMapWithMapLink(new MapLinkPayload(
+                            territory.RowId,
+                            map.RowId,
+                            (int) (message.X * 1_000),
+                            (int) (message.Z * 1_000)
+                        ));
+                    }
                 }
 
                 if (message.IsHidden) {
