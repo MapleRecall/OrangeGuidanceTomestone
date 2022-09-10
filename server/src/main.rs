@@ -1,4 +1,3 @@
-#![feature(let_chains)]
 #![feature(drain_filter)]
 
 use std::collections::HashMap;
@@ -8,6 +7,7 @@ use anyhow::{Context, Result};
 use sqlx::{Executor, Pool, Sqlite};
 use sqlx::migrate::Migrator;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+use tokio::runtime::Handle;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
@@ -107,8 +107,32 @@ async fn main() -> Result<()> {
     println!("adding packs");
     state.update_packs().await?;
 
+    spawn_command_reader(Arc::clone(&state), Handle::current());
     let address = state.config.address;
     println!("listening at {}", address);
     warp::serve(web::routes(state)).run(address).await;
     Ok(())
+}
+
+fn spawn_command_reader(state: Arc<State>, handle: Handle) {
+    std::thread::spawn(move || {
+        let mut line = String::new();
+        while let Ok(size) = std::io::stdin().read_line(&mut line) {
+            let read = line[..size].trim();
+
+            match read {
+                "reload packs" => {
+                    let state = Arc::clone(&state);
+                    handle.spawn(async move {
+                        if let Err(e) = state.update_packs().await {
+                            eprintln!("failed to update packs: {:#?}", e);
+                        }
+                    });
+                }
+                _ => {}
+            }
+
+            line.clear();
+        }
+    });
 }
