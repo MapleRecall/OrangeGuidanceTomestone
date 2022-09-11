@@ -185,6 +185,7 @@ words:
       - confusion
       - single-target
       - area of effect
+      - combo
 
   - name: Actions
     words:
@@ -225,6 +226,7 @@ words:
       - arkasodara
       - goat
       - mameshiba
+      - loporrit
 
   - name: Situations
     words:
@@ -384,3 +386,4 @@ words:
       - this was not my intention
       - gobbie-boom
       - please look forward to it
+      - it can't be helped
