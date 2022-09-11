@@ -1,4 +1,5 @@
 using System.Numerics;
+using Dalamud.Data;
 using Dalamud.Game;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Logging;
@@ -18,6 +19,19 @@ internal class Messages : IDisposable {
         "bg/ex2/02_est_e3/common/vfx/eff/b0941trp1f_o.avfx",
     };
 
+    private static string GetPath(DataManager data, Message message) {
+        var glyph = message.Glyph;
+        if (glyph < 0 || glyph >= VfxPaths.Length) {
+            // not checking if this exists, but the check is really only for the
+            // last file in the array anyway. we're guaranteed to have these
+            // files with an up-to-date install
+            return VfxPaths[0];
+        }
+
+        return data.FileExists(VfxPaths[glyph])
+            ? VfxPaths[glyph]
+            : VfxPaths[message.Id.ToByteArray()[^1] % 5];
+    }
 
     private Plugin Plugin { get; }
 
@@ -118,9 +132,7 @@ internal class Messages : IDisposable {
 
         PluginLog.Debug($"spawning vfx for {message.Id}");
         var rotation = Quaternion.CreateFromYawPitchRoll(message.Yaw, 0, 0);
-        var path = message.Glyph < 0 || message.Glyph >= VfxPaths.Length
-            ? VfxPaths[0]
-            : VfxPaths[message.Glyph];
+        var path = GetPath(this.Plugin.DataManager, message);
         if (this.Plugin.Vfx.SpawnStatic(message.Id, path, message.Position, rotation) == null) {
             PluginLog.Debug("trying again");
             this.SpawnQueue.Enqueue(message);
