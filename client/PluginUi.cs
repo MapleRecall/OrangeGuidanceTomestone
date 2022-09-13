@@ -20,10 +20,16 @@ public class PluginUi : IDisposable {
         this.ViewerButton = new ViewerButton(this.Plugin);
 
         this.Plugin.Interface.UiBuilder.Draw += this.Draw;
+        this.Plugin.Interface.UiBuilder.OpenConfigUi += this.OpenConfig;
     }
 
     public void Dispose() {
+        this.Plugin.Interface.UiBuilder.OpenConfigUi -= this.OpenConfig;
         this.Plugin.Interface.UiBuilder.Draw -= this.Draw;
+    }
+
+    private void OpenConfig() {
+        this.MainWindow.Visible = true;
     }
 
     private void Draw() {
