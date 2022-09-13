@@ -152,10 +152,19 @@ internal class Settings : ITab {
 
             if (toRemove > -1) {
                 this.Plugin.Config.BannedTerritories.Remove((uint) toRemove);
+                if (this.Plugin.ClientState.TerritoryType == toRemove) {
+                    this.Plugin.Messages.SpawnVfx();
+                }
             }
 
             if (toAdd > -1) {
                 this.Plugin.Config.BannedTerritories.Add((uint) toAdd);
+                if (this.Plugin.ClientState.TerritoryType == toAdd) {
+                    this.Plugin.Framework.RunOnFrameworkThread(() => {
+                        this.Plugin.Messages.RemoveVfx();
+                        this.Plugin.Messages.Clear();
+                    });
+                }
             }
 
             if (toRemove > -1 || toAdd > -1) {

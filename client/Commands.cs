@@ -40,8 +40,10 @@ internal class Commands : IDisposable {
                 this.Plugin.SaveConfig();
                 this.Plugin.ChatGui.Print($"Added {name} to the ban list.");
 
-                this.Plugin.Messages.RemoveVfx();
-                this.Plugin.Messages.Clear();
+                this.Plugin.Framework.RunOnFrameworkThread(() => {
+                    this.Plugin.Messages.RemoveVfx();
+                    this.Plugin.Messages.Clear();
+                });
                 break;
             }
             case "unban": {
