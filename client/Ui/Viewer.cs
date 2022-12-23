@@ -1,7 +1,13 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
+using System.Text.RegularExpressions;
+using System.Web;
 using Dalamud.Interface;
+using Dalamud.Logging;
 using ImGuiNET;
 using OrangeGuidanceTomestone.Helpers;
+using WebTranslator.Baidu;
 
 namespace OrangeGuidanceTomestone.Ui;
 
@@ -81,7 +87,110 @@ internal class Viewer {
 
         if (ImGui.TableSetColumnIndex(1) && this._idx > -1 && this._idx < nearby.Count) {
             var message = nearby[this._idx];
-            var size = ImGui.CalcTextSize(message.Text, ImGui.GetContentRegionAvail().X).Y;
+
+            if (string.IsNullOrWhiteSpace(message.TextZh) && !message.Translating)
+            {
+                message.Translating = true;
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        BaiduTranslate.appId = "20221223001505811";
+                        BaiduTranslate.secretKey = "vym5TLDMKtsSJ3uysAG1";
+
+                        var msg = message.Text;
+                        PluginLog.Debug(message.Text);
+
+                        var msgParts = msg.Split("\n");
+                        var conjunction = string.Empty;
+                        var conjunctionZh = string.Empty;
+
+                        if (msgParts.Length > 1)
+                        {
+                            foreach (var pair in Pack.ConjunctionsZH.OrderByDescending(x => x.Key.Length))
+                            {
+                                var reg = new Regex($"(^|\\b)({Regex.Escape(pair.Key)})(\\b|$)", RegexOptions.IgnoreCase);
+                                PluginLog.Verbose($"[Conjunctions] {reg}");
+
+                                if (reg.IsMatch(msgParts[1]))
+                                {
+                                    conjunction = pair.Key;
+                                    conjunctionZh = pair.Value;
+                                    msgParts[1] = msgParts[1].Replace(conjunction, string.Empty);
+                                    PluginLog.Debug($"[Conjunctions]");
+                                    PluginLog.Debug($"[Conjunctions] {conjunction} >> {conjunctionZh}");
+                                    PluginLog.Debug($"[Conjunctions] {msgParts[0]} : {msgParts[1]}");
+
+                                    break;
+                                }
+                            }
+                        }
+
+                        foreach (var pair in Pack.TemplatesZH.OrderByDescending(x => x.Key.Length))
+                        {
+                            var reg = new Regex($"{Regex.Escape(pair.Key).Replace("\\{0}", "(?<content>.+)")}", RegexOptions.IgnoreCase);
+                            PluginLog.Verbose($"[Templates] {reg}");
+
+                            for (int i = 0; i < msgParts.Length; i++)
+                            {
+                                var match = reg.Match(msgParts[i]);
+                                if (match.Success)
+                                {
+                                    PluginLog.Debug($"[Templates]");
+                                    PluginLog.Debug($"[Templates] [FOO] {msgParts[i]}");
+                                    msgParts[i] = string.Format(pair.Value, match.Groups["content"].Value);
+                                    PluginLog.Debug($"[Templates] {pair.Key} >> {pair.Value}");
+                                    PluginLog.Debug($"[Templates] [BAR] {msgParts[i]}");
+                                }
+                            }
+                        };
+
+                        if (msgParts.Length > 1)
+                        {
+                            msgParts[1] = conjunctionZh + msgParts[1];
+                        }
+
+                        msg = string.Join("\n", msgParts);
+
+                        PluginLog.Debug($"[Dictionary]");
+                        PluginLog.Debug($"[Dictionary] [FOO] {msg}");
+                        foreach (var pair in Pack.DictionaryZH.OrderByDescending(x => x.Key.Length))
+                        {
+                            var reg = new Regex($"(^|\\b)({Regex.Escape(pair.Key)})(\\b|$)", RegexOptions.IgnoreCase);
+                            PluginLog.Verbose($"[Dictionary] {reg}");
+                            msg = reg.Replace(msg, pair.Value);
+                        };
+
+                        PluginLog.Debug($"[Dictionary] [BAR] {msg}");
+
+                        message.TextZh = msg;
+
+                        var enCount = new Regex("[a-z]", RegexOptions.IgnoreCase).Matches(msg).Count;
+                        PluginLog.Debug($"[EN Count] {enCount}");
+
+                        if (enCount > 1)
+                        {
+                            msg = msg.ToLower().Replace("\n", " [%0A] ");
+                            PluginLog.Debug($"[Translate] {msg}");
+                            msg = BaiduTranslate.Baidu_Translate(baidu_lan.en.ToString(), baidu_lan.zh.ToString(), msg).Result.Replace("[%0A]", "\n");
+                            PluginLog.Debug($"[Translate] end");
+                        }
+
+                        message.TextZh = msg.Replace(" ", "");
+
+                        PluginLog.Debug(message.TextZh);
+                    }
+                    finally
+                    {
+                        message.Translating = false;
+                    }
+
+                });
+
+            }
+
+            var text = string.IsNullOrWhiteSpace(message.TextZh) ? message.Text : $"{message.TextZh}\n\n{message.Text}\n\n";
+            var size = ImGui.CalcTextSize(text, ImGui.GetContentRegionAvail().X).Y;
             size += ImGui.GetStyle().ItemSpacing.Y * 2;
             size += ImGui.CalcTextSize("A").Y;
             size += ImGuiHelpers.GetButtonSize("A").Y;
@@ -89,7 +198,7 @@ internal class Viewer {
             ImGui.Dummy(new Vector2(1, height / 2 - size / 2 - ImGui.GetStyle().ItemSpacing.Y));
 
             ImGui.PushTextWrapPos();
-            ImGui.TextUnformatted(message.Text);
+            ImGui.TextUnformatted(text);
             ImGui.PopTextWrapPos();
 
             var appraisals = Math.Max(0, message.PositiveVotes - message.NegativeVotes);

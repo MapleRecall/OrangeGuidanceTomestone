@@ -15,6 +15,8 @@ internal class Message {
 
     [JsonProperty("message")]
     public string Text { get; init; }
+    public string TextZh { get; set; }
+    public bool Translating { get; set; }
 
     public int PositiveVotes { get; set; }
     public int NegativeVotes { get; set; }
@@ -37,6 +39,7 @@ internal class MessageWithTerritory {
 
     [JsonProperty("message")]
     public string Text { get; init; }
+    public string TextZh { get; init; }
 
     public int PositiveVotes { get; init; }
     public int NegativeVotes { get; init; }

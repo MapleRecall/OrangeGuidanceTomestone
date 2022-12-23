@@ -66,8 +66,9 @@ internal class MessageList : ITab {
             foreach (var message in messages) {
                 var territory = this.Plugin.DataManager.GetExcelSheet<TerritoryType>()?.GetRow(message.Territory);
                 var territoryName = territory?.PlaceName.Value?.Name?.ToDalamudString().TextValue ?? "???";
+                var text = string.IsNullOrWhiteSpace(message.TextZh) ? message.Text : message.TextZh;
 
-                ImGui.TextUnformatted(message.Text);
+                ImGui.TextUnformatted(text);
                 ImGui.TreePush();
                 ImGui.TextUnformatted($"Location: {territoryName}");
                 ImGui.SameLine();
