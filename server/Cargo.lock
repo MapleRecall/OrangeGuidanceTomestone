@@ -1050,6 +1050,7 @@ dependencies = [
  "sha3",
  "sqlx",
  "tokio",
+ "tokio-stream",
  "toml",
  "uuid",
  "warp",

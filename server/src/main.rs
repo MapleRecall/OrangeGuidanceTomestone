@@ -1,14 +1,21 @@
 #![feature(drain_filter)]
 
 use std::collections::HashMap;
+use std::fs::Permissions;
+use std::net::SocketAddr;
+use std::os::unix::fs::PermissionsExt;
+use std::str::FromStr;
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use sqlx::{Executor, Pool, Sqlite};
 use sqlx::migrate::Migrator;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+use tokio::fs::File;
+use tokio::net::{TcpListener, UnixListener};
 use tokio::runtime::Handle;
 use tokio::sync::RwLock;
+use tokio_stream::wrappers::{TcpListenerStream, UnixListenerStream};
 use uuid::Uuid;
 
 use crate::config::Config;
@@ -108,9 +115,23 @@ async fn main() -> Result<()> {
     state.update_packs().await?;
 
     spawn_command_reader(Arc::clone(&state), Handle::current());
-    let address = state.config.address;
+
+
+    let address = state.config.address.clone();
+    let server = warp::serve(web::routes(state));
     println!("listening at {}", address);
-    warp::serve(web::routes(state)).run(address).await;
+
+    if address.starts_with("unix:") {
+        let listener = UnixListener::bind(&address[5..])?;
+        let stream = UnixListenerStream::new(listener);
+        server.run_incoming(stream).await;
+    } else {
+        let addr = SocketAddr::from_str(&address)?;
+        let listener = TcpListener::bind(addr).await?;
+        let stream = TcpListenerStream::new(listener);
+        server.run_incoming(stream).await;
+    }
+
     Ok(())
 }
 
