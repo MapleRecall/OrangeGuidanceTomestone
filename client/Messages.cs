@@ -190,14 +190,16 @@ internal class Messages : IDisposable {
         var messages = JsonConvert.DeserializeObject<Message[]>(json)!;
 
         await this.CurrentMutex.WaitAsync();
-        this.Current.Clear();
+        try {
+            this.Current.Clear();
 
-        foreach (var message in messages) {
-            this.Current[message.Id] = message;
-            this.SpawnQueue.Enqueue(message);
+            foreach (var message in messages) {
+                this.Current[message.Id] = message;
+                this.SpawnQueue.Enqueue(message);
+            }
+        } finally {
+            this.CurrentMutex.Release();
         }
-
-        this.CurrentMutex.Release();
     }
 
     private void RemoveVfx(object? sender, EventArgs? e) {
@@ -210,8 +212,11 @@ internal class Messages : IDisposable {
 
     internal void Clear() {
         this.CurrentMutex.Wait();
-        this.Current.Clear();
-        this.CurrentMutex.Release();
+        try {
+            this.Current.Clear();
+        } finally {
+            this.CurrentMutex.Release();
+        }
     }
 
     internal IEnumerable<Message> Nearby() {
@@ -221,27 +226,39 @@ internal class Messages : IDisposable {
 
         var position = player.Position;
 
+        List<Message> nearby;
         this.CurrentMutex.Wait();
-        var nearby = this.Current
-            .Values
-            .Where(msg => Math.Abs(msg.Position.Y - position.Y) <= 1f)
-            .Where(msg => Vector3.Distance(msg.Position, position) <= 2f)
-            .ToList();
-        this.CurrentMutex.Release();
+        try {
+            nearby = this.Current
+                .Values
+                .Where(msg => Math.Abs(msg.Position.Y - position.Y) <= 1f)
+                .Where(msg => Vector3.Distance(msg.Position, position) <= 2f)
+                .ToList();
+        } finally {
+            this.CurrentMutex.Release();
+        }
+
 
         return nearby;
     }
 
     internal void Add(Message message) {
         this.CurrentMutex.Wait();
-        this.Current[message.Id] = message;
-        this.CurrentMutex.Release();
+        try {
+            this.Current[message.Id] = message;
+        } finally {
+            this.CurrentMutex.Release();
+        }
+
         this.SpawnQueue.Enqueue(message);
     }
 
     internal void Remove(Guid id) {
         this.CurrentMutex.Wait();
-        this.Current.Remove(id);
-        this.CurrentMutex.Release();
+        try {
+            this.Current.Remove(id);
+        } finally {
+            this.CurrentMutex.Release();
+        }
     }
 }

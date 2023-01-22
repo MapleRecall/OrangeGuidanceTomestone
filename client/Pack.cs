@@ -20,8 +20,11 @@ public class Pack {
             var json = await resp.Content.ReadAsStringAsync();
             var packs = JsonConvert.DeserializeObject<Pack[]>(json)!;
             await AllMutex.WaitAsync();
-            All = packs;
-            AllMutex.Release();
+            try {
+                All = packs;
+            } finally {
+                AllMutex.Release();
+            }
         });
     }
 }

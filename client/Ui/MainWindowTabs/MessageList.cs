@@ -41,7 +41,14 @@ internal class MessageList : ITab {
         }
 
         this.MessagesMutex.Wait();
+        try {
+            this.ShowList();
+        } finally {
+            this.MessagesMutex.Release();
+        }
+    }
 
+    private void ShowList() {
         ImGui.TextUnformatted($"Messages: {this.Messages.Count:N0} / {10 + this.Plugin.Ui.MainWindow.ExtraMessages:N0}");
 
         ImGui.Separator();
@@ -112,8 +119,6 @@ internal class MessageList : ITab {
         }
 
         ImGui.EndChild();
-
-        this.MessagesMutex.Release();
     }
 
     private void Refresh() {
@@ -126,10 +131,13 @@ internal class MessageList : ITab {
             var json = await resp.Content.ReadAsStringAsync();
             var messages = JsonConvert.DeserializeObject<MyMessages>(json)!;
             await this.MessagesMutex.WaitAsync();
-            this.Plugin.Ui.MainWindow.ExtraMessages = messages.Extra;
-            this.Messages.Clear();
-            this.Messages.AddRange(messages.Messages);
-            this.MessagesMutex.Release();
+            try {
+                this.Plugin.Ui.MainWindow.ExtraMessages = messages.Extra;
+                this.Messages.Clear();
+                this.Messages.AddRange(messages.Messages);
+            } finally {
+                this.MessagesMutex.Release();
+            }
         });
     }
 
