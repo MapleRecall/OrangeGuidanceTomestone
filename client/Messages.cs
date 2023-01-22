@@ -172,24 +172,32 @@ internal class Messages : IDisposable {
         this.RemoveVfx(null, null);
 
         Task.Run(async () => {
-            var resp = await ServerHelper.SendRequest(
-                this.Plugin.Config.ApiKey,
-                HttpMethod.Get,
-                $"/messages/{territory}"
-            );
-            var json = await resp.Content.ReadAsStringAsync();
-            var messages = JsonConvert.DeserializeObject<Message[]>(json)!;
-
-            await this.CurrentMutex.WaitAsync();
-            this.Current.Clear();
-
-            foreach (var message in messages) {
-                this.Current[message.Id] = message;
-                this.SpawnQueue.Enqueue(message);
+            try {
+                await this.DownloadMessages(territory);
+            } catch (Exception ex) {
+                PluginLog.LogError(ex, $"Failed to get messages for territory {territory}");
             }
-
-            this.CurrentMutex.Release();
         });
+    }
+
+    private async Task DownloadMessages(ushort territory) {
+        var resp = await ServerHelper.SendRequest(
+            this.Plugin.Config.ApiKey,
+            HttpMethod.Get,
+            $"/messages/{territory}"
+        );
+        var json = await resp.Content.ReadAsStringAsync();
+        var messages = JsonConvert.DeserializeObject<Message[]>(json)!;
+
+        await this.CurrentMutex.WaitAsync();
+        this.Current.Clear();
+
+        foreach (var message in messages) {
+            this.Current[message.Id] = message;
+            this.SpawnQueue.Enqueue(message);
+        }
+
+        this.CurrentMutex.Release();
     }
 
     private void RemoveVfx(object? sender, EventArgs? e) {
