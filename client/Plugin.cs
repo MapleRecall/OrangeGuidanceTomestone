@@ -7,6 +7,7 @@ using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using OrangeGuidanceTomestone.MiniPenumbra;
+using XivCommon;
 
 namespace OrangeGuidanceTomestone;
 
@@ -38,6 +39,7 @@ public class Plugin : IDalamudPlugin {
     internal GameGui GameGui { get; init; }
 
     internal Configuration Config { get; }
+    internal XivCommonBase Common { get; }
     internal Vfx Vfx { get; }
     internal PluginUi Ui { get; }
     internal Messages Messages { get; }
@@ -51,6 +53,7 @@ public class Plugin : IDalamudPlugin {
         this.AvfxFilePath = this.CopyAvfxFile();
 
         this.Config = this.Interface!.GetPluginConfig() as Configuration ?? new Configuration();
+        this.Common = new XivCommonBase();
         this.Vfx = new Vfx();
         this.Messages = new Messages(this);
         this.Ui = new PluginUi(this);
@@ -70,6 +73,7 @@ public class Plugin : IDalamudPlugin {
         this.Ui.Dispose();
         this.Messages.Dispose();
         this.Vfx.Dispose();
+        this.Common.Dispose();
     }
 
     internal void SaveConfig() {

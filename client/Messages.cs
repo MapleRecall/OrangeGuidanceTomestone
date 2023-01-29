@@ -153,6 +153,8 @@ internal class Messages : IDisposable {
             return;
         }
 
+        var ward = this.Plugin.Common.Functions.Housing.Location?.Ward;
+
         if (this.Plugin.Config.DisableTrials && this.Trials.Contains(territory)) {
             return;
         }
@@ -173,18 +175,23 @@ internal class Messages : IDisposable {
 
         Task.Run(async () => {
             try {
-                await this.DownloadMessages(territory);
+                await this.DownloadMessages(territory, ward);
             } catch (Exception ex) {
                 PluginLog.LogError(ex, $"Failed to get messages for territory {territory}");
             }
         });
     }
 
-    private async Task DownloadMessages(ushort territory) {
+    private async Task DownloadMessages(ushort territory, ushort? ward) {
+        var route = $"/messages/{territory}";
+        if (ward != null) {
+            route += $"?ward={ward}";
+        }
+
         var resp = await ServerHelper.SendRequest(
             this.Plugin.Config.ApiKey,
             HttpMethod.Get,
-            $"/messages/{territory}"
+            route
         );
         var json = await resp.Content.ReadAsStringAsync();
         var messages = JsonConvert.DeserializeObject<Message[]>(json)!;

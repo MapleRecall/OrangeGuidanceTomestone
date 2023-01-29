@@ -1,9 +1,7 @@
 #![feature(drain_filter)]
 
 use std::collections::HashMap;
-use std::fs::Permissions;
 use std::net::SocketAddr;
-use std::os::unix::fs::PermissionsExt;
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -11,7 +9,6 @@ use anyhow::{Context, Result};
 use sqlx::{Executor, Pool, Sqlite};
 use sqlx::migrate::Migrator;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
-use tokio::fs::File;
 use tokio::net::{TcpListener, UnixListener};
 use tokio::runtime::Handle;
 use tokio::sync::RwLock;
@@ -54,7 +51,7 @@ impl State {
             let text = match tokio::fs::read_to_string(entry.path()).await {
                 Ok(t) => t,
                 Err(e) => {
-                    eprintln!("error reading pack: {:#?}", e);
+                    eprintln!("error reading pack: {e:#?}");
                     continue;
                 }
             };
@@ -119,10 +116,10 @@ async fn main() -> Result<()> {
 
     let address = state.config.address.clone();
     let server = warp::serve(web::routes(state));
-    println!("listening at {}", address);
+    println!("listening at {address}");
 
-    if address.starts_with("unix:") {
-        let listener = UnixListener::bind(&address[5..])?;
+    if let Some(path) = address.strip_prefix("unix:") {
+        let listener = UnixListener::bind(path)?;
         let stream = UnixListenerStream::new(listener);
         server.run_incoming(stream).await;
     } else {
@@ -141,16 +138,13 @@ fn spawn_command_reader(state: Arc<State>, handle: Handle) {
         while let Ok(size) = std::io::stdin().read_line(&mut line) {
             let read = line[..size].trim();
 
-            match read {
-                "reload packs" => {
-                    let state = Arc::clone(&state);
-                    handle.spawn(async move {
-                        if let Err(e) = state.update_packs().await {
-                            eprintln!("failed to update packs: {:#?}", e);
-                        }
-                    });
-                }
-                _ => {}
+            if read == "reload packs" {
+                let state = Arc::clone(&state);
+                handle.spawn(async move {
+                    if let Err(e) = state.update_packs().await {
+                        eprintln!("failed to update packs: {e:#?}");
+                    }
+                });
             }
 
             line.clear();

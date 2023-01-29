@@ -4,12 +4,14 @@ use anyhow::Context;
 use chrono::{Duration, Utc};
 use rand::Rng;
 use rand::seq::SliceRandom;
+use serde::Deserialize;
 use warp::{Filter, Rejection, Reply};
 use warp::filters::BoxedFilter;
 
 use crate::message::RetrievedMessage;
 use crate::State;
-use crate::web::AnyhowRejection;
+use crate::util::HOUSING_ZONES;
+use crate::web::{AnyhowRejection, WebError};
 
 pub fn get_location(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
     warp::get()
@@ -17,11 +19,27 @@ pub fn get_location(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
         .and(warp::path::param())
         .and(warp::path::end())
         .and(super::get_id(Arc::clone(&state)))
-        .and_then(move |location: u32, (id, _)| logic(Arc::clone(&state), id, location))
+        .and(warp::query::<GetLocationQuery>())
+        .and_then(move |location: u32, (id, _), query| logic(Arc::clone(&state), id, location, query))
         .boxed()
 }
 
-async fn logic(state: Arc<State>, id: i64, location: u32) -> Result<impl Reply, Rejection> {
+#[derive(Deserialize)]
+pub struct GetLocationQuery {
+    #[serde(default)]
+    ward: Option<u32>,
+}
+
+async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuery) -> Result<impl Reply, Rejection> {
+    let housing = HOUSING_ZONES.contains(&location);
+    if housing && query.ward.is_none() {
+        return Err(warp::reject::custom(WebError::MissingWard));
+    }
+
+    if !housing && query.ward.is_some() {
+        return Err(warp::reject::custom(WebError::UnnecessaryWard));
+    }
+    
     let location = location as i64;
     let mut messages = sqlx::query_as!(
         RetrievedMessage,
@@ -44,10 +62,11 @@ async fn logic(state: Arc<State>, id: i64, location: u32) -> Result<impl Reply, 
                      left join votes v on m.id = v.message
                      left join votes v2 on m.id = v2.message and v2.user = ?
                      inner join users u on m.user = u.id
-            where m.territory = ?
+            where m.territory = ? and m.ward = ?
             group by m.id"#,
         id,
         location,
+        query.ward,
     )
         .fetch_all(&state.db)
         .await

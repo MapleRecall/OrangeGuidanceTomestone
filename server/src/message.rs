@@ -22,6 +22,9 @@ pub struct Message {
 
     #[serde(default = "glyph_default")]
     pub glyph: i8,
+
+    #[serde(default)]
+    pub ward: Option<u16>,
 }
 
 fn glyph_default() -> i8 {
@@ -52,6 +55,7 @@ pub struct RetrievedMessage {
 pub struct RetrievedMessageTerritory {
     pub id: String,
     pub territory: i64,
+    pub ward: Option<i64>,
     pub x: f64,
     pub y: f64,
     pub z: f64,
@@ -69,6 +73,7 @@ pub struct RetrievedMessageTerritory {
 pub struct OwnMessage {
     pub id: String,
     pub territory: i64,
+    pub ward: Option<i64>,
     pub x: f64,
     pub y: f64,
     pub z: f64,

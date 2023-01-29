@@ -231,6 +231,7 @@ internal class Write : ITab {
         if (ImGui.Button("Write") && valid && !inAir && this.Plugin.ClientState.LocalPlayer is { } player) {
             var req = new MessageRequest {
                 Territory = this.Plugin.ClientState.TerritoryType,
+                Ward = this.Plugin.Common.Functions.Housing.Location?.Ward,
                 X = player.Position.X,
                 Y = player.Position.Y,
                 Z = player.Position.Z,

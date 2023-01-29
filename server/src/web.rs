@@ -73,6 +73,8 @@ pub enum WebError {
     TooManyMessages,
     NoSuchMessage,
     InvalidExtraCode,
+    MissingWard,
+    UnnecessaryWard,
 }
 
 impl Reject for WebError {}
@@ -92,22 +94,24 @@ async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
             WebError::TooManyMessages => (StatusCode::BAD_REQUEST, "too_many_messages", "you have run out of messages - delete one and try again".into()),
             WebError::NoSuchMessage => (StatusCode::NOT_FOUND, "no_such_message", "no message with that id was found".into()),
             WebError::InvalidExtraCode => (StatusCode::BAD_REQUEST, "invalid_extra_code", "that extra code was not found".into()),
+            WebError::MissingWard => (StatusCode::BAD_REQUEST, "missing_ward", "a ward was not provided - try updating the plugin".into()),
+            WebError::UnnecessaryWard => (StatusCode::BAD_REQUEST, "unnecessar_ward", "a ward was provided but not necessary - try updating the plugin".into()),
         }
     } else if err.is_not_found() {
         (StatusCode::NOT_FOUND, "not_found", "route was unknown to the server".into())
     } else if let Some(e) = err.find::<BodyDeserializeError>() {
-        (StatusCode::BAD_REQUEST, "invalid_body", format!("invalid body: {}", e))
-    } else if let Some(_) = err.find::<MethodNotAllowed>() {
+        (StatusCode::BAD_REQUEST, "invalid_body", format!("invalid body: {e}"))
+    } else if err.find::<MethodNotAllowed>().is_some() {
         (StatusCode::METHOD_NOT_ALLOWED, "method_not_allowed", "that http method is not allowed on that route".into())
     } else if let Some(AnyhowRejection(e)) = err.find::<AnyhowRejection>() {
-        eprintln!("{:#?}", e);
+        eprintln!("{e:#?}");
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             "internal_error",
             "an internal logic error occured".into(),
         )
     } else {
-        eprintln!("{:#?}", err);
+        eprintln!("{err:#?}");
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             "internal_error",
