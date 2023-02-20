@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 using Dalamud.Data;
 using Dalamud.Game;
@@ -83,21 +84,38 @@ internal class Messages : IDisposable {
             this.SpawnVfx();
         }
 
+        this.Plugin.Framework.Update += this.DetermineIfSpawn;
         this.Plugin.Framework.Update += this.RemoveConditionally;
         this.Plugin.Framework.Update += this.HandleSpawnQueue;
         this.Plugin.ClientState.Login += this.SpawnVfx;
         this.Plugin.ClientState.Logout += this.RemoveVfx;
-        this.Plugin.ClientState.TerritoryChanged += this.SpawnVfx;
     }
 
     public void Dispose() {
-        this.Plugin.ClientState.TerritoryChanged -= this.SpawnVfx;
         this.Plugin.ClientState.Logout -= this.RemoveVfx;
         this.Plugin.ClientState.Login -= this.SpawnVfx;
         this.Plugin.Framework.Update -= this.HandleSpawnQueue;
         this.Plugin.Framework.Update -= this.RemoveConditionally;
+        this.Plugin.Framework.Update -= this.DetermineIfSpawn;
 
         this.RemoveVfx();
+    }
+
+    private readonly Stopwatch _timer = new();
+    private ushort _lastTerritory;
+
+    private void DetermineIfSpawn(Framework framework) {
+        var current = this.Plugin.ClientState.TerritoryType;
+        if (current != this._lastTerritory && this.Plugin.ClientState.LocalPlayer != null) {
+            this._timer.Start();
+        }
+
+        if (this._timer.Elapsed >= TimeSpan.FromSeconds(1)) {
+            this._timer.Reset();
+            this.SpawnVfx();
+        }
+
+        this._lastTerritory = current;
     }
 
     private void RemoveConditionally(Framework framework) {
