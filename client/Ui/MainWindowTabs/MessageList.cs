@@ -74,9 +74,14 @@ internal class MessageList : ITab {
                 var territory = this.Plugin.DataManager.GetExcelSheet<TerritoryType>()?.GetRow(message.Territory);
                 var territoryName = territory?.PlaceName.Value?.Name?.ToDalamudString().TextValue ?? "???";
 
+                var loc = $"Location: {territoryName}";
+                if (message.Ward != null) {
+                    loc += $" (Ward {message.Ward.Value})";
+                }
+
                 ImGui.TextUnformatted(message.Text);
                 ImGui.TreePush();
-                ImGui.TextUnformatted($"Location: {territoryName}");
+                ImGui.TextUnformatted(loc);
                 ImGui.SameLine();
 
                 if (ImGuiHelper.SmallIconButton(FontAwesomeIcon.MapMarkerAlt, $"{message.Id}") && territory != null) {

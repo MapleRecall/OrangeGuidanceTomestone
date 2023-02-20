@@ -39,7 +39,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
     if !housing && query.ward.is_some() {
         return Err(warp::reject::custom(WebError::UnnecessaryWard));
     }
-    
+
     let location = location as i64;
     let mut messages = sqlx::query_as!(
         RetrievedMessage,
@@ -62,7 +62,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                      left join votes v on m.id = v.message
                      left join votes v2 on m.id = v2.message and v2.user = ?
                      inner join users u on m.user = u.id
-            where m.territory = ? and m.ward = ?
+            where m.territory = ? and m.ward is ?
             group by m.id"#,
         id,
         location,
