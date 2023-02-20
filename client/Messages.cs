@@ -155,14 +155,7 @@ internal class Messages : IDisposable {
 
         var housing = this.Plugin.Common.Functions.Housing.Location;
         var ward = housing?.Ward;
-        ushort? plot = null;
-        if (housing is { Apartment: { } apt, ApartmentWing: { } wing }) {
-            plot = (ushort) (10_000
-                             + (wing - 1) * 5_000
-                             + apt);
-        } else if (housing?.Plot is { } plotNum) {
-            plot = plotNum;
-        }
+        var plot = housing?.CombinedPlot();
 
         if (this.Plugin.Config.DisableTrials && this.Trials.Contains(territory)) {
             return;

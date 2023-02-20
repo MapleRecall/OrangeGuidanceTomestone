@@ -232,7 +232,7 @@ internal class Write : ITab {
             var req = new MessageRequest {
                 Territory = this.Plugin.ClientState.TerritoryType,
                 Ward = this.Plugin.Common.Functions.Housing.Location?.Ward,
-                Plot = this.Plugin.Common.Functions.Housing.Location?.Plot,
+                Plot = this.Plugin.Common.Functions.Housing.Location?.CombinedPlot(),
                 X = player.Position.X,
                 Y = player.Position.Y,
                 Z = player.Position.Z,

@@ -76,7 +76,13 @@ internal class MessageList : ITab {
 
                 var loc = $"Location: {territoryName}";
                 if (message.Ward != null) {
-                    loc += $" (Ward {message.Ward.Value})";
+                    loc += $" (Ward {message.Ward.Value}";
+
+                    if (message.Plot != null) {
+                        loc += $", Plot {message.Plot.Value}";
+                    }
+
+                    loc += ")";
                 }
 
                 ImGui.TextUnformatted(message.Text);
