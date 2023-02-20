@@ -76,7 +76,20 @@ internal class MessageList : ITab {
 
                 var loc = $"Location: {territoryName}";
                 if (message.Ward != null) {
-                    loc += $" (Ward {message.Ward.Value}";
+                    loc += " (";
+
+                    if (message.World != null) {
+                        var world = this.Plugin.DataManager.GetExcelSheet<World>()?.GetRow((ushort) message.World);
+                        if (world != null) {
+                            loc += world.Name.ToDalamudString().TextValue;
+                        }
+                    }
+
+                    if (loc != " (") {
+                        loc += ", ";
+                    }
+
+                    loc += $"Ward {message.Ward.Value}";
 
                     if (message.Plot != null) {
                         if (message.Plot.Value >= HousingLocationExt.Apt) {

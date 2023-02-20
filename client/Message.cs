@@ -32,6 +32,7 @@ internal class MessageWithTerritory {
     public uint Territory { get; init; }
     public uint? Ward { get; init; }
     public uint? Plot { get; init; }
+    public uint? World { get; init; }
     public float X { get; init; }
     public float Y { get; init; }
     public float Z { get; init; }

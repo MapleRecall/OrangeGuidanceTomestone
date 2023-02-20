@@ -181,6 +181,11 @@ internal class Messages : IDisposable {
             return;
         }
 
+        var world = this.Plugin.ClientState.LocalPlayer?.CurrentWorld.Id ?? 0;
+        if (world == 0) {
+            return;
+        }
+
         var housing = this.Plugin.Common.Functions.Housing.Location;
         var ward = housing?.Ward;
         var plot = housing?.CombinedPlot();
@@ -205,14 +210,14 @@ internal class Messages : IDisposable {
 
         Task.Run(async () => {
             try {
-                await this.DownloadMessages(territory, ward, plot);
+                await this.DownloadMessages(world, territory, ward, plot);
             } catch (Exception ex) {
                 PluginLog.LogError(ex, $"Failed to get messages for territory {territory}");
             }
         });
     }
 
-    private async Task DownloadMessages(ushort territory, ushort? ward, ushort? plot) {
+    private async Task DownloadMessages(uint world, ushort territory, ushort? ward, ushort? plot) {
         var route = $"/messages/{territory}";
         if (ward != null) {
             route += $"?ward={ward}";
@@ -220,6 +225,8 @@ internal class Messages : IDisposable {
             if (plot != null) {
                 route += $"&plot={plot}";
             }
+
+            route += $"&world={world}";
         }
 
         var resp = await ServerHelper.SendRequest(
