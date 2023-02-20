@@ -7,6 +7,7 @@ namespace OrangeGuidanceTomestone;
 [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
 public class MessageRequest {
     public uint Territory { get; set; }
+    public uint? World { get; set; }
     public uint? Ward { get; set; }
     public uint? Plot { get; set; }
     public float X { get; set; }
