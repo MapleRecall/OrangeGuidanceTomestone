@@ -87,6 +87,7 @@ internal class Messages : IDisposable {
         this.Plugin.Framework.Update += this.DetermineIfSpawn;
         this.Plugin.Framework.Update += this.RemoveConditionally;
         this.Plugin.Framework.Update += this.HandleSpawnQueue;
+        this.Plugin.ClientState.TerritoryChanged += this.TerritoryChanged;
         this.Plugin.ClientState.Login += this.SpawnVfx;
         this.Plugin.ClientState.Logout += this.RemoveVfx;
     }
@@ -94,6 +95,7 @@ internal class Messages : IDisposable {
     public void Dispose() {
         this.Plugin.ClientState.Logout -= this.RemoveVfx;
         this.Plugin.ClientState.Login -= this.SpawnVfx;
+        this.Plugin.ClientState.TerritoryChanged -= this.TerritoryChanged;
         this.Plugin.Framework.Update -= this.HandleSpawnQueue;
         this.Plugin.Framework.Update -= this.RemoveConditionally;
         this.Plugin.Framework.Update -= this.DetermineIfSpawn;
@@ -102,15 +104,27 @@ internal class Messages : IDisposable {
     }
 
     private readonly Stopwatch _timer = new();
+
+    private void TerritoryChanged(object? sender, ushort e) {
+        this._territoryChanged = true;
+        this.RemoveVfx();
+    }
+
     private ushort _lastTerritory;
+    private bool _territoryChanged;
 
     private void DetermineIfSpawn(Framework framework) {
         var current = this.Plugin.ClientState.TerritoryType;
-        if (current != this._lastTerritory && this.Plugin.ClientState.LocalPlayer != null) {
+
+        var diffTerritory = current != this._lastTerritory;
+        var playerPresent = this.Plugin.ClientState.LocalPlayer != null;
+
+        if ((this._territoryChanged || diffTerritory) && playerPresent) {
+            this._territoryChanged = false;
             this._timer.Start();
         }
 
-        if (this._timer.Elapsed >= TimeSpan.FromSeconds(1)) {
+        if (this._timer.Elapsed >= TimeSpan.FromSeconds(1.5)) {
             this._timer.Reset();
             this.SpawnVfx();
         }
@@ -158,10 +172,6 @@ internal class Messages : IDisposable {
     }
 
     private void SpawnVfx(object? sender, EventArgs e) {
-        this.SpawnVfx();
-    }
-
-    private void SpawnVfx(object? sender, ushort e) {
         this.SpawnVfx();
     }
 
