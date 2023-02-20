@@ -85,9 +85,9 @@ internal class MessageList : ITab {
                             var apt = wing == 2 ? apartment - HousingLocationExt.Wng : apartment;
 
                             if (apt == 0) {
-                                loc += $", Wing {wing} Lobby";
+                                loc += $", Wing {wing}, Lobby";
                             } else {
-                                loc += $", Apt. {apt}, Wing {wing}";
+                                loc += $", Wing {wing}, Apt. {apt}";
                             }
                         } else {
                             loc += $", Plot {message.Plot.Value}";
