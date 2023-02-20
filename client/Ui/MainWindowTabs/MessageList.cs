@@ -79,7 +79,15 @@ internal class MessageList : ITab {
                     loc += $" (Ward {message.Ward.Value}";
 
                     if (message.Plot != null) {
-                        loc += $", Plot {message.Plot.Value}";
+                        if (message.Plot.Value >= 10_000) {
+                            var apartment = message.Plot.Value - 10_000;
+                            var wing = apartment < 5_000 ? 1 : 2;
+                            var apt = wing == 2 ? apartment - 5_000 : apartment;
+
+                            loc += $", Apt. {apt}, Wing {wing}";
+                        } else {
+                            loc += $", Plot {message.Plot.Value}";
+                        }
                     }
 
                     loc += ")";
