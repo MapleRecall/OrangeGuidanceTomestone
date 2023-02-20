@@ -79,12 +79,16 @@ internal class MessageList : ITab {
                     loc += $" (Ward {message.Ward.Value}";
 
                     if (message.Plot != null) {
-                        if (message.Plot.Value >= 10_000) {
+                        if (message.Plot.Value >= HousingLocationExt.Apt) {
                             var apartment = message.Plot.Value - 10_000;
-                            var wing = apartment < 5_000 ? 1 : 2;
-                            var apt = wing == 2 ? apartment - 5_000 : apartment;
+                            var wing = apartment < HousingLocationExt.Wng ? 1 : 2;
+                            var apt = wing == 2 ? apartment - HousingLocationExt.Wng : apartment;
 
-                            loc += $", Apt. {apt}, Wing {wing}";
+                            if (apt == 0) {
+                                loc += $", Wing {wing} Lobby";
+                            } else {
+                                loc += $", Apt. {apt}, Wing {wing}";
+                            }
                         } else {
                             loc += $", Plot {message.Plot.Value}";
                         }
