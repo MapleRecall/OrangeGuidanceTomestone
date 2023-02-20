@@ -31,6 +31,7 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, mut query: HashMap<String
         r#"
             select m.id,
                    m.territory,
+                   m.world,
                    m.ward,
                    m.plot,
                    m.x,

@@ -24,6 +24,8 @@ pub struct Message {
     pub glyph: i8,
 
     #[serde(default)]
+    pub world: Option<u32>,
+    #[serde(default)]
     pub ward: Option<u16>,
     #[serde(default)]
     pub plot: Option<u16>,
@@ -57,6 +59,7 @@ pub struct RetrievedMessage {
 pub struct RetrievedMessageTerritory {
     pub id: String,
     pub territory: i64,
+    pub world: Option<i64>,
     pub ward: Option<i64>,
     pub plot: Option<i64>,
     pub x: f64,
@@ -76,6 +79,7 @@ pub struct RetrievedMessageTerritory {
 pub struct OwnMessage {
     pub id: String,
     pub territory: i64,
+    pub world: Option<i64>,
     pub ward: Option<i64>,
     pub plot: Option<i64>,
     pub x: f64,

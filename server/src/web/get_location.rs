@@ -27,6 +27,8 @@ pub fn get_location(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
 #[derive(Deserialize)]
 pub struct GetLocationQuery {
     #[serde(default)]
+    world: Option<u32>,
+    #[serde(default)]
     ward: Option<u32>,
     #[serde(default)]
     plot: Option<u32>,
@@ -34,13 +36,19 @@ pub struct GetLocationQuery {
 
 async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuery) -> Result<impl Reply, Rejection> {
     let housing = HOUSING_ZONES.contains(&location);
-    if housing && query.ward.is_none() {
-        return Err(warp::reject::custom(WebError::MissingWard));
+    if housing && (query.world.is_none() || query.ward.is_none()) {
+        return Err(warp::reject::custom(WebError::MissingHousingInfo));
     }
 
     if !housing && (query.ward.is_some() || query.plot.is_some()) {
         return Err(warp::reject::custom(WebError::UnnecessaryHousingInfo));
     }
+
+    let world = if housing {
+        query.world
+    } else {
+        None
+    };
 
     let location = location as i64;
     let mut messages = sqlx::query_as!(
@@ -64,10 +72,11 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                      left join votes v on m.id = v.message
                      left join votes v2 on m.id = v2.message and v2.user = ?
                      inner join users u on m.user = u.id
-            where m.territory = ? and m.ward is ? and m.plot is ?
+            where m.territory = ? and m.world is ? and m.ward is ? and m.plot is ?
             group by m.id"#,
         id,
         location,
+        world,
         query.ward,
         query.plot,
     )

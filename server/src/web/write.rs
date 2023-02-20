@@ -23,8 +23,8 @@ pub fn write(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
 
 async fn logic(state: Arc<State>, id: i64, extra: i64, message: Message) -> Result<impl Reply, Rejection> {
     let housing = HOUSING_ZONES.contains(&message.territory);
-    if housing && message.ward.is_none() {
-        return Err(warp::reject::custom(WebError::MissingWard));
+    if housing && (message.world.is_none() || message.ward.is_none()) {
+        return Err(warp::reject::custom(WebError::MissingHousingInfo));
     }
 
     if !housing && (message.ward.is_some() || message.plot.is_some()) {
@@ -67,10 +67,11 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, message: Message) -> Resu
 
     sqlx::query!(
         // language=sqlite
-        "insert into messages (id, user, territory, ward, plot, x, y, z, yaw, message, glyph) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "insert into messages (id, user, territory, world, ward, plot, x, y, z, yaw, message, glyph) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         message_id,
         id,
         territory,
+        message.world,
         message.ward,
         message.plot,
         message.x,

@@ -73,7 +73,7 @@ pub enum WebError {
     TooManyMessages,
     NoSuchMessage,
     InvalidExtraCode,
-    MissingWard,
+    MissingHousingInfo,
     UnnecessaryHousingInfo,
 }
 
@@ -94,7 +94,7 @@ async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
             WebError::TooManyMessages => (StatusCode::BAD_REQUEST, "too_many_messages", "you have run out of messages - delete one and try again".into()),
             WebError::NoSuchMessage => (StatusCode::NOT_FOUND, "no_such_message", "no message with that id was found".into()),
             WebError::InvalidExtraCode => (StatusCode::BAD_REQUEST, "invalid_extra_code", "that extra code was not found".into()),
-            WebError::MissingWard => (StatusCode::BAD_REQUEST, "missing_ward", "a ward was not provided - try updating the plugin".into()),
+            WebError::MissingHousingInfo => (StatusCode::BAD_REQUEST, "missing_housing_info", "housing info was not provided - try updating the plugin".into()),
             WebError::UnnecessaryHousingInfo => (StatusCode::BAD_REQUEST, "unnecessary_housing_info", "a ward/plot was provided but not necessary - try updating the plugin".into()),
         }
     } else if err.is_not_found() {
