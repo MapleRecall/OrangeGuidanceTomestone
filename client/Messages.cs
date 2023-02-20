@@ -153,7 +153,16 @@ internal class Messages : IDisposable {
             return;
         }
 
-        var ward = this.Plugin.Common.Functions.Housing.Location?.Ward;
+        var housing = this.Plugin.Common.Functions.Housing.Location;
+        var ward = housing?.Ward;
+        ushort? plot = null;
+        if (housing is { Apartment: { } apt, ApartmentWing: { } wing }) {
+            plot = (ushort) (10_000
+                             + (wing - 1) * 5_000
+                             + apt);
+        } else if (housing?.Plot is { } plotNum) {
+            plot = plotNum;
+        }
 
         if (this.Plugin.Config.DisableTrials && this.Trials.Contains(territory)) {
             return;
@@ -175,17 +184,21 @@ internal class Messages : IDisposable {
 
         Task.Run(async () => {
             try {
-                await this.DownloadMessages(territory, ward);
+                await this.DownloadMessages(territory, ward, plot);
             } catch (Exception ex) {
                 PluginLog.LogError(ex, $"Failed to get messages for territory {territory}");
             }
         });
     }
 
-    private async Task DownloadMessages(ushort territory, ushort? ward) {
+    private async Task DownloadMessages(ushort territory, ushort? ward, ushort? plot) {
         var route = $"/messages/{territory}";
         if (ward != null) {
             route += $"?ward={ward}";
+
+            if (plot != null) {
+                route += $"&plot={plot}";
+            }
         }
 
         var resp = await ServerHelper.SendRequest(

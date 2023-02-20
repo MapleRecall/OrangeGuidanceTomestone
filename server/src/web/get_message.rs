@@ -28,6 +28,7 @@ async fn logic(state: Arc<State>, id: i64, message_id: Uuid) -> Result<impl Repl
             select m.id,
                    m.territory,
                    m.ward,
+                   m.plot,
                    m.x,
                    m.y,
                    m.z,

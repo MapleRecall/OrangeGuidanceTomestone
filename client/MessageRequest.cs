@@ -8,6 +8,7 @@ namespace OrangeGuidanceTomestone;
 public class MessageRequest {
     public uint Territory { get; set; }
     public uint? Ward { get; set; }
+    public uint? Plot { get; set; }
     public float X { get; set; }
     public float Y { get; set; }
     public float Z { get; set; }

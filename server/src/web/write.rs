@@ -27,8 +27,8 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, message: Message) -> Resu
         return Err(warp::reject::custom(WebError::MissingWard));
     }
 
-    if !housing && message.ward.is_some() {
-        return Err(warp::reject::custom(WebError::UnnecessaryWard));
+    if !housing && (message.ward.is_some() || message.plot.is_some()) {
+        return Err(warp::reject::custom(WebError::UnnecessaryHousingInfo));
     }
 
     let text = {

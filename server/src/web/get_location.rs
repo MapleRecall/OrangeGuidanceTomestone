@@ -28,6 +28,8 @@ pub fn get_location(state: Arc<State>) -> BoxedFilter<(impl Reply, )> {
 pub struct GetLocationQuery {
     #[serde(default)]
     ward: Option<u32>,
+    #[serde(default)]
+    plot: Option<u32>,
 }
 
 async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuery) -> Result<impl Reply, Rejection> {
@@ -36,8 +38,8 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
         return Err(warp::reject::custom(WebError::MissingWard));
     }
 
-    if !housing && query.ward.is_some() {
-        return Err(warp::reject::custom(WebError::UnnecessaryWard));
+    if !housing && (query.ward.is_some() || query.plot.is_some()) {
+        return Err(warp::reject::custom(WebError::UnnecessaryHousingInfo));
     }
 
     let location = location as i64;
@@ -62,11 +64,12 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                      left join votes v on m.id = v.message
                      left join votes v2 on m.id = v2.message and v2.user = ?
                      inner join users u on m.user = u.id
-            where m.territory = ? and m.ward is ?
+            where m.territory = ? and m.ward is ? and m.plot is ?
             group by m.id"#,
         id,
         location,
         query.ward,
+        query.plot,
     )
         .fetch_all(&state.db)
         .await
