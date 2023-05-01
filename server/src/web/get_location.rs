@@ -2,8 +2,10 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use chrono::{Duration, Utc};
+use parking_lot::RwLock;
 use rand::Rng;
 use rand::seq::SliceRandom;
+use rayon::prelude::*;
 use serde::Deserialize;
 use warp::{Filter, Rejection, Reply};
 use warp::filters::BoxedFilter;
@@ -99,75 +101,80 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
     messages.shuffle(&mut rand::thread_rng());
 
     // just count nearby messages. this is O(n^2) but alternatives are hard
-    let mut ids = Vec::with_capacity(messages.len());
-    for a in messages.iter() {
-        if a.user == id {
-            // always include own messages
-            ids.push(a.id.clone());
-            continue;
-        }
-
-        let mut nearby_ids = Vec::new();
-        for b in messages.iter() {
-            if a.id == b.id {
-                continue;
+    let ids = RwLock::new(Vec::with_capacity(messages.len()));
+    messages.par_iter()
+        .for_each(|a| {
+            if a.user == id {
+                ids.write().push(a.id.clone());
+                return;
             }
 
-            let distance = (a.x - b.x).powi(2)
-                + (a.y - b.y).powi(2)
-                + (a.z - b.z).powi(2);
-            // 10 squared
-            if distance >= 100.0 {
-                continue;
+            let mut nearby_ids = Vec::new();
+            for b in messages.iter() {
+                if a.id == b.id {
+                    continue;
+                }
+
+                let distance = (a.x - b.x).powi(2)
+                    + (a.y - b.y).powi(2)
+                    + (a.z - b.z).powi(2);
+                // 10 squared
+                if distance >= 100.0 {
+                    continue;
+                }
+
+                nearby_ids.push(&b.id);
             }
 
-            nearby_ids.push(&b.id);
-        }
+            let mut nearby = nearby_ids.len() as u32;
+            let (numerator, denominator) = if nearby <= 2 {
+                // no need to do calculations for groups of three or fewer
+                (17, 20)
+            } else {
+                let already_visible = {
+                    let ids = ids.read();
+                    nearby_ids.iter()
+                        .filter(|id| ids.contains(id))
+                        .count()
+                };
 
-        let mut nearby = nearby_ids.len() as u32;
-        let (numerator, denominator) = if nearby <= 2 {
-            // no need to do calculations for groups of three or fewer
-            (17, 20)
-        } else {
-            let already_visible = nearby_ids.iter()
-                .filter(|id| ids.contains(id))
-                .count();
-            if already_visible >= 3 {
-                continue;
+                if already_visible >= 3 {
+                    return;
+                }
+
+                let time_since_creation = a.created.signed_duration_since(Utc::now().naive_utc());
+                let brand_new = time_since_creation < Duration::minutes(30);
+                let new = time_since_creation < Duration::hours(2);
+
+                let mut numerator = 1;
+                if brand_new {
+                    numerator = nearby;
+                } else if new {
+                    numerator += (nearby / 3).min(1);
+                }
+
+                let score = (a.positive_votes - a.negative_votes).max(0);
+                if score > 0 {
+                    let pad = score as f32 / nearby as f32;
+                    let rounded = pad.floor() as u32;
+                    numerator += rounded.max(nearby / 2);
+                }
+
+                nearby *= 2;
+
+                if numerator * 5 > nearby * 4 {
+                    numerator = 4;
+                    nearby = 5;
+                }
+
+                (numerator, nearby)
+            };
+
+            if rand::thread_rng().gen_ratio(numerator.min(denominator), denominator) {
+                ids.write().push(a.id.clone());
             }
+        });
 
-            let time_since_creation = a.created.signed_duration_since(Utc::now().naive_utc());
-            let brand_new = time_since_creation < Duration::minutes(30);
-            let new = time_since_creation < Duration::hours(2);
-
-            let mut numerator = 1;
-            if brand_new {
-                numerator = nearby;
-            } else if new {
-                numerator += (nearby / 3).min(1);
-            }
-
-            let score = (a.positive_votes - a.negative_votes).max(0);
-            if score > 0 {
-                let pad = score as f32 / nearby as f32;
-                let rounded = pad.floor() as u32;
-                numerator += rounded.max(nearby / 2);
-            }
-
-            nearby *= 2;
-
-            if numerator * 5 > nearby * 4 {
-                numerator = 4;
-                nearby = 5;
-            }
-
-            (numerator, nearby)
-        };
-
-        if rand::thread_rng().gen_ratio(numerator.min(denominator), denominator) {
-            ids.push(a.id.clone());
-        }
-    }
-
+    let ids = ids.into_inner();
     messages.drain_filter(|msg| !ids.contains(&msg.id));
 }
