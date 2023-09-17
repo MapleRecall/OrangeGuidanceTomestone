@@ -41,7 +41,7 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, mut query: HashMap<String
                    m.message,
                    coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                    coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
-                   v2.vote                                   as user_vote,
+                   coalesce(v2.vote, 0)                      as user_vote,
                    m.glyph,
                    m.created,
                    0 as "is_hidden: bool"

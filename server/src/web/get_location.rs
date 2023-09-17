@@ -66,11 +66,11 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                        m.message,
                        coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                        coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
-                       v2.vote                                   as user_vote,
+                       coalesce(v2.vote, 0)                      as user_vote,
                        m.glyph,
                        m.created,
                        m.user,
-                       cast((julianday(current_timestamp) - julianday(u.last_seen)) * 1440 as int) as last_seen_minutes
+                       coalesce(cast((julianday(current_timestamp) - julianday(u.last_seen)) * 1440 as int), 0) as last_seen_minutes
                 from messages m
                          left join votes v on m.id = v.message
                          left join votes v2 on m.id = v2.message and v2.user = ?
@@ -101,11 +101,11 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                        m.message,
                        coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                        coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
-                       v2.vote                                   as user_vote,
+                       coalesce(v2.vote, 0)                      as user_vote,
                        m.glyph,
                        m.created,
                        m.user,
-                       cast((julianday(current_timestamp) - julianday(u.last_seen)) * 1440 as int) as last_seen_minutes
+                       coalesce(cast((julianday(current_timestamp) - julianday(u.last_seen)) * 1440 as int), 0) as last_seen_minutes
                 from messages m
                          left join votes v on m.id = v.message
                          left join votes v2 on m.id = v2.message and v2.user = ?
@@ -129,7 +129,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
 fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
     // remove messages where the user has been offline for over 35 minutes
     // also remove messages with low score (that aren't the from the user)
-    messages.drain_filter(|msg| msg.last_seen_minutes >= 35 || (msg.user != id && (msg.positive_votes - msg.negative_votes) < crate::consts::VOTE_THRESHOLD_HIDE));
+    messages.retain(|msg| msg.last_seen_minutes < 35 && (msg.user == id || (msg.positive_votes - msg.negative_votes) >= crate::consts::VOTE_THRESHOLD_HIDE));
 
     // shuffle messages since we'll be excluding later based on messages
     // that have already been included, so this will be more fair
@@ -211,5 +211,5 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
         });
 
     let ids = ids.into_inner();
-    messages.drain_filter(|msg| !ids.contains(&msg.id));
+    messages.retain(|msg| ids.contains(&msg.id));
 }

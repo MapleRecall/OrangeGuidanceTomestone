@@ -1,4 +1,4 @@
-#![feature(drain_filter)]
+#![feature(extract_if)]
 
 use std::collections::HashMap;
 use std::net::SocketAddr;

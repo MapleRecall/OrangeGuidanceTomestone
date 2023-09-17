@@ -5,7 +5,6 @@ use uuid::Uuid;
 use warp::{Filter, Rejection, Reply};
 use warp::filters::BoxedFilter;
 
-use crate::message::RetrievedMessageTerritory;
 use crate::State;
 use crate::web::{AnyhowRejection, WebError};
 
@@ -37,7 +36,7 @@ async fn logic(state: Arc<State>, id: i64, message_id: Uuid) -> Result<impl Repl
                    m.message,
                    coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                    coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
-                   v2.vote                                   as user_vote,
+                   coalesce(v2.vote, 0)                      as user_vote,
                    m.glyph,
                    m.created
             from messages m

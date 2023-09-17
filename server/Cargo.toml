@@ -17,8 +17,8 @@ rayon = "1"
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
 sha3 = "0.10"
-sqlx = { version = "0.6", features = ["runtime-tokio-rustls", "sqlite", "chrono"] }
-toml = "0.7"
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite", "chrono"] }
+toml = "0.8"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 tokio-stream = { version = "0.1", default-features = false, features = ["net"] }
 uuid = { version = "1", features = ["serde", "v4"] }
