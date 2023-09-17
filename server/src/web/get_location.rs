@@ -53,40 +53,75 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
     };
 
     let location = location as i64;
-    let mut messages = sqlx::query_as!(
-        RetrievedMessage,
-        // language=sqlite
-        r#"
-            select m.id,
-                   m.x,
-                   m.y,
-                   m.z,
-                   m.yaw,
-                   m.message,
-                   coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
-                   coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
-                   v2.vote                                   as user_vote,
-                   m.glyph,
-                   m.created,
-                   m.user,
-                   cast((julianday(current_timestamp) - julianday(u.last_seen)) * 1440 as int) as last_seen_minutes
-            from messages m
-                     left join votes v on m.id = v.message
-                     left join votes v2 on m.id = v2.message and v2.user = ?
-                     inner join users u on m.user = u.id
-            where m.territory = ? and m.world is ? and m.ward is ? and m.plot is ?
-            group by m.id"#,
-        id,
-        location,
-        world,
-        query.ward,
-        query.plot,
-    )
-        .fetch_all(&state.db)
-        .await
-        .context("could not get messages from database")
-        .map_err(AnyhowRejection)
-        .map_err(warp::reject::custom)?;
+    let mut messages = if housing {
+        sqlx::query_as!(
+            RetrievedMessage,
+            // language=sqlite
+            r#"
+                select m.id,
+                       m.x,
+                       m.y,
+                       m.z,
+                       m.yaw,
+                       m.message,
+                       coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
+                       coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
+                       v2.vote                                   as user_vote,
+                       m.glyph,
+                       m.created,
+                       m.user,
+                       cast((julianday(current_timestamp) - julianday(u.last_seen)) * 1440 as int) as last_seen_minutes
+                from messages m
+                         left join votes v on m.id = v.message
+                         left join votes v2 on m.id = v2.message and v2.user = ?
+                         inner join users u on m.user = u.id
+                where m.territory = ? and m.world is ? and m.ward is ? and m.plot is ?
+                group by m.id"#,
+            id,
+            location,
+            world,
+            query.ward,
+            query.plot,
+        )
+            .fetch_all(&state.db)
+            .await
+            .context("could not get messages from database")
+            .map_err(AnyhowRejection)
+            .map_err(warp::reject::custom)?
+    } else {
+        sqlx::query_as!(
+            RetrievedMessage,
+            // language=sqlite
+            r#"
+                select m.id,
+                       m.x,
+                       m.y,
+                       m.z,
+                       m.yaw,
+                       m.message,
+                       coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
+                       coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
+                       v2.vote                                   as user_vote,
+                       m.glyph,
+                       m.created,
+                       m.user,
+                       cast((julianday(current_timestamp) - julianday(u.last_seen)) * 1440 as int) as last_seen_minutes
+                from messages m
+                         left join votes v on m.id = v.message
+                         left join votes v2 on m.id = v2.message and v2.user = ?
+                         inner join users u on m.user = u.id
+                where m.territory = ?
+                group by m.id"#,
+            id,
+            location,
+        )
+            .fetch_all(&state.db)
+            .await
+            .context("could not get messages from database")
+            .map_err(AnyhowRejection)
+            .map_err(warp::reject::custom)?
+    };
+
     filter_messages(&mut messages, id);
     Ok(warp::reply::json(&messages))
 }
