@@ -1,8 +1,8 @@
 using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Interface.Internal;
 using ImGuiNET;
-using ImGuiScene;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
 
@@ -21,7 +21,7 @@ internal class Write : ITab {
     private (int, int) _word2 = (-1, -1);
     private int _glyph;
 
-    private List<TextureWrap> GlyphImages { get; } = new();
+    private List<IDalamudTextureWrap> GlyphImages { get; } = new();
 
     private void LoadSignImages() {
         for (var i = 0; i < Messages.VfxPaths.Length; i++) {

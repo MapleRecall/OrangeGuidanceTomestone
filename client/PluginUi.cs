@@ -41,13 +41,13 @@ public class PluginUi : IDisposable {
 
     private void DrawModals() {
         while (this.ToShow.TryDequeue(out var toShow)) {
-            ImGui.OpenPopup($"{this.Plugin.Name}##{toShow}");
+            ImGui.OpenPopup($"{Plugin.Name}##{toShow}");
         }
 
         var toRemove = -1;
         for (var i = 0; i < this.Modals.Count; i++) {
             var (id, text) = this.Modals[i];
-            if (!ImGui.BeginPopupModal($"{this.Plugin.Name}##{id}")) {
+            if (!ImGui.BeginPopupModal($"{Plugin.Name}##{id}")) {
                 continue;
             }
 

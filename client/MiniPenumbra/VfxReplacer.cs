@@ -16,7 +16,7 @@ internal unsafe class VfxReplacer : IDisposable {
 
     internal VfxReplacer(Plugin plugin) {
         this.Plugin = plugin;
-        SignatureHelper.Initialise(this);
+        this.Plugin.GameInteropProvider.InitializeFromAttributes(this);
 
         this._readSqPackHook!.Enable();
     }

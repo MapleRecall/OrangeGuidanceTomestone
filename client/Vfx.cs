@@ -6,7 +6,7 @@ using Dalamud.Utility.Signatures;
 namespace OrangeGuidanceTomestone;
 
 internal unsafe class Vfx : IDisposable {
-    private static readonly byte[] Pool = Encoding.UTF8.GetBytes("Client.System.Scheduler.Instance.VfxObject");
+    private static readonly byte[] Pool = "Client.System.Scheduler.Instance.VfxObject"u8.ToArray();
 
     [Signature("E8 ?? ?? ?? ?? F3 0F 10 35 ?? ?? ?? ?? 48 89 43 08")]
     private delegate* unmanaged<byte*, byte*, VfxStruct*> _staticVfxCreate;
@@ -19,8 +19,8 @@ internal unsafe class Vfx : IDisposable {
 
     private Dictionary<Guid, IntPtr> Spawned { get; } = new();
 
-    internal Vfx() {
-        SignatureHelper.Initialise(this);
+    internal Vfx(Plugin plugin) {
+        plugin.GameInteropProvider.InitializeFromAttributes(this);
     }
 
     public void Dispose() {

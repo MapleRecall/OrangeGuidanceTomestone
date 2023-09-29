@@ -1,9 +1,7 @@
 using System.Diagnostics;
 using System.Numerics;
-using Dalamud.Data;
-using Dalamud.Game;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
@@ -20,7 +18,7 @@ internal class Messages : IDisposable {
         "bg/ex2/02_est_e3/common/vfx/eff/b0941trp1f_o.avfx",
     };
 
-    private static string GetPath(DataManager data, Message message) {
+    private static string GetPath(IDataManager data, Message message) {
         var glyph = message.Glyph;
         if (glyph < 0 || glyph >= VfxPaths.Length) {
             // not checking if this exists, but the check is really only for the
@@ -105,7 +103,7 @@ internal class Messages : IDisposable {
 
     private readonly Stopwatch _timer = new();
 
-    private void TerritoryChanged(object? sender, ushort e) {
+    private void TerritoryChanged(ushort territory) {
         this._territoryChanged = true;
         this.RemoveVfx();
     }
@@ -113,7 +111,7 @@ internal class Messages : IDisposable {
     private ushort _lastTerritory;
     private bool _territoryChanged;
 
-    private void DetermineIfSpawn(Framework framework) {
+    private void DetermineIfSpawn(IFramework framework) {
         var current = this.Plugin.ClientState.TerritoryType;
 
         var diffTerritory = current != this._lastTerritory;
@@ -132,7 +130,7 @@ internal class Messages : IDisposable {
         this._lastTerritory = current;
     }
 
-    private void RemoveConditionally(Framework framework) {
+    private void RemoveConditionally(IFramework framework) {
         var nowCutscene = this.CutsceneActive;
         var cutsceneChanged = this._inCutscene != nowCutscene;
         if (this.Plugin.Config.DisableInCutscene && cutsceneChanged) {
@@ -157,22 +155,18 @@ internal class Messages : IDisposable {
         this._inGpose = nowGpose;
     }
 
-    private unsafe void HandleSpawnQueue(Framework framework) {
+    private unsafe void HandleSpawnQueue(IFramework framework) {
         if (!this.SpawnQueue.TryDequeue(out var message)) {
             return;
         }
 
-        PluginLog.Debug($"spawning vfx for {message.Id}");
+        Plugin.Log.Debug($"spawning vfx for {message.Id}");
         var rotation = Quaternion.CreateFromYawPitchRoll(message.Yaw, 0, 0);
         var path = GetPath(this.Plugin.DataManager, message);
         if (this.Plugin.Vfx.SpawnStatic(message.Id, path, message.Position, rotation) == null) {
-            PluginLog.Debug("trying again");
+            Plugin.Log.Debug("trying again");
             this.SpawnQueue.Enqueue(message);
         }
-    }
-
-    private void SpawnVfx(object? sender, EventArgs e) {
-        this.SpawnVfx();
     }
 
     internal void SpawnVfx() {
@@ -212,7 +206,7 @@ internal class Messages : IDisposable {
             try {
                 await this.DownloadMessages(world, territory, ward, plot);
             } catch (Exception ex) {
-                PluginLog.LogError(ex, $"Failed to get messages for territory {territory}");
+                Plugin.Log.Error(ex, $"Failed to get messages for territory {territory}");
             }
         });
     }

@@ -26,7 +26,7 @@ internal class MainWindow {
         }
 
         ImGui.SetNextWindowSize(new Vector2(475, 350), ImGuiCond.FirstUseEver);
-        if (!ImGui.Begin(this.Plugin.Name, ref this.Visible)) {
+        if (!ImGui.Begin(Plugin.Name, ref this.Visible)) {
             ImGui.End();
             return;
         }
@@ -65,7 +65,7 @@ internal class MainWindow {
     private void DrawApiKey() {
         ImGui.PushTextWrapPos();
 
-        ImGui.TextUnformatted($"Somehow, {this.Plugin.Name} wasn't able to register you an account automatically.");
+        ImGui.TextUnformatted($"Somehow, {Plugin.Name} wasn't able to register you an account automatically.");
         ImGui.TextUnformatted("Click the button below to try again.");
 
         ImGui.PopTextWrapPos();

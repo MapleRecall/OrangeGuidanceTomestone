@@ -1,42 +1,43 @@
-﻿using Dalamud.Data;
-using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
-using Dalamud.IoC;
+﻿using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using OrangeGuidanceTomestone.MiniPenumbra;
 using XivCommon;
 
 namespace OrangeGuidanceTomestone;
 
 public class Plugin : IDalamudPlugin {
-    public string Name => "Orange Guidance Tomestone";
+    internal static string Name => "Orange Guidance Tomestone";
+
+    [PluginService]
+    internal static IPluginLog Log { get; private set; }
 
     [PluginService]
     internal DalamudPluginInterface Interface { get; init; }
 
     [PluginService]
-    internal ChatGui ChatGui { get; init; }
+    internal IChatGui ChatGui { get; init; }
 
     [PluginService]
-    internal ClientState ClientState { get; init; }
+    internal IClientState ClientState { get; init; }
 
     [PluginService]
-    internal CommandManager CommandManager { get; init; }
+    internal ICommandManager CommandManager { get; init; }
 
     [PluginService]
-    internal Condition Condition { get; init; }
+    internal ICondition Condition { get; init; }
 
     [PluginService]
-    internal DataManager DataManager { get; init; }
+    internal IDataManager DataManager { get; init; }
 
     [PluginService]
-    internal Framework Framework { get; init; }
+    internal IFramework Framework { get; init; }
 
     [PluginService]
-    internal GameGui GameGui { get; init; }
+    internal IGameGui GameGui { get; init; }
+
+    [PluginService]
+    internal IGameInteropProvider GameInteropProvider { get; init; }
 
     internal Configuration Config { get; }
     internal XivCommonBase Common { get; }
@@ -54,7 +55,7 @@ public class Plugin : IDalamudPlugin {
 
         this.Config = this.Interface!.GetPluginConfig() as Configuration ?? new Configuration();
         this.Common = new XivCommonBase();
-        this.Vfx = new Vfx();
+        this.Vfx = new Vfx(this);
         this.Messages = new Messages(this);
         this.Ui = new PluginUi(this);
         this.VfxReplacer = new VfxReplacer(this);

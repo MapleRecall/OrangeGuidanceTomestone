@@ -1,6 +1,5 @@
 using System.Diagnostics;
-using Dalamud.Game;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using OrangeGuidanceTomestone.Helpers;
 
 namespace OrangeGuidanceTomestone;
@@ -22,7 +21,7 @@ internal class Pinger : IDisposable {
         this.Plugin.Framework.Update -= this.Ping;
     }
 
-    private void Ping(Framework framework) {
+    private void Ping(IFramework framework) {
         if (this.Stopwatch.Elapsed < TimeSpan.FromSeconds(this._waitSecs)) {
             return;
         }
@@ -45,7 +44,7 @@ internal class Pinger : IDisposable {
             );
 
             if (!resp.IsSuccessStatusCode) {
-                PluginLog.LogWarning($"Failed to ping, status {resp.StatusCode}");
+                Plugin.Log.Warning($"Failed to ping, status {resp.StatusCode}");
             }
         });
     }
