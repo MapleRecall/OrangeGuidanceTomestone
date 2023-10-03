@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <Version>1.7.2</Version>
+        <Version>1.7.3</Version>
         <TargetFramework>net7.0-windows</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -54,10 +54,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DalamudPackager" Version="2.1.10"/>
-        <PackageReference Include="Fody" Version="6.6.4" PrivateAssets="all"/>
-        <PackageReference Include="Resourcer.Fody" Version="1.8.0" PrivateAssets="all"/>
-        <PackageReference Include="XivCommon" Version="7.0.0-alpha.1" PrivateAssets="all"/>
+        <PackageReference Include="DalamudPackager" Version="2.1.12"/>
+        <PackageReference Include="Fody" Version="6.8.0" PrivateAssets="all"/>
+        <PackageReference Include="Resourcer.Fody" Version="1.8.1" PrivateAssets="all"/>
+        <PackageReference Include="XivCommon" Version="9.0.0" PrivateAssets="all"/>
     </ItemGroup>
 
     <ItemGroup>

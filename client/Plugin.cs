@@ -54,7 +54,7 @@ public class Plugin : IDalamudPlugin {
         this.AvfxFilePath = this.CopyAvfxFile();
 
         this.Config = this.Interface!.GetPluginConfig() as Configuration ?? new Configuration();
-        this.Common = new XivCommonBase();
+        this.Common = new XivCommonBase(this.Interface);
         this.Vfx = new Vfx(this);
         this.Messages = new Messages(this);
         this.Ui = new PluginUi(this);
