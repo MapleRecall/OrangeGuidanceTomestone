@@ -63,7 +63,7 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, mut query: HashMap<String
     messages.reverse();
 
     for msg in &mut messages {
-        msg.is_hidden = msg.positive_votes - msg.negative_votes < crate::consts::VOTE_THRESHOLD_HIDE;
+        msg.is_hidden = msg.positive_votes - msg.negative_votes < state.config.vote_threshold_hide;
     }
 
     if version == 1 {

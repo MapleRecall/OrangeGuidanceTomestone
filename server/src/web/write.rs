@@ -58,7 +58,7 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, message: Message) -> Resu
         .map_err(AnyhowRejection)
         .map_err(warp::reject::custom)?;
 
-    if existing.count >= 10 + extra as i32 {
+    if existing.count >= state.config.max_messages + extra as i32 {
         return Err(warp::reject::custom(WebError::TooManyMessages));
     }
 

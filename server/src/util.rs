@@ -1,5 +1,3 @@
-use base64::Engine;
-use base64::prelude::BASE64_STANDARD;
 use sha3::{Digest, Sha3_384};
 
 // TerritoryIntendedUse = 13 or 14
@@ -50,5 +48,5 @@ pub fn hash(input: &str) -> String {
     let mut hasher = Sha3_384::default();
     hasher.update(input.as_bytes());
     let result = hasher.finalize();
-    BASE64_STANDARD.encode(result)
+    data_encoding::BASE64.encode(&result)
 }

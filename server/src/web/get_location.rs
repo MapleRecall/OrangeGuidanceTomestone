@@ -122,14 +122,14 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
             .map_err(warp::reject::custom)?
     };
 
-    filter_messages(&mut messages, id);
+    filter_messages(&mut messages, id, state.config.vote_threshold_hide);
     Ok(warp::reply::json(&messages))
 }
 
-fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64) {
+fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64, vote_threshold_hide: i32) {
     // remove messages where the user has been offline for over 35 minutes
     // also remove messages with low score (that aren't the from the user)
-    messages.retain(|msg| msg.last_seen_minutes < 35 && (msg.user == id || (msg.positive_votes - msg.negative_votes) >= crate::consts::VOTE_THRESHOLD_HIDE));
+    messages.retain(|msg| msg.last_seen_minutes < 35 && (msg.user == id || (msg.positive_votes - msg.negative_votes) >= vote_threshold_hide));
 
     // shuffle messages since we'll be excluding later based on messages
     // that have already been included, so this will be more fair

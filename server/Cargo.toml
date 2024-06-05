@@ -7,9 +7,9 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
-base64 = "0.21"
 bytes = "1"
 chrono = "0.4"
+data-encoding = "2.6.0"
 if_chain = "1"
 parking_lot = "0.12"
 rand = "0.8"
