@@ -9,6 +9,8 @@ using OrangeGuidanceTomestone.Helpers;
 namespace OrangeGuidanceTomestone;
 
 internal class Messages : IDisposable {
+    internal const uint MaxAmount = 20;
+
     internal static readonly string[] VfxPaths = {
         "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1a_o.avfx",
         "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1b_o.avfx",

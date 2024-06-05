@@ -49,7 +49,7 @@ internal class MessageList : ITab {
     }
 
     private void ShowList() {
-        ImGui.TextUnformatted($"Messages: {this.Messages.Count:N0} / {10 + this.Plugin.Ui.MainWindow.ExtraMessages:N0}");
+        ImGui.TextUnformatted($"Messages: {this.Messages.Count:N0} / {Messages.MaxAmount + this.Plugin.Ui.MainWindow.ExtraMessages:N0}");
 
         ImGui.Separator();
 
