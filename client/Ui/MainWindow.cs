@@ -13,11 +13,11 @@ internal class MainWindow {
 
     internal MainWindow(Plugin plugin) {
         this.Plugin = plugin;
-        this.Tabs = new List<ITab> {
+        this.Tabs = [
             new Write(this.Plugin),
             new MessageList(this.Plugin),
             new Settings(this.Plugin),
-        };
+        ];
     }
 
     internal void Draw() {

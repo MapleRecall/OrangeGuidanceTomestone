@@ -10,7 +10,7 @@ public class PluginUi : IDisposable {
     internal Viewer Viewer { get; }
     internal ViewerButton ViewerButton { get; }
 
-    private List<(string, string)> Modals { get; } = new();
+    private List<(string, string)> Modals { get; } = [];
     private Queue<string> ToShow { get; } = new();
 
     internal PluginUi(Plugin plugin) {

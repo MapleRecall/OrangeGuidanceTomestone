@@ -6,7 +6,7 @@ namespace OrangeGuidanceTomestone;
 [Serializable]
 public class Pack {
     internal static SemaphoreSlim AllMutex { get; } = new(1, 1);
-    internal static Pack[] All { get; set; } = Array.Empty<Pack>();
+    internal static Pack[] All { get; set; } = [];
 
     public string Name { get; init; }
     public Guid Id { get; init; }

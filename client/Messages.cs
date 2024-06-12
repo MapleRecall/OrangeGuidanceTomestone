@@ -11,14 +11,15 @@ namespace OrangeGuidanceTomestone;
 internal class Messages : IDisposable {
     internal const uint MaxAmount = 20;
 
-    internal static readonly string[] VfxPaths = {
+    internal static readonly string[] VfxPaths = [
         "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1a_o.avfx",
         "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1b_o.avfx",
         "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1c_o.avfx",
         "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1d_o.avfx",
         "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1e_o.avfx",
         "bg/ex2/02_est_e3/common/vfx/eff/b0941trp1f_o.avfx",
-    };
+        "bg/ex4/07_lak_l5/common/vfx/eff/b2640trp1g_o.avfx",
+    ];
 
     private static string GetPath(IDataManager data, Message message) {
         var glyph = message.Glyph;
@@ -40,8 +41,8 @@ internal class Messages : IDisposable {
     private Dictionary<Guid, Message> Current { get; } = new();
     private Queue<Message> SpawnQueue { get; } = new();
 
-    private HashSet<uint> Trials { get; } = new();
-    private HashSet<uint> DeepDungeons { get; } = new();
+    private HashSet<uint> Trials { get; } = [];
+    private HashSet<uint> DeepDungeons { get; } = [];
 
     private bool CutsceneActive {
         get {

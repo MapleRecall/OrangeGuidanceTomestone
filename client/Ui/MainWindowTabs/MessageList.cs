@@ -14,7 +14,7 @@ internal class MessageList : ITab {
     private SortMode Sort { get; set; }
 
     private SemaphoreSlim MessagesMutex { get; } = new(1, 1);
-    private List<MessageWithTerritory> Messages { get; } = new();
+    private List<MessageWithTerritory> Messages { get; } = [];
 
     internal MessageList(Plugin plugin) {
         this.Plugin = plugin;
@@ -49,7 +49,7 @@ internal class MessageList : ITab {
     }
 
     private void ShowList() {
-        ImGui.TextUnformatted($"Messages: {this.Messages.Count:N0} / {Messages.MaxAmount + this.Plugin.Ui.MainWindow.ExtraMessages:N0}");
+        ImGui.TextUnformatted($"Messages: {this.Messages.Count:N0} / {OrangeGuidanceTomestone.Messages.MaxAmount + this.Plugin.Ui.MainWindow.ExtraMessages:N0}");
 
         ImGui.Separator();
 

@@ -21,7 +21,7 @@ internal class Write : ITab {
     private (int, int) _word2 = (-1, -1);
     private int _glyph;
 
-    private List<IDalamudTextureWrap> GlyphImages { get; } = new();
+    private List<IDalamudTextureWrap> GlyphImages { get; } = [];
 
     private void LoadSignImages() {
         for (var i = 0; i < Messages.VfxPaths.Length; i++) {
