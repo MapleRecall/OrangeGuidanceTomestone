@@ -1,7 +1,7 @@
-name: FINAL FANTASY XIV
-id: 378e7ae0-7971-4379-8c82-d9c146d8a3b6
-visible: true
-order: 1
+name: FINAL FANTASY XIV (v4)
+id: 120e0e08-9533-454b-bfab-f8774a5b6d80
+visible: false
+order: 0
 
 templates:
   - '{0} ahead'
@@ -26,23 +26,6 @@ templates:
   - 'Let there be {0}'
   - 'Ahh, {0}...'
   - 'Such {0}...'
-  - 'Remember {0}'
-  - 'It''s the scourge of {0}'
-  - 'Reeks of {0}'
-  - '{0} is effective'
-  - 'Treat {0} with care'
-  - 'It is all thanks to {0}'
-  - 'Despicable {0}'
-  - 'Woeful {0}'
-  - 'Wondrous {0}'
-  - 'Nothing but {0} here'
-  - '{0} waits ahead'
-  - 'You must accept {0}'
-  - 'Have mercy, {0}'
-  - 'No mercy for {0}'
-  - 'Have audience with {0}'
-  - 'Reminescent of {0}'
-  - 'Oh, {0}!'
   - '{0}'
   - '{0}!'
   - '{0}?'
@@ -53,7 +36,6 @@ conjunctions:
   - 'or'
   - 'but'
   - 'therefore'
-  - 'eventually'
   - 'in short'
   - 'except'
   - 'by the way'
@@ -83,7 +65,6 @@ words:
       - Warrior of Light
       - Warrior of Darkness
       - Ascian
-      - Ancient
       - merchant
       - teacher
       - master
@@ -120,7 +101,6 @@ words:
       - Doman
       - Hingan
       - Ala Mhigan
-      - Thavnairian
       - lalafell
       - miqo'te
       - hyur
@@ -145,16 +125,13 @@ words:
       - dragoon
       - samurai
       - reaper
-      - viper
       - bard
       - machinist
       - dancer
       - black mage
       - summoner
       - red mage
-      - pictomancer
       - blue mage
-      - beastmaster
       - carpenter
       - blacksmith
       - armorer
@@ -247,9 +224,6 @@ words:
       - qitari
       - dwarf
       - arkasodara
-      - pelupelu
-      - moblin
-      - mamool ja
       - goat
       - mameshiba
       - loporrit
@@ -277,23 +251,11 @@ words:
 
   - name: Places
     words:
-      - Etheirys
       - Eorzea
-      - Aldenard
-      - Ilsabard
-      - Othard
-      - Limsa Lominsa
-      - Ul'dah
-      - Gridania
-      - Sharlayan
-      - Thavnair
-      - Meracydia
       - Garlemald
-      - Tural
       - the Source
       - the First
       - the Thirteenth
-      - the Moon
       - high road
       - bridge
       - castle
@@ -318,7 +280,6 @@ words:
       - waterside
       - nest
       - hole
-      - aetheryte
 
   - name: Directions
     words:
@@ -347,9 +308,7 @@ words:
       - core
       - fingers
       - horns
-      - ears
       - feet
-      - hair
 
   - name: Affinities
     words:
@@ -372,7 +331,6 @@ words:
       - life
       - death
       - aether
-      - dynamis
       - astral
       - umbral
       - calamity
@@ -380,7 +338,6 @@ words:
       - darkness
       - devastation
       - fear
-      - hope
       - despair
       - joy
       - bliss
