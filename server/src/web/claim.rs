@@ -26,31 +26,53 @@ async fn logic(state: Arc<State>, id: i64, bytes: Bytes) -> Result<impl Reply, R
         .map_err(AnyhowRejection)
         .map_err(warp::reject::custom)?;
 
-    let code = sqlx::query!(
-        // language=sqlite
-        r#"delete from extra_tokens where id = ? returning extra as "extra!: i64""#,
+    let mut t = state.db.begin()
+        .await
+        .context("could not start transaction")
+        .map_err(AnyhowRejection)
+        .map_err(warp::reject::custom)?;
+    let rec = sqlx::query!(
+        // language="sqlite"
+        r#"update extra_tokens set uses = case uses when -1 then -1 else max(0, uses - 1) end where id = ? returning extra as "extra!: i64""#,
         code,
     )
-        .fetch_optional(&state.db)
+        .fetch_optional(&mut *t)
         .await
-        .context("could not get code from database")
+        .context("could not update code in database")
         .map_err(AnyhowRejection)
         .map_err(warp::reject::custom)?;
 
-    if let Some(code) = code {
-        sqlx::query!(
+    sqlx::query!(
+        // language=sqlite
+        "delete from extra_tokens where id = ? and uses = 0",
+        code,
+    )
+        .execute(&mut *t)
+        .await
+        .context("could not attempt to delete expended code")
+        .map_err(AnyhowRejection)
+        .map_err(warp::reject::custom)?;
+
+    t.commit()
+        .await
+        .context("could not commit transaction")
+        .map_err(AnyhowRejection)
+        .map_err(warp::reject::custom)?;
+
+    if let Some(code) = rec {
+        let result = sqlx::query!(
             // language=sqlite
-            "update users set extra = ? where id = ?",
+            r#"update users set extra = extra + ? where id = ? returning extra as "extra!: i64""#,
             code.extra,
             id,
         )
-            .execute(&state.db)
+            .fetch_one(&state.db)
             .await
             .context("could not update user")
             .map_err(AnyhowRejection)
             .map_err(warp::reject::custom)?;
 
-        return Ok(code.extra.to_string());
+        return Ok(result.extra.to_string());
     }
 
     Err(warp::reject::custom(WebError::InvalidExtraCode))
