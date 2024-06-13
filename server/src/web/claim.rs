@@ -42,6 +42,34 @@ async fn logic(state: Arc<State>, id: i64, bytes: Bytes) -> Result<impl Reply, R
         .map_err(AnyhowRejection)
         .map_err(warp::reject::custom)?;
 
+    let count = sqlx::query_scalar!(
+        // language=sqlite
+        "select count(*) as count from used_codes where id = ? and user = ?",
+        code,
+        id,
+    )
+        .fetch_one(&mut *t)
+        .await
+        .context("could not check if code is used")
+        .map_err(AnyhowRejection)
+        .map_err(warp::reject::custom)?;
+
+    if count > 0 {
+        return Err(warp::reject::custom(WebError::InvalidExtraCode));
+    }
+
+    sqlx::query!(
+        // language=sqlite
+        "insert into used_codes (id, user) values (?, ?)",
+        code,
+        id,
+    )
+        .execute(&mut *t)
+        .await
+        .context("could not store used code")
+        .map_err(AnyhowRejection)
+        .map_err(warp::reject::custom)?;
+
     sqlx::query!(
         // language=sqlite
         "delete from extra_tokens where id = ? and uses = 0",
