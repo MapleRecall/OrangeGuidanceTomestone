@@ -28,7 +28,33 @@
       "type": "array",
       "description": "An array of template strings, using {0} for where the chosen word should be inserted (if any).",
       "items": {
-        "type": "string"
+        "anyOf": [
+          {
+            "type": "string",
+            "description": "A template that should use the global word list defined at the root of this document."
+          },
+          {
+            "type": "object",
+            "description": "A template that should use its own word list defined on the template object.",
+            "properties": {
+              "template": {
+                "type": "string",
+                "description": "The template string, using {0} for where the chosen word should be inserted (if any)."
+              },
+              "words": {
+                "type": "array",
+                "description": "A list of words for this template specifically.",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "template",
+              "words"
+            ]
+          }
+        ]
       },
       "minItems": 1
     },
@@ -72,8 +98,6 @@
     "id",
     "visible",
     "order",
-    "templates",
-    "conjunctions",
-    "words"
+    "templates"
   ]
 }

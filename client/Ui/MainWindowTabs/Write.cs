@@ -104,6 +104,21 @@ internal class Write : ITab {
             ImGui.EndCombo();
         }
 
+        void DrawSpecificWordPicker(string id, WordListTemplate template, ref (int, int) x) {
+            var preview = x == (-1, -1) ? "" : template.Words[x.Item2];
+            if (!ImGui.BeginCombo(id, preview)) {
+                return;
+            }
+
+            for (var wordIdx = 0; wordIdx < template.Words.Length; wordIdx++) {
+                if (ImGui.Selectable(template.Words[wordIdx], x == (-1, wordIdx))) {
+                    x = (-1, wordIdx);
+                }
+            }
+
+            ImGui.EndCombo();
+        }
+
         void DrawWordPicker(string id, IReadOnlyList<WordList> words, ref (int, int) x) {
             var preview = x == (-1, -1) ? "" : words[x.Item1].Words[x.Item2];
             if (!ImGui.BeginCombo(id, preview)) {
@@ -149,12 +164,13 @@ internal class Write : ITab {
                 var preview = new StringBuilder();
 
                 var template1 = pack.Templates[this._part1];
-                var word1 = this._word1 == (-1, -1) ? placeholder : pack.Words[this._word1.Item1].Words[this._word1.Item2];
-                preview.Append(string.Format(template1, word1));
+                var wordList1 = template1.Words ?? pack.Words?[this._word1.Item1].Words;
+                var word1 = this._word1 == (-1, -1) ? placeholder : wordList1?[this._word1.Item2];
+                preview.Append(string.Format(template1.Template, word1));
 
                 if (this._conj != -1) {
-                    var conj = pack.Conjunctions[this._conj];
-                    var isPunc = conj.Length == 1 && char.IsPunctuation(conj[0]);
+                    var conj = pack.Conjunctions?[this._conj];
+                    var isPunc = conj?.Length == 1 && char.IsPunctuation(conj[0]);
                     if (isPunc) {
                         preview.Append(conj);
                         preview.Append('\n');
@@ -166,8 +182,9 @@ internal class Write : ITab {
 
                     if (this._part2 != -1) {
                         var template2 = pack.Templates[this._part2];
-                        var word2 = this._word2 == (-1, -1) ? placeholder : pack.Words[this._word2.Item1].Words[this._word2.Item2];
-                        preview.Append(string.Format(template2, word2));
+                        var wordList2 = template2.Words ?? pack.Words?[this._word2.Item1].Words;
+                        var word2 = this._word2 == (-1, -1) ? placeholder : wordList2?[this._word2.Item2];
+                        preview.Append(string.Format(template2.Template, word2));
                     }
                 }
 
@@ -182,17 +199,47 @@ internal class Write : ITab {
 
         ImGui.Separator();
 
-        DrawPicker("Template##part-1", pack.Templates, ref this._part1);
-        if (this._part1 > -1 && pack.Templates[this._part1].Contains("{0}")) {
-            DrawWordPicker("Word##word-1", pack.Words, ref this._word1);
+        var templateStrings = pack.Templates
+            .Select(template => template.Template)
+            .ToArray();
+
+        DrawPicker("Template##part-1", templateStrings, ref this._part1);
+        if (this._part1 > -1 && pack.Templates[this._part1].Template.Contains("{0}")) {
+            switch (pack.Templates[this._part1]) {
+                case BasicTemplate basic: {
+                    if (pack.Words != null) {
+                        DrawWordPicker("Word##word-1", pack.Words, ref this._word1);
+                    }
+
+                    break;
+                }
+                case WordListTemplate wordListTemplate: {
+                    DrawSpecificWordPicker("Word##word-1", wordListTemplate, ref this._word1);
+                    break;
+                }
+            }
         }
 
-        DrawPicker("Conjunction##conj", pack.Conjunctions, ref this._conj);
+        if (pack.Conjunctions != null) {
+            DrawPicker("Conjunction##conj", pack.Conjunctions, ref this._conj);
+        }
 
         if (this._conj != -1) {
-            DrawPicker("Template##part-2", pack.Templates, ref this._part2);
-            if (this._part2 > -1 && pack.Templates[this._part2].Contains("{0}")) {
-                DrawWordPicker("Word##word-2", pack.Words, ref this._word2);
+            DrawPicker("Template##part-2", templateStrings, ref this._part2);
+            if (this._part2 > -1 && pack.Templates[this._part2].Template.Contains("{0}")) {
+                switch (pack.Templates[this._part2]) {
+                    case BasicTemplate basic: {
+                        if (pack.Words != null) {
+                            DrawWordPicker("Word##word-2", pack.Words, ref this._word2);
+                        }
+
+                        break;
+                    }
+                    case WordListTemplate wordListTemplate: {
+                        DrawSpecificWordPicker("Word##word-2", wordListTemplate, ref this._word2);
+                        break;
+                    }
+                }
             }
         }
 
@@ -301,7 +348,7 @@ internal class Write : ITab {
 
         var pack = Pack.All[this._pack];
 
-        if (this._part1 == -1 || !pack.Templates[this._part1].Contains("{0}")) {
+        if (this._part1 == -1 || !pack.Templates[this._part1].Template.Contains("{0}")) {
             this._word1 = (-1, -1);
         }
 
@@ -309,7 +356,7 @@ internal class Write : ITab {
             this._part2 = -1;
         }
 
-        if (this._part2 == -1 || !pack.Templates[this._part2].Contains("{0}")) {
+        if (this._part2 == -1 || !pack.Templates[this._part2].Template.Contains("{0}")) {
             this._word2 = (-1, -1);
         }
     }
@@ -321,7 +368,7 @@ internal class Write : ITab {
 
         var pack = Pack.All[this._pack];
         var template1 = pack.Templates[this._part1];
-        var temp1Variable = template1.Contains("{0}");
+        var temp1Variable = template1.Template.Contains("{0}");
 
         switch (temp1Variable) {
             case true when this._word1 == (-1, -1):
@@ -339,7 +386,7 @@ internal class Write : ITab {
             }
 
             var template2 = pack.Templates[this._part2];
-            var temp2Variable = template2.Contains("{0}");
+            var temp2Variable = template2.Template.Contains("{0}");
 
             switch (temp2Variable) {
                 case true when this._word2 == (-1, -1):

@@ -9,9 +9,36 @@ pub struct Pack {
     pub visible: bool,
     #[serde(default, skip_serializing)]
     pub order: u8,
-    pub templates: Vec<String>,
-    pub conjunctions: Vec<String>,
-    pub words: Vec<WordList>,
+    pub templates: Vec<Template>,
+    pub conjunctions: Option<Vec<String>>,
+    pub words: Option<Vec<WordList>>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(untagged)]
+pub enum Template {
+    Basic(String),
+    List {
+        template: String,
+        words: Vec<String>,
+    },
+}
+
+impl Template {
+    pub fn template(&self) -> &str {
+        match self {
+            Self::Basic(template) => template,
+            Self::List { template, .. } => template,
+        }
+    }
+
+    pub fn requires_word(&self) -> bool {
+        self.template().contains("{0}")
+    }
+
+    pub fn format(&self, word: &str) -> String {
+        self.template().replace("{0}", word)
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -21,27 +48,71 @@ pub struct WordList {
 }
 
 impl Pack {
-    pub fn format(&self, template_1_idx: usize, word_1_idx: Option<(usize, usize)>, conjunction: Option<usize>, template_2_idx: Option<usize>, word_2_idx: Option<(usize, usize)>) -> Option<String> {
-        let template_1 = self.templates.get(template_1_idx)?;
+    fn get_word(&self, list_idx: usize, word_idx: usize) -> Option<&str> {
+        let words = self.words.as_ref()?;
+        let list = words.get(list_idx)?;
+        list.words
+            .get(word_idx)
+            .map(|word| word.as_str())
+    }
 
-        if template_1.contains("{0}") && word_1_idx.is_none() {
+    fn replace(
+        &self,
+        template: &Template,
+        list_idx: usize,
+        word_idx: usize,
+    ) -> Option<String> {
+        let word = match template {
+            Template::Basic(_) => self.get_word(list_idx, word_idx),
+            Template::List { words, .. } => words
+                .get(word_idx)
+                .map(|word| word.as_str()),
+        }?;
+
+        Some(template.format(word))
+    }
+
+    fn partial_format(
+        &self,
+        template: &Template,
+        word_idx: Option<(usize, usize)>,
+    ) -> Option<String> {
+        let requires_word = template.requires_word();
+        if requires_word && word_idx.is_none() {
             return None;
         }
 
-        let mut formatted = if_chain::if_chain! {
-            if template_1.contains("{0}");
-            if let Some((w1_list, w1_word)) = word_1_idx;
+        if_chain::if_chain! {
+            if requires_word;
+            if let Some((list_idx, word_idx)) = word_idx;
             then {
-                let word_1 = self.words.get(w1_list)?.words.get(w1_word)?;
-                template_1.replace("{0}", word_1)
+                self.replace(template, list_idx, word_idx)
             } else {
-                template_1.clone()
+                Some(template.template().to_string())
             }
-        };
+        }
+    }
 
-        if let Some(conj_idx) = conjunction {
-            if let Some(template_2_idx) = template_2_idx {
-                let conj = self.conjunctions.get(conj_idx)?;
+    pub fn format(
+        &self,
+        template_1_idx: usize,
+        word_1_idx: Option<(usize, usize)>,
+        conjunction: Option<usize>,
+        template_2_idx: Option<usize>,
+        word_2_idx: Option<(usize, usize)>,
+    ) -> Option<String> {
+        let template_1 = self.templates.get(template_1_idx)?;
+        let mut formatted = self.partial_format(template_1, word_1_idx)?;
+
+        if_chain::if_chain! {
+            if let Some(conj_idx) = conjunction;
+            if let Some(conjunctions) = &self.conjunctions;
+            if let Some(template_2_idx) = template_2_idx;
+            then {
+                let template_2 = self.templates.get(template_2_idx)?;
+                let append = self.partial_format(template_2, word_2_idx)?;
+
+                let conj = conjunctions.get(conj_idx)?;
                 let is_punc = conj.len() == 1 && conj.chars().next().map(|x| x.is_ascii_punctuation()).unwrap_or(false);
                 if is_punc {
                     formatted.push_str(conj);
@@ -51,18 +122,6 @@ impl Pack {
                     formatted.push_str(conj);
                     formatted.push(' ');
                 }
-
-                let template_2 = self.templates.get(template_2_idx)?;
-                let append = if_chain::if_chain! {
-                    if template_2.contains("{0}");
-                    if let Some((w2_list, w2_word)) = word_2_idx;
-                    then {
-                        let word_2 = self.words.get(w2_list)?.words.get(w2_word)?;
-                        template_2.replace("{0}", word_2)
-                    } else {
-                        template_2.clone()
-                    }
-                };
 
                 formatted.push_str(&append);
             }
