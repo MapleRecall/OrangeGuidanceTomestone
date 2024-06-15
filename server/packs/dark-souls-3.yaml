@@ -254,7 +254,7 @@ words:
       - 'above'
       - 'behind'
 
-  - name: 'Body Parts'
+  - name: 'Body parts'
     words:
       - 'head'
       - 'neck'
