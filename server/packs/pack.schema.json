@@ -70,6 +70,9 @@
   "required": [
     "name",
     "id",
+    "visible",
+    "order",
+    "templates",
     "conjunctions",
     "words"
   ]
