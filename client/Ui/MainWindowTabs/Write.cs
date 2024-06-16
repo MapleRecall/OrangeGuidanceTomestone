@@ -118,33 +118,40 @@ internal class Write : ITab {
 
         const string placeholder = "****";
 
-        void DrawPicker(string id, IReadOnlyList<string> items, ref int x) {
+        bool DrawPicker(string id, IReadOnlyList<string> items, ref int x) {
             var preview = x == -1 ? "" : items[x].Replace("{0}", placeholder);
             if (!ImGui.BeginCombo(id, preview)) {
-                return;
+                return false;
             }
 
             using var endCombo = new OnDispose(ImGui.EndCombo);
 
+            var changed = false;
             if (ImGui.Selectable("<none>")) {
                 x = -1;
+                changed = true;
             }
 
             for (var i = 0; i < items.Count; i++) {
                 var template = items[i].Replace("{0}", placeholder);
-                if (ImGui.Selectable(template, i == x)) {
-                    x = i;
+                if (!ImGui.Selectable(template, i == x)) {
+                    continue;
                 }
+
+                x = i;
+                changed = true;
             }
+
+            return changed;
         }
 
         void DrawTemplatePicker(string id, IReadOnlyList<string> items, ref int x, ref (int, int) word) {
-            var wasAdvanced = this.Pack?.Templates[x].Words != null;
-            if (wasAdvanced) {
+            var wasAdvanced = this.Pack?.Templates.Get(x)?.Words != null;
+
+            var changed = DrawPicker(id, items, ref x);
+            if (changed && wasAdvanced) {
                 word = (-1, -1);
             }
-
-            DrawPicker(id, items, ref x);
         }
 
         void DrawSpecificWordPicker(string id, Template template, ref (int, int) x) {
