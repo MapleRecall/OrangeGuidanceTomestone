@@ -1,4 +1,5 @@
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using OrangeGuidanceTomestone.Helpers;
 
 namespace OrangeGuidanceTomestone;
@@ -7,12 +8,17 @@ namespace OrangeGuidanceTomestone;
 public class Pack {
     internal static SemaphoreSlim AllMutex { get; } = new(1, 1);
     internal static Pack[] All { get; set; } = [];
+    private static readonly JsonSerializerOptions Options = new() {
+        Converters = {
+            new TemplateConverter(),
+        },
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+    };
 
     public string Name { get; init; }
     public Guid Id { get; init; }
 
-    [JsonConverter(typeof(TemplateConverter))]
-    public ITemplate[] Templates { get; init; }
+    public Template[] Templates { get; init; }
 
     public string[]? Conjunctions { get; init; }
     public List<WordList>? Words { get; init; }
@@ -21,7 +27,7 @@ public class Pack {
         Task.Run(async () => {
             var resp = await ServerHelper.SendRequest(null, HttpMethod.Get, "/packs");
             var json = await resp.Content.ReadAsStringAsync();
-            var packs = JsonConvert.DeserializeObject<Pack[]>(json)!;
+            var packs = JsonSerializer.Deserialize<Pack[]>(json, Pack.Options)!;
             await AllMutex.WaitAsync();
             try {
                 All = packs;
@@ -32,48 +38,50 @@ public class Pack {
     }
 }
 
-public interface ITemplate {
-    public string Template { get; }
-    public string[]? Words { get; }
+public class Template {
+    [JsonPropertyName("template")]
+    public string Text { get; init; }
+    public string[]? Words { get; init; }
 }
 
-public class BasicTemplate : ITemplate {
-    public string Template { get; init; }
-    public string[]? Words => null;
-}
-
-[Serializable]
-public class WordListTemplate : ITemplate {
-    public string Template { get; init; }
-    public string[] Words { get; init; }
-}
-
-public class TemplateConverter : JsonConverter<ITemplate>
-{
-    public override ITemplate? ReadJson(JsonReader reader, Type objectType, ITemplate? existingValue, bool hasExistingValue, JsonSerializer serializer) {
-        if (reader.TokenType == JsonToken.String) {
-            var template = reader.ReadAsString();
-            if (template == null) {
-                return null;
+public class TemplateConverter : JsonConverter<Template> {
+    private static JsonSerializerOptions RemoveSelf(JsonSerializerOptions old) {
+        var newOptions = new JsonSerializerOptions(old);
+        for (var i = 0; i < old.Converters.Count; i++) {
+            if (old.Converters[i] is TemplateConverter) {
+                newOptions.Converters.RemoveAt(i);
+                break;
             }
+        }
 
-            return new BasicTemplate {
-                Template = template,
-            };
-        } else if (reader.TokenType == JsonToken.StartObject) {
-            return serializer.Deserialize<WordListTemplate>(reader);
-        } else {
-            throw new JsonReaderException("unexpected template kind");
+        return newOptions;
+    }
+
+    public override Template? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+        switch (reader.TokenType) {
+            case JsonTokenType.String: {
+                var template = reader.GetString() ?? throw new JsonException("template cannot be null");
+                return new Template {
+                    Text = template,
+                    Words = null,
+                };
+            }
+            case JsonTokenType.StartObject: {
+                var newOptions = TemplateConverter.RemoveSelf(options);
+                return JsonSerializer.Deserialize<Template>(ref reader, newOptions);
+            }
+            default: {
+                throw new JsonException("unexpected template type");
+            }
         }
     }
 
-    public override void WriteJson(JsonWriter writer, ITemplate? value, JsonSerializer serializer) {
-        if (value is BasicTemplate basic) {
-            serializer.Serialize(writer, basic.Template);
-        } else if (value is WordListTemplate wordList) {
-            serializer.Serialize(writer, wordList);
+    public override void Write(Utf8JsonWriter writer, Template value, JsonSerializerOptions options) {
+        if (value.Words == null) {
+            JsonSerializer.Serialize(writer, value.Text, options);
         } else {
-            throw new JsonWriterException("unexpected template kind");
+            var newOptions = TemplateConverter.RemoveSelf(options);
+            JsonSerializer.Serialize(writer, value, newOptions);
         }
     }
 }

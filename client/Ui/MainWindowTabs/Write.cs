@@ -5,6 +5,7 @@ using Dalamud.Interface.Internal;
 using ImGuiNET;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
+using OrangeGuidanceTomestone.Util;
 
 namespace OrangeGuidanceTomestone.Ui.MainWindowTabs;
 
@@ -20,6 +21,39 @@ internal class Write : ITab {
     private int _part2 = -1;
     private (int, int) _word2 = (-1, -1);
     private int _glyph;
+
+    private const string Placeholder = "****";
+    private Pack? Pack => Pack.All.Get(this._pack);
+    private Template? Template1 => this.Pack?.Templates.Get(this._part1);
+    private Template? Template2 => this.Pack?.Templates.Get(this._part2);
+    private string? Word1 => this.GetWord(this._word1, this.Template1);
+    private string? Word2 => this.GetWord(this._word2, this.Template2);
+    private string? Conjunction => this.Pack?.Conjunctions?.Get(this._conj);
+
+    private string? GetWord((int, int) word, Template? template) {
+        if (word.Item2 == -1) {
+            return Placeholder;
+        }
+
+        if (template == null) {
+            return null;
+        }
+
+        if (template.Words == null) {
+            if (word.Item1 == -1) {
+                return Placeholder;
+            }
+
+            var pack = this.Pack;
+            if (pack?.Words == null) {
+                return null;
+            }
+
+            return pack.Words.Get(word.Item1)?.Words.Get(word.Item2);
+        }
+
+        return template.Words.Get(word.Item2);
+    }
 
     private List<IDalamudTextureWrap> GlyphImages { get; } = [];
 
@@ -69,6 +103,8 @@ internal class Write : ITab {
 
         var packPrev = Pack.All[this._pack].Name;
         if (ImGui.BeginCombo("Pack", packPrev)) {
+            using var endCombo = new OnDispose(ImGui.EndCombo);
+
             for (var i = 0; i < Pack.All.Length; i++) {
                 var selPack = Pack.All[i];
                 if (!ImGui.Selectable(selPack.Name)) {
@@ -78,8 +114,6 @@ internal class Write : ITab {
                 this._pack = i;
                 this.ResetWriter();
             }
-
-            ImGui.EndCombo();
         }
 
         const string placeholder = "****";
@@ -89,6 +123,8 @@ internal class Write : ITab {
             if (!ImGui.BeginCombo(id, preview)) {
                 return;
             }
+
+            using var endCombo = new OnDispose(ImGui.EndCombo);
 
             if (ImGui.Selectable("<none>")) {
                 x = -1;
@@ -100,11 +136,22 @@ internal class Write : ITab {
                     x = i;
                 }
             }
-
-            ImGui.EndCombo();
         }
 
-        void DrawSpecificWordPicker(string id, WordListTemplate template, ref (int, int) x) {
+        void DrawTemplatePicker(string id, IReadOnlyList<string> items, ref int x, ref (int, int) word) {
+            var wasAdvanced = this.Pack?.Templates[x].Words != null;
+            if (wasAdvanced) {
+                word = (-1, -1);
+            }
+
+            DrawPicker(id, items, ref x);
+        }
+
+        void DrawSpecificWordPicker(string id, Template template, ref (int, int) x) {
+            if (template.Words == null) {
+                return;
+            }
+
             var preview = x == (-1, -1) ? "" : template.Words[x.Item2];
             if (!ImGui.BeginCombo(id, preview)) {
                 return;
@@ -125,22 +172,22 @@ internal class Write : ITab {
                 return;
             }
 
+            using var endCombo = new OnDispose(ImGui.EndCombo);
+
             for (var listIdx = 0; listIdx < words.Count; listIdx++) {
                 var list = words[listIdx];
                 if (!ImGui.BeginMenu(list.Name)) {
                     continue;
                 }
 
+                using var endMenu = new OnDispose(ImGui.EndMenu);
+
                 for (var wordIdx = 0; wordIdx < list.Words.Length; wordIdx++) {
                     if (ImGui.MenuItem(list.Words[wordIdx])) {
                         x = (listIdx, wordIdx);
                     }
                 }
-
-                ImGui.EndMenu();
             }
-
-            ImGui.EndCombo();
         }
 
         var pack = Pack.All[this._pack];
@@ -151,6 +198,8 @@ internal class Write : ITab {
         var actualText = string.Empty;
 
         if (ImGui.BeginTable("##message-preview", 2)) {
+            using var endTable = new OnDispose(ImGui.EndTable);
+
             ImGui.TableSetupColumn("##image", ImGuiTableColumnFlags.WidthFixed);
             ImGui.TableSetupColumn("##message", ImGuiTableColumnFlags.WidthStretch);
             ImGui.TableNextRow();
@@ -163,14 +212,13 @@ internal class Write : ITab {
             if (ImGui.TableSetColumnIndex(1) && this._part1 != -1) {
                 var preview = new StringBuilder();
 
-                var template1 = pack.Templates[this._part1];
-                var wordList1 = template1.Words ?? pack.Words?[this._word1.Item1].Words;
-                var word1 = this._word1 == (-1, -1) ? placeholder : wordList1?[this._word1.Item2];
-                preview.Append(string.Format(template1.Template, word1));
+                var word1 = this.Word1;
+                if (this.Template1 is { } template1Preview && word1 != null) {
+                    preview.Append(string.Format(template1Preview.Text, word1));
+                }
 
-                if (this._conj != -1) {
-                    var conj = pack.Conjunctions?[this._conj];
-                    var isPunc = conj?.Length == 1 && char.IsPunctuation(conj[0]);
+                if (this.Conjunction is { } conj) {
+                    var isPunc = conj.Length == 1 && char.IsPunctuation(conj[0]);
                     if (isPunc) {
                         preview.Append(conj);
                         preview.Append('\n');
@@ -180,11 +228,9 @@ internal class Write : ITab {
                         preview.Append(' ');
                     }
 
-                    if (this._part2 != -1) {
-                        var template2 = pack.Templates[this._part2];
-                        var wordList2 = template2.Words ?? pack.Words?[this._word2.Item1].Words;
-                        var word2 = this._word2 == (-1, -1) ? placeholder : wordList2?[this._word2.Item2];
-                        preview.Append(string.Format(template2.Template, word2));
+                    var word2 = this.Word2;
+                    if (this.Template2 is { } template2Preview && word2 != null) {
+                        preview.Append(string.Format(template2Preview.Text, word2));
                     }
                 }
 
@@ -193,30 +239,20 @@ internal class Write : ITab {
                 ImGui.Dummy(new Vector2(1, imageHeight / 2 - actualSize.Y / 2 - ImGui.GetStyle().ItemSpacing.Y));
                 ImGui.TextUnformatted(actualText);
             }
-
-            ImGui.EndTable();
         }
 
         ImGui.Separator();
 
         var templateStrings = pack.Templates
-            .Select(template => template.Template)
+            .Select(template => template.Text)
             .ToArray();
 
-        DrawPicker("Template##part-1", templateStrings, ref this._part1);
-        if (this._part1 > -1 && pack.Templates[this._part1].Template.Contains("{0}")) {
-            switch (pack.Templates[this._part1]) {
-                case BasicTemplate basic: {
-                    if (pack.Words != null) {
-                        DrawWordPicker("Word##word-1", pack.Words, ref this._word1);
-                    }
-
-                    break;
-                }
-                case WordListTemplate wordListTemplate: {
-                    DrawSpecificWordPicker("Word##word-1", wordListTemplate, ref this._word1);
-                    break;
-                }
+        DrawTemplatePicker("Template##part-1", templateStrings, ref this._part1, ref this._word1);
+        if (this.Template1 is { } template1 && template1.Text.Contains("{0}")) {
+            if (template1.Words == null && pack.Words != null) {
+                DrawWordPicker("Word##word-1", pack.Words, ref this._word1);
+            } else if (template1.Words != null) {
+                DrawSpecificWordPicker("Word##word-1", template1, ref this._word1);
             }
         }
 
@@ -225,25 +261,18 @@ internal class Write : ITab {
         }
 
         if (this._conj != -1) {
-            DrawPicker("Template##part-2", templateStrings, ref this._part2);
-            if (this._part2 > -1 && pack.Templates[this._part2].Template.Contains("{0}")) {
-                switch (pack.Templates[this._part2]) {
-                    case BasicTemplate basic: {
-                        if (pack.Words != null) {
-                            DrawWordPicker("Word##word-2", pack.Words, ref this._word2);
-                        }
-
-                        break;
-                    }
-                    case WordListTemplate wordListTemplate: {
-                        DrawSpecificWordPicker("Word##word-2", wordListTemplate, ref this._word2);
-                        break;
-                    }
+            DrawTemplatePicker("Template##part-2", templateStrings, ref this._part2, ref this._word2);
+            if (this.Template1 is { } template2 && template2.Text.Contains("{0}")) {
+                if (template2.Words == null && pack.Words != null) {
+                    DrawWordPicker("Word##word-2", pack.Words, ref this._word2);
+                } else if (template2.Words != null) {
+                    DrawSpecificWordPicker("Word##word-2", template2, ref this._word2);
                 }
             }
         }
 
         if (ImGui.BeginCombo("Glyph", $"{this._glyph + 1}")) {
+            using var endCombo = new OnDispose(ImGui.EndCombo);
             var tooltipShown = false;
 
             for (var i = 0; i < Messages.VfxPaths.Length; i++) {
@@ -256,13 +285,11 @@ internal class Write : ITab {
                 }
 
                 ImGui.BeginTooltip();
+                using var endTooltip = new OnDispose(ImGui.EndTooltip);
                 var image = this.GlyphImages[i];
                 ImGui.Image(image.ImGuiHandle, new Vector2(imageHeight));
-                ImGui.EndTooltip();
                 tooltipShown = true;
             }
-
-            ImGui.EndCombo();
         }
 
         this.ClearIfNecessary();
@@ -348,7 +375,7 @@ internal class Write : ITab {
 
         var pack = Pack.All[this._pack];
 
-        if (this._part1 == -1 || !pack.Templates[this._part1].Template.Contains("{0}")) {
+        if (this._part1 == -1 || !pack.Templates[this._part1].Text.Contains("{0}")) {
             this._word1 = (-1, -1);
         }
 
@@ -356,7 +383,7 @@ internal class Write : ITab {
             this._part2 = -1;
         }
 
-        if (this._part2 == -1 || !pack.Templates[this._part2].Template.Contains("{0}")) {
+        if (this._part2 == -1 || !pack.Templates[this._part2].Text.Contains("{0}")) {
             this._word2 = (-1, -1);
         }
     }
@@ -368,7 +395,7 @@ internal class Write : ITab {
 
         var pack = Pack.All[this._pack];
         var template1 = pack.Templates[this._part1];
-        var temp1Variable = template1.Template.Contains("{0}");
+        var temp1Variable = template1.Text.Contains("{0}");
 
         switch (temp1Variable) {
             case true when this._word1 == (-1, -1):
@@ -386,7 +413,7 @@ internal class Write : ITab {
             }
 
             var template2 = pack.Templates[this._part2];
-            var temp2Variable = template2.Template.Contains("{0}");
+            var temp2Variable = template2.Text.Contains("{0}");
 
             switch (temp2Variable) {
                 case true when this._word2 == (-1, -1):
