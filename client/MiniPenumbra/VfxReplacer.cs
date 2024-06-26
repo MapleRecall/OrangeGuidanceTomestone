@@ -6,10 +6,10 @@ namespace OrangeGuidanceTomestone.MiniPenumbra;
 internal unsafe class VfxReplacer : IDisposable {
     private delegate byte ReadSqPackDelegate(void* resourceManager, SeFileDescriptor* pFileDesc, int priority, bool isSync);
 
-    [Signature("E8 ?? ?? ?? ?? EB 05 E8 ?? ?? ?? ?? 84 C0 0F 84 ?? 00 00 00 4C 8B C3", DetourName = nameof(ReadSqPackDetour))]
+    [Signature("40 55 56 48 83 EC 28 44 0F BE 12", DetourName = nameof(ReadSqPackDetour))]
     private Hook<ReadSqPackDelegate> _readSqPackHook;
 
-    [Signature("E8 ?? ?? ?? ?? 84 C0 0F 84 ?? 00 00 00 4C 8B C3 BA 05")]
+    [Signature("48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 63 42 28")]
     private delegate* unmanaged<void*, SeFileDescriptor*, int, bool, byte> _readFile;
 
     private Plugin Plugin { get; }
