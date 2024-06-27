@@ -52,12 +52,7 @@ internal class Messages : IDisposable {
         }
     }
 
-    private bool GposeActive {
-        get {
-            var condition = this.Plugin.Condition;
-            return condition[ConditionFlag.WatchingCutscene];
-        }
-    }
+    private bool GposeActive => this.Plugin.ClientState.IsGPosing;
 
     private bool _inCutscene;
     private bool _inGpose;
