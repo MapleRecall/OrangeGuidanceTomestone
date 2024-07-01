@@ -2,7 +2,6 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using OrangeGuidanceTomestone.MiniPenumbra;
-using XivCommon;
 
 namespace OrangeGuidanceTomestone;
 
@@ -13,7 +12,7 @@ public class Plugin : IDalamudPlugin {
     internal static IPluginLog Log { get; private set; }
 
     [PluginService]
-    internal DalamudPluginInterface Interface { get; init; }
+    internal IDalamudPluginInterface Interface { get; init; }
 
     [PluginService]
     internal IChatGui ChatGui { get; init; }
@@ -39,8 +38,10 @@ public class Plugin : IDalamudPlugin {
     [PluginService]
     internal IGameInteropProvider GameInteropProvider { get; init; }
 
+    [PluginService]
+    internal ITextureProvider TextureProvider { get; init; }
+
     internal Configuration Config { get; }
-    internal XivCommonBase Common { get; }
     internal Vfx Vfx { get; }
     internal PluginUi Ui { get; }
     internal Messages Messages { get; }
@@ -54,7 +55,6 @@ public class Plugin : IDalamudPlugin {
         this.AvfxFilePath = this.CopyAvfxFile();
 
         this.Config = this.Interface!.GetPluginConfig() as Configuration ?? new Configuration();
-        this.Common = new XivCommonBase(this.Interface);
         this.Vfx = new Vfx(this);
         this.Messages = new Messages(this);
         this.Ui = new PluginUi(this);
@@ -74,7 +74,6 @@ public class Plugin : IDalamudPlugin {
         this.Ui.Dispose();
         this.Messages.Dispose();
         this.Vfx.Dispose();
-        this.Common.Dispose();
     }
 
     internal void SaveConfig() {
@@ -96,7 +95,7 @@ public class Plugin : IDalamudPlugin {
 
     internal void GetApiKey() {
         Task.Run(async () => {
-            var resp = await new HttpClient().PostAsync("https://tryfingerbuthole.anna.lgbt/account", null);
+            var resp = await new HttpClient().PostAsync("http://192.168.174.246:8080/account", null);
             var key = await resp.Content.ReadAsStringAsync();
             this.Config.ApiKey = key;
             this.SaveConfig();

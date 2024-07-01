@@ -5,6 +5,7 @@ using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
+using OrangeGuidanceTomestone.Util;
 
 namespace OrangeGuidanceTomestone;
 
@@ -178,7 +179,7 @@ internal class Messages : IDisposable {
             return;
         }
 
-        var housing = this.Plugin.Common.Functions.Housing.Location;
+        var housing = HousingLocation.Current();
         var ward = housing?.Ward;
         var plot = housing?.CombinedPlot();
 

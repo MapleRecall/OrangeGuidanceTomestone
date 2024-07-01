@@ -1,7 +1,7 @@
 using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using ImGuiNET;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
@@ -58,13 +58,15 @@ internal class Write : ITab {
     private List<IDalamudTextureWrap> GlyphImages { get; } = [];
 
     private void LoadSignImages() {
-        for (var i = 0; i < Messages.VfxPaths.Length; i++) {
-            var stream = Resourcer.Resource.AsStreamUnChecked($"OrangeGuidanceTomestone.img.sign_{i}.jpg");
-            using var mem = new MemoryStream();
-            stream.CopyTo(mem);
-            var wrap = this.Plugin.Interface.UiBuilder.LoadImage(mem.ToArray());
-            this.GlyphImages.Add(wrap);
-        }
+        Task.Run(async () => {
+            for (var i = 0; i < Messages.VfxPaths.Length; i++) {
+                var stream = Resourcer.Resource.AsStreamUnChecked($"OrangeGuidanceTomestone.img.sign_{i}.jpg");
+                using var mem = new MemoryStream();
+                await stream.CopyToAsync(mem);
+                var wrap = await this.Plugin.TextureProvider.CreateFromImageAsync(mem.ToArray());
+                this.GlyphImages.Add(wrap);
+            }
+        });
     }
 
     internal Write(Plugin plugin) {
@@ -310,11 +312,12 @@ internal class Write : ITab {
                     || this.Plugin.Condition[ConditionFlag.Jumping61]
                     || this.Plugin.Condition[ConditionFlag.InFlight];
         if (ImGui.Button("Write") && valid && !inAir && this.Plugin.ClientState.LocalPlayer is { } player) {
+            var location = HousingLocation.Current();
             var req = new MessageRequest {
                 Territory = this.Plugin.ClientState.TerritoryType,
                 World = this.Plugin.ClientState.LocalPlayer?.CurrentWorld.Id ?? 0,
-                Ward = this.Plugin.Common.Functions.Housing.Location?.Ward,
-                Plot = this.Plugin.Common.Functions.Housing.Location?.CombinedPlot(),
+                Ward = location?.Ward,
+                Plot = location?.CombinedPlot(),
                 X = player.Position.X,
                 Y = player.Position.Y,
                 Z = player.Position.Z,
