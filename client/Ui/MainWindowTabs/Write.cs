@@ -1,7 +1,7 @@
 using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Interface.Textures.TextureWraps;
+using Dalamud.Interface.Textures;
 using ImGuiNET;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
@@ -55,32 +55,21 @@ internal class Write : ITab {
         return template.Words.Get(word.Item2);
     }
 
-    private List<IDalamudTextureWrap> GlyphImages { get; } = [];
-
-    private void LoadSignImages() {
-        Task.Run(async () => {
-            for (var i = 0; i < Messages.VfxPaths.Length; i++) {
-                var stream = Resourcer.Resource.AsStreamUnChecked($"OrangeGuidanceTomestone.img.sign_{i}.jpg");
-                using var mem = new MemoryStream();
-                await stream.CopyToAsync(mem);
-                var wrap = await this.Plugin.TextureProvider.CreateFromImageAsync(mem.ToArray());
-                this.GlyphImages.Add(wrap);
-            }
-        });
-    }
-
     internal Write(Plugin plugin) {
         this.Plugin = plugin;
-        this.LoadSignImages();
 
         this._glyph = this.Plugin.Config.DefaultGlyph;
         Pack.UpdatePacks();
     }
 
     public void Dispose() {
-        foreach (var wrap in this.GlyphImages) {
-            wrap.Dispose();
-        }
+    }
+
+    private ISharedImmediateTexture GetGlyphImage(int i) {
+        return this.Plugin.TextureProvider.GetFromManifestResource(
+            typeof(Plugin).Assembly,
+            $"OrangeGuidanceTomestone.img.sign_{i}.jpg"
+        );
     }
 
     public void Draw() {
@@ -214,8 +203,9 @@ internal class Write : ITab {
             ImGui.TableNextRow();
 
             if (ImGui.TableSetColumnIndex(0)) {
-                var glyphImage = this.GlyphImages[this._glyph];
-                ImGui.Image(glyphImage.ImGuiHandle, new Vector2(imageHeight));
+                var glyphImage = this.GetGlyphImage(this._glyph);
+                var wrap = glyphImage.GetWrapOrEmpty();
+                ImGui.Image(wrap.ImGuiHandle, new Vector2(imageHeight));
             }
 
             if (ImGui.TableSetColumnIndex(1) && this._part1 != -1) {
@@ -295,8 +285,9 @@ internal class Write : ITab {
 
                 ImGui.BeginTooltip();
                 using var endTooltip = new OnDispose(ImGui.EndTooltip);
-                var image = this.GlyphImages[i];
-                ImGui.Image(image.ImGuiHandle, new Vector2(imageHeight));
+                var glyphImage = this.GetGlyphImage(this._glyph);
+                var wrap = glyphImage.GetWrapOrEmpty();
+                ImGui.Image(wrap.ImGuiHandle, new Vector2(imageHeight));
                 tooltipShown = true;
             }
         }
