@@ -285,7 +285,7 @@ internal class Write : ITab {
 
                 ImGui.BeginTooltip();
                 using var endTooltip = new OnDispose(ImGui.EndTooltip);
-                var glyphImage = this.GetGlyphImage(this._glyph);
+                var glyphImage = this.GetGlyphImage(i);
                 var wrap = glyphImage.GetWrapOrEmpty();
                 ImGui.Image(wrap.ImGuiHandle, new Vector2(imageHeight));
                 tooltipShown = true;
