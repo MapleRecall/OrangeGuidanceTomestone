@@ -1,7 +1,7 @@
-name: FINAL FANTASY XIV
-id: 96ec7332-3a16-4688-a814-47d7c3cc4380
-visible: true
-order: 1
+name: FINAL FANTASY XIV (v5)
+id: 378e7ae0-7971-4379-8c82-d9c146d8a3b6
+visible: false
+order: 0
 
 templates:
   - '{0} ahead'
@@ -49,26 +49,16 @@ templates:
   - '{0}...'
 
 conjunctions:
-  - and then
-  - or
-  - but
-  - therefore
-  - in short
-  - except
-  - by the way
-  - so to speak
-  - all the more
-  - and
-  - eventually
-  - because
-  - is
-  - that is to say
-  - also
-  - however
-  - if
-  - then
-  - as it were
-  - only
+  - 'and then'
+  - 'or'
+  - 'but'
+  - 'therefore'
+  - 'eventually'
+  - 'in short'
+  - 'except'
+  - 'by the way'
+  - 'so to speak'
+  - 'all the more'
   - ','
 
 words:
@@ -131,8 +121,6 @@ words:
       - Hingan
       - Ala Mhigan
       - Thavnairian
-      - Tuliyollan
-      - Turali
       - lalafell
       - miqo'te
       - hyur
@@ -262,32 +250,9 @@ words:
       - pelupelu
       - moblin
       - mamool ja
-      - yak huy
-      - hanu hanu
       - goat
       - mameshiba
-      - alpaca
       - loporrit
-
-  - name: Allied Societies
-    words:
-      - The Brotherhood of Ash
-      - The Sylphs of Little Solace
-      - The 789th Order
-      - The Sahagin of Novv's Clutch
-      - The Ehcatl Nine
-      - The Gundu Tribe
-      - The Vath
-      - The Mogmenders of Moghome
-      - The Divine Circle
-      - The Velodyna Gatekeepers
-      - The Seven Hundred Seventy-Seven
-      - The Dreamspinners
-      - The Stewards
-      - The Dwarves of Watt's Anvil
-      - The Hippo Riders
-      - The Last Dregs
-      - The Dreaming Ways
 
   - name: Situations
     words:
@@ -325,7 +290,6 @@ words:
       - Meracydia
       - Garlemald
       - Tural
-      - Tuliyollal
       - the Source
       - the First
       - the Thirteenth
@@ -429,7 +393,6 @@ words:
       - suffering
       - sadness
       - happiness
-      - music
 
   - name: Phrases
     words:
