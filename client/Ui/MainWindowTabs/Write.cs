@@ -283,10 +283,14 @@ internal class Write : ITab {
                     continue;
                 }
 
+                var glyphImage = this.GetGlyphImage(i);
+                if (!glyphImage.TryGetWrap(out var wrap, out _)) {
+                    continue;
+                }
+
                 ImGui.BeginTooltip();
                 using var endTooltip = new OnDispose(ImGui.EndTooltip);
-                var glyphImage = this.GetGlyphImage(i);
-                var wrap = glyphImage.GetWrapOrEmpty();
+
                 ImGui.Image(wrap.ImGuiHandle, new Vector2(imageHeight));
                 tooltipShown = true;
             }
