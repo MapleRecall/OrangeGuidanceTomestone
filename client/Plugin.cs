@@ -95,7 +95,7 @@ public class Plugin : IDalamudPlugin {
 
     internal void GetApiKey() {
         Task.Run(async () => {
-            var resp = await new HttpClient().PostAsync("http://192.168.174.246:8080/account", null);
+            var resp = await new HttpClient().PostAsync("https://tryfingerbuthole.anna.lgbt/account", null);
             var key = await resp.Content.ReadAsStringAsync();
             this.Config.ApiKey = key;
             this.SaveConfig();
