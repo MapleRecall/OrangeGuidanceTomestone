@@ -1,12 +1,13 @@
 using Dalamud.Hooking;
 using Dalamud.Utility.Signatures;
+using FileMode = FFXIVClientStructs.FFXIV.Client.System.File.FileMode;
 
 namespace OrangeGuidanceTomestone.MiniPenumbra;
 
 internal unsafe class VfxReplacer : IDisposable {
     private delegate byte ReadSqPackDelegate(void* resourceManager, SeFileDescriptor* pFileDesc, int priority, bool isSync);
 
-    [Signature("40 55 56 48 83 EC 28 44 0F BE 12", DetourName = nameof(ReadSqPackDetour))]
+    [Signature("40 56 41 56 48 83 EC 28 0F BE 02", DetourName = nameof(ReadSqPackDetour))]
     private Hook<ReadSqPackDelegate> _readSqPackHook;
 
     [Signature("48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 55 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 63 42 28")]
@@ -53,7 +54,7 @@ internal unsafe class VfxReplacer : IDisposable {
         // Specify that we are loading unpacked files from the drive.
         // We need to copy the actual file path in UTF16 (Windows-Unicode) on two locations,
         // but since we only allow ASCII in the game paths, this is just a matter of upcasting.
-        fileDescriptor->FileMode = SeFileMode.LoadUnpackedResource;
+        fileDescriptor->FileMode = FileMode.LoadUnpackedResource;
 
         var fd = stackalloc byte[0x20 + 2 * gamePath.Length + 0x16];
         fileDescriptor->FileDescriptor = fd;
