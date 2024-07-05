@@ -199,7 +199,7 @@ internal class Messages : IDisposable {
             return;
         }
 
-        this.RemoveVfx(null, null);
+        this.RemoveVfx();
 
         Task.Run(async () => {
             try {
@@ -241,10 +241,6 @@ internal class Messages : IDisposable {
         } finally {
             this.CurrentMutex.Release();
         }
-    }
-
-    private void RemoveVfx(object? sender, EventArgs? e) {
-        this.RemoveVfx();
     }
 
     internal void RemoveVfx() {

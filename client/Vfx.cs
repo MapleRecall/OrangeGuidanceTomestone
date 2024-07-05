@@ -1,54 +1,74 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
+using Dalamud.Memory;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility.Signatures;
 
 namespace OrangeGuidanceTomestone;
 
 internal unsafe class Vfx : IDisposable {
-    private static readonly byte[] Pool = "Client.System.Scheduler.Instance.VfxObject"u8.ToArray();
+    private static readonly byte[] Pool = "Client.System.Scheduler.Instance.VfxObject\0"u8.ToArray();
 
     [Signature("E8 ?? ?? ?? ?? F3 0F 10 35 ?? ?? ?? ?? 48 89 43 08")]
     private delegate* unmanaged<byte*, byte*, VfxStruct*> _staticVfxCreate;
 
     [Signature("E8 ?? ?? ?? ?? 8B 4B 7C 85 C9")]
-    private delegate* unmanaged<VfxStruct*, float, uint, ulong> _staticVfxRun;
+    private delegate* unmanaged<VfxStruct*, float, int, ulong> _staticVfxRun;
 
     [Signature("40 53 48 83 EC 20 48 8B D9 48 8B 89 ?? ?? ?? ?? 48 85 C9 74 28 33 D2 E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9")]
-    private delegate* unmanaged<VfxStruct*, void> _staticVfxRemove;
+    private delegate* unmanaged<VfxStruct*, nint> _staticVfxRemove;
 
-    private Dictionary<Guid, IntPtr> Spawned { get; } = new();
+    private Plugin Plugin { get; }
+    private Dictionary<Guid, nint> Spawned { get; } = [];
+    private Queue<nint> RemoveQueue { get; } = [];
+    private bool _disposed;
 
     internal Vfx(Plugin plugin) {
-        plugin.GameInteropProvider.InitializeFromAttributes(this);
+        this.Plugin = plugin;
+
+        this.Plugin.GameInteropProvider.InitializeFromAttributes(this);
+        this.Plugin.Framework.Update += this.OnFrameworkUpdate;
     }
 
     public void Dispose() {
+        if (this._disposed) {
+            return;
+        }
+
+        this._disposed = true;
         this.RemoveAll();
     }
 
-    internal void RemoveAll() {
-        foreach (var spawned in this.Spawned.Values) {
-            this.RemoveStatic((VfxStruct*) spawned);
+    private void OnFrameworkUpdate(IFramework framework) {
+        if (this._disposed && this.RemoveQueue.Count == 0) {
+            this.Plugin.Framework.Update -= this.OnFrameworkUpdate;
         }
 
-        this.Spawned.Clear();
+        if (!this.RemoveQueue.TryDequeue(out var vfx)) {
+            return;
+        }
+
+        if (!this.RemoveStatic((VfxStruct*) vfx)) {
+            this.RemoveQueue.Enqueue(vfx);
+        }
+    }
+
+    internal void RemoveAll() {
+        foreach (var spawned in this.Spawned.Keys.ToArray()) {
+            this.RemoveStatic(spawned);
+        }
     }
 
     internal VfxStruct* SpawnStatic(Guid id, string path, Vector3 pos, Quaternion rotation) {
         VfxStruct* vfx;
-        fixed (byte* p = Encoding.UTF8.GetBytes(path)) {
+        fixed (byte* p = Encoding.UTF8.GetBytes(path).NullTerminate()) {
             fixed (byte* pool = Pool) {
                 vfx = this._staticVfxCreate(p, pool);
             }
         }
 
         if (vfx == null) {
-            return null;
-        }
-
-        if (this._staticVfxRun(vfx, 0.0f, 0xFFFFFFFF) != 0) {
-            this.RemoveStatic(vfx);
             return null;
         }
 
@@ -60,19 +80,29 @@ internal unsafe class Vfx : IDisposable {
         // update
         vfx->Flags |= 2;
 
-        this.Spawned[id] = (IntPtr) vfx;
+        this._staticVfxRun(vfx, 0.0f, -1);
+
+        this.Spawned[id] = (nint) vfx;
 
         return vfx;
     }
 
-    internal void RemoveStatic(VfxStruct* vfx) {
-        this._staticVfxRemove(vfx);
+    internal bool RemoveStatic(VfxStruct* vfx) {
+        var result = this._staticVfxRemove(vfx);
+        var success = result != 0;
+        if (!success) {
+            this.RemoveQueue.Enqueue((nint) vfx);
+        }
+
+        return success;
     }
 
     internal void RemoveStatic(Guid id) {
-        if (this.Spawned.TryGetValue(id, out var vfx)) {
-            this.RemoveStatic((VfxStruct*) vfx);
+        if (!this.Spawned.Remove(id, out var vfx)) {
+            return;
         }
+
+        this.RemoveStatic((VfxStruct*) vfx);
     }
 
     [StructLayout(LayoutKind.Explicit)]
