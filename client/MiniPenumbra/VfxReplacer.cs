@@ -27,6 +27,15 @@ internal unsafe class VfxReplacer : IDisposable {
     }
 
     private byte ReadSqPackDetour(void* resourceManager, SeFileDescriptor* fileDescriptor, int priority, bool isSync) {
+        try {
+            return this.ReadSqPackDetourInner(resourceManager, fileDescriptor, priority, isSync);
+        } catch (Exception ex) {
+            Plugin.Log.Error(ex, "Error in ReadSqPackDetour");
+            return this._readSqPackHook.Original(resourceManager, fileDescriptor, priority, isSync);
+        }
+    }
+
+    private byte ReadSqPackDetourInner(void* resourceManager, SeFileDescriptor* fileDescriptor, int priority, bool isSync) {
         if (!this.Plugin.Config.RemoveGlow) {
             goto Original;
         }
@@ -35,7 +44,12 @@ internal unsafe class VfxReplacer : IDisposable {
             goto Original;
         }
 
-        var path = fileDescriptor->ResourceHandle->FileName.ToString();
+        var fileName = fileDescriptor->ResourceHandle->FileName;
+        if (fileName.BasicString.First == null) {
+            goto Original;
+        }
+
+        var path = fileName.ToString();
         var index = Array.IndexOf(Messages.VfxPaths, path);
         if (index == -1) {
             goto Original;
