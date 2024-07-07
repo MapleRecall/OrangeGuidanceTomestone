@@ -39,8 +39,13 @@ internal class Messages : IDisposable {
     private Plugin Plugin { get; }
 
     private SemaphoreSlim CurrentMutex { get; } = new(1, 1);
-    private Dictionary<Guid, Message> Current { get; } = new();
-    private Queue<Message> SpawnQueue { get; } = new();
+    private Dictionary<Guid, Message> Current { get; } = [];
+    internal IReadOnlyDictionary<Guid, Message> CurrentCloned {
+        get {
+            using var guard = this.CurrentMutex.With();
+            return this.Current.ToDictionary(e => e.Key, e => e.Value);
+        }
+    }
 
     private HashSet<uint> Trials { get; } = [];
     private HashSet<uint> DeepDungeons { get; } = [];
@@ -83,7 +88,6 @@ internal class Messages : IDisposable {
 
         this.Plugin.Framework.Update += this.DetermineIfSpawn;
         this.Plugin.Framework.Update += this.RemoveConditionally;
-        this.Plugin.Framework.Update += this.HandleSpawnQueue;
         this.Plugin.ClientState.TerritoryChanged += this.TerritoryChanged;
         this.Plugin.ClientState.Login += this.SpawnVfx;
         this.Plugin.ClientState.Logout += this.RemoveVfx;
@@ -93,7 +97,6 @@ internal class Messages : IDisposable {
         this.Plugin.ClientState.Logout -= this.RemoveVfx;
         this.Plugin.ClientState.Login -= this.SpawnVfx;
         this.Plugin.ClientState.TerritoryChanged -= this.TerritoryChanged;
-        this.Plugin.Framework.Update -= this.HandleSpawnQueue;
         this.Plugin.Framework.Update -= this.RemoveConditionally;
         this.Plugin.Framework.Update -= this.DetermineIfSpawn;
 
@@ -152,20 +155,6 @@ internal class Messages : IDisposable {
 
         this._inCutscene = nowCutscene;
         this._inGpose = nowGpose;
-    }
-
-    private unsafe void HandleSpawnQueue(IFramework framework) {
-        if (!this.SpawnQueue.TryDequeue(out var message)) {
-            return;
-        }
-
-        Plugin.Log.Debug($"spawning vfx for {message.Id}");
-        var rotation = Quaternion.CreateFromYawPitchRoll(message.Yaw, 0, 0);
-        var path = GetPath(this.Plugin.DataManager, message);
-        if (this.Plugin.Vfx.SpawnStatic(message.Id, path, message.Position, rotation) == null) {
-            Plugin.Log.Debug("trying again");
-            this.SpawnQueue.Enqueue(message);
-        }
     }
 
     internal void SpawnVfx() {
@@ -236,7 +225,9 @@ internal class Messages : IDisposable {
 
             foreach (var message in messages) {
                 this.Current[message.Id] = message;
-                this.SpawnQueue.Enqueue(message);
+                var path = GetPath(this.Plugin.DataManager, message);
+                var rotation = Quaternion.CreateFromYawPitchRoll(message.Yaw, 0, 0);
+                this.Plugin.Vfx.QueueSpawn(message.Id, path, message.Position, rotation);
             }
         } finally {
             this.CurrentMutex.Release();
@@ -244,7 +235,7 @@ internal class Messages : IDisposable {
     }
 
     internal void RemoveVfx() {
-        this.Plugin.Vfx.RemoveAll();
+        this.Plugin.Vfx.QueueRemoveAll();
     }
 
     internal void Clear() {
@@ -287,7 +278,9 @@ internal class Messages : IDisposable {
             this.CurrentMutex.Release();
         }
 
-        this.SpawnQueue.Enqueue(message);
+        var path = GetPath(this.Plugin.DataManager, message);
+        var rotation = Quaternion.CreateFromYawPitchRoll(message.Yaw, 0, 0);
+        this.Plugin.Vfx.QueueSpawn(message.Id, path, message.Position, rotation);
     }
 
     internal void Remove(Guid id) {

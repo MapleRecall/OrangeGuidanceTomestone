@@ -1,3 +1,4 @@
+using Dalamud.Interface.Utility;
 using ImGuiNET;
 using OrangeGuidanceTomestone.Ui;
 
@@ -9,6 +10,11 @@ public class PluginUi : IDisposable {
     internal MainWindow MainWindow { get; }
     internal Viewer Viewer { get; }
     internal ViewerButton ViewerButton { get; }
+    #if DEBUG
+    internal bool Debug = true;
+    #else
+    internal bool Debug;
+    #endif
 
     private List<(string, string)> Modals { get; } = [];
     private Queue<string> ToShow { get; } = new();
@@ -33,6 +39,10 @@ public class PluginUi : IDisposable {
     }
 
     private void Draw() {
+        if (this.Debug) {
+            this.DrawDebug();
+        }
+
         this.MainWindow.Draw();
         this.ViewerButton.Draw();
         this.Viewer.Draw();
@@ -79,5 +89,24 @@ public class PluginUi : IDisposable {
     internal void ShowModal(string id, string text) {
         this.Modals.Add((id, text));
         this.ToShow.Enqueue(id);
+    }
+
+    private void DrawDebug() {
+        foreach (var msg in this.Plugin.Messages.CurrentCloned.Values) {
+            if (!this.Plugin.GameGui.WorldToScreen(msg.Position, out var screen)) {
+                continue;
+            }
+
+            ImGui.GetBackgroundDrawList().AddCircleFilled(screen, 6f * ImGuiHelpers.GlobalScale, 0xff0000ff);
+
+            var label = msg.Id.ToString("N");
+            var size = ImGui.CalcTextSize(label);
+            ImGui.GetBackgroundDrawList().AddRectFilled(
+                screen,
+                screen + size,
+                0xff000000
+            );
+            ImGui.GetForegroundDrawList().AddText(screen, 0xffffffff, label);
+        }
     }
 }

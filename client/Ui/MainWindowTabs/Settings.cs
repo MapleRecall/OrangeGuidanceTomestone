@@ -38,6 +38,7 @@ internal class Settings : ITab {
             ("Viewer", this.DrawViewer),
             ("Unlocks", this.DrawUnlocks),
             ("Account", this.DrawAccount),
+            ("Debug", this.DrawDebug),
         };
     }
 
@@ -225,6 +226,10 @@ internal class Settings : ITab {
 
     private void DrawAccount(ref bool anyChanged, ref bool vfx) {
         this.DeleteAccountButton();
+    }
+
+    private void DrawDebug(ref bool anyChanged, ref bool vfx) {
+        ImGui.Checkbox("Show debug information", ref this.Plugin.Ui.Debug);
     }
 
     private void ExtraCodeInput() {

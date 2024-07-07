@@ -187,7 +187,7 @@ internal class MessageList : ITab {
 
             if (resp.IsSuccessStatusCode) {
                 this.Refresh();
-                this.Plugin.Vfx.RemoveStatic(id);
+                this.Plugin.Vfx.QueueRemove(id);
                 this.Plugin.Messages.Remove(id);
             }
         });

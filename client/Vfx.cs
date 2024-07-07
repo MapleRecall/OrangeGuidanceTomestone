@@ -4,6 +4,7 @@ using System.Text;
 using Dalamud.Memory;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility.Signatures;
+using OrangeGuidanceTomestone.Util;
 
 namespace OrangeGuidanceTomestone;
 
@@ -11,24 +12,30 @@ internal unsafe class Vfx : IDisposable {
     private static readonly byte[] Pool = "Client.System.Scheduler.Instance.VfxObject\0"u8.ToArray();
 
     [Signature("E8 ?? ?? ?? ?? F3 0F 10 35 ?? ?? ?? ?? 48 89 43 08")]
-    private delegate* unmanaged<byte*, byte*, VfxStruct*> _staticVfxCreate;
+    private readonly delegate* unmanaged<byte*, byte*, VfxStruct*> _staticVfxCreate;
 
     [Signature("E8 ?? ?? ?? ?? 8B 4B 7C 85 C9")]
-    private delegate* unmanaged<VfxStruct*, float, int, ulong> _staticVfxRun;
+    private readonly delegate* unmanaged<VfxStruct*, float, int, ulong> _staticVfxRun;
 
     [Signature("40 53 48 83 EC 20 48 8B D9 48 8B 89 ?? ?? ?? ?? 48 85 C9 74 28 33 D2 E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9")]
-    private delegate* unmanaged<VfxStruct*, nint> _staticVfxRemove;
+    private readonly delegate* unmanaged<VfxStruct*, nint> _staticVfxRemove;
 
     private Plugin Plugin { get; }
+    private SemaphoreSlim Mutex { get; } = new(1, 1);
     private Dictionary<Guid, nint> Spawned { get; } = [];
-    private Queue<nint> RemoveQueue { get; } = [];
+    private Queue<IQueueAction> Queue { get; } = [];
     private bool _disposed;
+
+    private enum Mode {
+        Add,
+        Remove,
+    }
 
     internal Vfx(Plugin plugin) {
         this.Plugin = plugin;
 
         this.Plugin.GameInteropProvider.InitializeFromAttributes(this);
-        this.Plugin.Framework.Update += this.OnFrameworkUpdate;
+        this.Plugin.Framework.Update += this.HandleQueues;
     }
 
     public void Dispose() {
@@ -37,30 +44,77 @@ internal unsafe class Vfx : IDisposable {
         }
 
         this._disposed = true;
-        this.RemoveAll();
+        this.Plugin.Framework.Update -= this.HandleQueues;
+        this.RemoveAllSync();
     }
 
-    private void OnFrameworkUpdate(IFramework framework) {
-        if (this._disposed && this.RemoveQueue.Count == 0) {
-            this.Plugin.Framework.Update -= this.OnFrameworkUpdate;
-        }
-
-        if (!this.RemoveQueue.TryDequeue(out var vfx)) {
+    private void HandleQueues(IFramework framework) {
+        if (!this.Queue.TryDequeue(out var action)) {
             return;
         }
 
-        if (!this.RemoveStatic((VfxStruct*) vfx)) {
-            this.RemoveQueue.Enqueue(vfx);
+        switch (action) {
+            case AddQueueAction add: {
+                using var guard = this.Mutex.With();
+                Plugin.Log.Debug($"adding vfx for {add.Id}");
+                if (this.Spawned.Remove(add.Id, out var existing)) {
+                    Plugin.Log.Warning($"vfx for {add.Id} already exists, queuing remove");
+                    this.Queue.Enqueue(new RemoveRawQueueAction(existing));
+                }
+
+                var vfx = this.SpawnStatic(add.Id, add.Path, add.Position, add.Rotation);
+                this.Spawned[add.Id] = (nint) vfx;
+                break;
+            }
+
+            case RemoveQueueAction remove: {
+                using var guard = this.Mutex.With();
+                Plugin.Log.Debug($"removing vfx for {remove.Id}");
+                if (!this.Spawned.Remove(remove.Id, out var ptr)) {
+                    break;
+                }
+
+                this.RemoveStatic((VfxStruct*) ptr);
+                break;
+            };
+
+            case RemoveRawQueueAction remove: {
+                Plugin.Log.Debug($"removing raw vfx at {remove.Pointer:X}");
+                this.RemoveStatic((VfxStruct*) remove.Pointer);
+                break;
+            }
         }
     }
 
-    internal void RemoveAll() {
-        foreach (var spawned in this.Spawned.Keys.ToArray()) {
-            this.RemoveStatic(spawned);
+    internal void RemoveAllSync() {
+        using var guard = this.Mutex.With();
+
+        foreach (var spawned in this.Spawned.Values.ToArray()) {
+            this.RemoveStatic((VfxStruct*) spawned);
+        }
+
+        this.Spawned.Clear();
+    }
+
+    internal void QueueSpawn(Guid id, string path, Vector3 pos, Quaternion rotation) {
+        using var guard = this.Mutex.With();
+        this.Queue.Enqueue(new AddQueueAction(id, path, pos, rotation));
+    }
+
+    internal void QueueRemove(Guid id) {
+        using var guard = this.Mutex.With();
+        this.Queue.Enqueue(new RemoveQueueAction(id));
+    }
+
+    internal void QueueRemoveAll() {
+        using var guard = this.Mutex.With();
+
+        foreach (var id in this.Spawned.Keys) {
+            this.Queue.Enqueue(new RemoveQueueAction(id));
         }
     }
 
-    internal VfxStruct* SpawnStatic(Guid id, string path, Vector3 pos, Quaternion rotation) {
+    private VfxStruct* SpawnStatic(Guid id, string path, Vector3 pos, Quaternion rotation) {
         VfxStruct* vfx;
         fixed (byte* p = Encoding.UTF8.GetBytes(path).NullTerminate()) {
             fixed (byte* pool = Pool) {
@@ -82,27 +136,11 @@ internal unsafe class Vfx : IDisposable {
 
         this._staticVfxRun(vfx, 0.0f, -1);
 
-        this.Spawned[id] = (nint) vfx;
-
         return vfx;
     }
 
-    internal bool RemoveStatic(VfxStruct* vfx) {
-        var result = this._staticVfxRemove(vfx);
-        var success = result != 0;
-        if (!success) {
-            this.RemoveQueue.Enqueue((nint) vfx);
-        }
-
-        return success;
-    }
-
-    internal void RemoveStatic(Guid id) {
-        if (!this.Spawned.Remove(id, out var vfx)) {
-            return;
-        }
-
-        this.RemoveStatic((VfxStruct*) vfx);
+    private void RemoveStatic(VfxStruct* vfx) {
+        this._staticVfxRemove(vfx);
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -132,3 +170,16 @@ internal unsafe class Vfx : IDisposable {
         public int StaticTarget;
     }
 }
+
+internal interface IQueueAction;
+
+internal sealed record AddQueueAction(
+    Guid Id,
+    string Path,
+    Vector3 Position,
+    Quaternion Rotation
+) : IQueueAction;
+
+internal sealed record RemoveQueueAction(Guid Id) : IQueueAction;
+
+internal sealed record RemoveRawQueueAction(nint Pointer) : IQueueAction;
