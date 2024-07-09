@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -21,15 +22,11 @@ internal unsafe class Vfx : IDisposable {
     private readonly delegate* unmanaged<VfxStruct*, nint> _staticVfxRemove;
 
     private Plugin Plugin { get; }
-    private SemaphoreSlim Mutex { get; } = new(1, 1);
-    private Dictionary<Guid, nint> Spawned { get; } = [];
+    internal SemaphoreSlim Mutex { get; } = new(1, 1);
+    internal Dictionary<Guid, nint> Spawned { get; } = [];
     private Queue<IQueueAction> Queue { get; } = [];
     private bool _disposed;
-
-    private enum Mode {
-        Add,
-        Remove,
-    }
+    private readonly Stopwatch _queueTimer = Stopwatch.StartNew();
 
     internal Vfx(Plugin plugin) {
         this.Plugin = plugin;
@@ -49,39 +46,44 @@ internal unsafe class Vfx : IDisposable {
     }
 
     private void HandleQueues(IFramework framework) {
-        if (!this.Queue.TryDequeue(out var action)) {
-            return;
-        }
+        this._queueTimer.Restart();
 
-        switch (action) {
-            case AddQueueAction add: {
-                using var guard = this.Mutex.With();
-                Plugin.Log.Debug($"adding vfx for {add.Id}");
-                if (this.Spawned.Remove(add.Id, out var existing)) {
-                    Plugin.Log.Warning($"vfx for {add.Id} already exists, queuing remove");
-                    this.Queue.Enqueue(new RemoveRawQueueAction(existing));
-                }
-
-                var vfx = this.SpawnStatic(add.Id, add.Path, add.Position, add.Rotation);
-                this.Spawned[add.Id] = (nint) vfx;
-                break;
+        while (this._queueTimer.Elapsed < TimeSpan.FromMilliseconds(1)) {
+            if (!this.Queue.TryDequeue(out var action)) {
+                return;
             }
 
-            case RemoveQueueAction remove: {
-                using var guard = this.Mutex.With();
-                Plugin.Log.Debug($"removing vfx for {remove.Id}");
-                if (!this.Spawned.Remove(remove.Id, out var ptr)) {
+            switch (action) {
+                case AddQueueAction add: {
+                    using var guard = this.Mutex.With();
+                    Plugin.Log.Debug($"adding vfx for {add.Id}");
+                    if (this.Spawned.Remove(add.Id, out var existing)) {
+                        Plugin.Log.Warning($"vfx for {add.Id} already exists, queuing remove");
+                        this.Queue.Enqueue(new RemoveRawQueueAction(existing));
+                    }
+
+                    var vfx = this.SpawnStatic(add.Path, add.Position, add.Rotation);
+                    this.Spawned[add.Id] = (nint) vfx;
                     break;
                 }
 
-                this.RemoveStatic((VfxStruct*) ptr);
-                break;
-            };
+                case RemoveQueueAction remove: {
+                    using var guard = this.Mutex.With();
+                    Plugin.Log.Debug($"removing vfx for {remove.Id}");
+                    if (!this.Spawned.Remove(remove.Id, out var ptr)) {
+                        break;
+                    }
 
-            case RemoveRawQueueAction remove: {
-                Plugin.Log.Debug($"removing raw vfx at {remove.Pointer:X}");
-                this.RemoveStatic((VfxStruct*) remove.Pointer);
-                break;
+                    this.RemoveStatic((VfxStruct*) ptr);
+                    break;
+                }
+                    ;
+
+                case RemoveRawQueueAction remove: {
+                    Plugin.Log.Debug($"removing raw vfx at {remove.Pointer:X}");
+                    this.RemoveStatic((VfxStruct*) remove.Pointer);
+                    break;
+                }
             }
         }
     }
@@ -114,7 +116,7 @@ internal unsafe class Vfx : IDisposable {
         }
     }
 
-    private VfxStruct* SpawnStatic(Guid id, string path, Vector3 pos, Quaternion rotation) {
+    private VfxStruct* SpawnStatic(string path, Vector3 pos, Quaternion rotation) {
         VfxStruct* vfx;
         fixed (byte* p = Encoding.UTF8.GetBytes(path).NullTerminate()) {
             fixed (byte* pool = Pool) {
@@ -130,6 +132,9 @@ internal unsafe class Vfx : IDisposable {
         vfx->Position = new Vector3(pos.X, pos.Y, pos.Z);
         // update rotation
         vfx->Rotation = new Quaternion(rotation.X, rotation.Y, rotation.Z, rotation.W);
+
+        // remove flag that sometimes causes vfx to not appear?
+        vfx->SomeFlags &= 0xF7;
 
         // update
         vfx->Flags |= 2;
@@ -168,6 +173,9 @@ internal unsafe class Vfx : IDisposable {
 
         [FieldOffset(0x1C0)]
         public int StaticTarget;
+
+        [FieldOffset(0x248)]
+        public byte SomeFlags;
     }
 }
 

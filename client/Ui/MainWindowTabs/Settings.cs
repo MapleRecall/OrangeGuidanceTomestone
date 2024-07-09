@@ -4,6 +4,7 @@ using Dalamud.Utility;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using OrangeGuidanceTomestone.Helpers;
+using OrangeGuidanceTomestone.Util;
 
 namespace OrangeGuidanceTomestone.Ui.MainWindowTabs;
 
@@ -21,6 +22,7 @@ internal class Settings : ITab {
     private IReadOnlyList<(string, DrawSettingsDelegate)> Tabs { get; }
 
     private string _filter = string.Empty;
+    private string _debugFilter = string.Empty;
 
     internal Settings(Plugin plugin) {
         this.Plugin = plugin;
@@ -230,6 +232,47 @@ internal class Settings : ITab {
 
     private void DrawDebug(ref bool anyChanged, ref bool vfx) {
         ImGui.Checkbox("Show debug information", ref this.Plugin.Ui.Debug);
+
+        ImGui.InputText("Filter", ref this._debugFilter, 64);
+
+        if (ImGui.BeginTable("###debug-info", 2)) {
+            using var endTable = new OnDispose(ImGui.EndTable);
+
+            ImGui.TableSetupColumn("ID", ImGuiTableColumnFlags.WidthStretch);
+            ImGui.TableSetupColumn("VFX pointer");
+            ImGui.TableHeadersRow();
+
+            using var guard = this.Plugin.Vfx.Mutex.With();
+            foreach (var (id, ptr) in this.Plugin.Vfx.Spawned) {
+                var idLabel = id.ToString("N");
+                var ptrLabel = ptr.ToString("X");
+
+                if (!string.IsNullOrWhiteSpace(this._debugFilter)) {
+                    if (
+                        !idLabel.Contains(this._debugFilter, StringComparison.CurrentCultureIgnoreCase)
+                        && !ptrLabel.Contains(this._debugFilter, StringComparison.CurrentCultureIgnoreCase)
+                    ) {
+                        continue;
+                    }
+                }
+
+                ImGui.TableNextRow();
+
+                if (ImGui.TableSetColumnIndex(0)) {
+                    ImGui.TextUnformatted(id.ToString("N"));
+                    if (ImGui.IsItemClicked()) {
+                        ImGui.SetClipboardText(id.ToString("N"));
+                    }
+                }
+
+                if (ImGui.TableSetColumnIndex(1)) {
+                    ImGui.TextUnformatted(ptr.ToString("X"));
+                    if (ImGui.IsItemClicked()) {
+                        ImGui.SetClipboardText(ptr.ToString("X"));
+                    }
+                }
+            }
+        }
     }
 
     private void ExtraCodeInput() {

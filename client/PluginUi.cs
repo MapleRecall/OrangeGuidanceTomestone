@@ -1,3 +1,4 @@
+using System.Numerics;
 using Dalamud.Interface.Utility;
 using ImGuiNET;
 using OrangeGuidanceTomestone.Ui;
@@ -102,11 +103,11 @@ public class PluginUi : IDisposable {
             var label = msg.Id.ToString("N");
             var size = ImGui.CalcTextSize(label);
             ImGui.GetBackgroundDrawList().AddRectFilled(
-                screen,
-                screen + size,
+                screen - Vector2.One * 4 * ImGuiHelpers.GlobalScale,
+                screen + size + Vector2.One * 4 * ImGuiHelpers.GlobalScale,
                 0xff000000
             );
-            ImGui.GetForegroundDrawList().AddText(screen, 0xffffffff, label);
+            ImGui.GetBackgroundDrawList().AddText(screen, 0xffffffff, label);
         }
     }
 }
