@@ -138,6 +138,7 @@ internal class Messages : IDisposable {
         if (this.Plugin.Config.DisableInCutscene && cutsceneChanged) {
             if (nowCutscene) {
                 this.RemoveVfx();
+                this.Clear();
             } else {
                 this.SpawnVfx();
             }
@@ -148,6 +149,7 @@ internal class Messages : IDisposable {
         if (this.Plugin.Config.DisableInGpose && gposeChanged) {
             if (nowGpose) {
                 this.RemoveVfx();
+                this.Clear();
             } else {
                 this.SpawnVfx();
             }
