@@ -171,6 +171,7 @@ internal class Write : ITab {
                 return;
             }
 
+            ImGui.SetNextWindowSizeConstraints(new Vector2(100 * ImGuiHelpers.GlobalScale, 0), new Vector2(float.MaxValue));
             var preview = x == (-1, -1) ? "" : template.Words[x.Item2];
             if (!ImGui.BeginCombo(id, preview)) {
                 return;
@@ -207,6 +208,7 @@ internal class Write : ITab {
 
             for (var listIdx = 0; listIdx < words.Count; listIdx++) {
                 var list = words[listIdx];
+                ImGui.SetNextWindowSizeConstraints(new Vector2(100 * ImGuiHelpers.GlobalScale, 0), new Vector2(float.MaxValue));
                 if (!ImGui.BeginMenu(list.Name)) {
                     continue;
                 }

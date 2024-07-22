@@ -19,6 +19,7 @@ public class Configuration : IPluginConfiguration {
     public bool ClickThroughViewer;
     public bool HideTitlebar;
     public bool ShowEmotes = true;
+    public float EmoteAlpha = 25.0f;
     public float ViewerOpacity = 100.0f;
     public int DefaultGlyph = 3;
 }

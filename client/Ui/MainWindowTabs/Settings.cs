@@ -121,7 +121,6 @@ internal class Settings : ITab {
         anyChanged |= vfx |= ImGui.Checkbox("Disable in cutscenes", ref this.Plugin.Config.DisableInCutscene);
         anyChanged |= vfx |= ImGui.Checkbox("Disable in /gpose", ref this.Plugin.Config.DisableInGpose);
         anyChanged |= vfx |= ImGui.Checkbox("Remove glow effect from signs", ref this.Plugin.Config.RemoveGlow);
-        anyChanged |= ImGui.Checkbox("Show player emotes", ref this.Plugin.Config.ShowEmotes);
 
         var tt = this.Plugin.DataManager.GetExcelSheet<TerritoryType>();
         if (tt == null) {
@@ -221,6 +220,9 @@ internal class Settings : ITab {
 
         anyChanged |= ImGui.Checkbox("Lock viewer in place", ref this.Plugin.Config.LockViewer);
         anyChanged |= ImGui.Checkbox("Click through viewer", ref this.Plugin.Config.ClickThroughViewer);
+
+        anyChanged |= ImGui.Checkbox("Show player emotes", ref this.Plugin.Config.ShowEmotes);
+        anyChanged |= ImGui.SliderFloat("Player emote opacity", ref this.Plugin.Config.EmoteAlpha, 0f, 100f, "%.2f%%");
     }
 
     private void DrawUnlocks(ref bool anyChanged, ref bool vfx) {

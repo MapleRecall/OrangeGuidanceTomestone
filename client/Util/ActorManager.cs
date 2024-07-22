@@ -13,11 +13,13 @@ internal class ActorManager : IDisposable {
     internal ActorManager(Plugin plugin) {
         this.Plugin = plugin;
         this.Plugin.Framework.Update += this.OnFramework;
+        this.Plugin.ClientState.TerritoryChanged += this.OnTerritoryChange;
         this.Plugin.Ui.Viewer.View += this.OnView;
     }
 
     public void Dispose() {
         this.Plugin.Ui.Viewer.View -= this.OnView;
+        this.Plugin.ClientState.TerritoryChanged -= this.OnTerritoryChange;
         this.Plugin.Framework.Update -= this.OnFramework;
 
         if (this._idx != null) {
@@ -52,6 +54,10 @@ internal class ActorManager : IDisposable {
         if (success) {
             this._tasks.Dequeue();
         }
+    }
+
+    private void OnTerritoryChange(ushort obj) {
+        this._idx = null;
     }
 
     private void OnView(Message? message) {
@@ -145,6 +151,12 @@ internal class ActorManager : IDisposable {
                 rawCustomise[i] = emote.Customise[i];
             }
 
+            // check if data is valid to prevent crashes
+            if (!(&drawData->CustomizeData)->NormalizeCustomizeData(&drawData->CustomizeData)) {
+                drawData->CustomizeData = new CustomizeData();
+            }
+
+            // weapon and equipment values don't cause crashes, just transparent body parts
             for (var i = 0; i < Math.Min(drawData->EquipmentModelIds.Length, emote.Equipment.Length); i++) {
                 var equip = emote.Equipment[i];
                 drawData->Equipment((DrawDataContainer.EquipmentSlot) i) = new EquipmentModelId {
@@ -177,7 +189,7 @@ internal class ActorManager : IDisposable {
 
             drawData->SetGlasses(0, (ushort) emote.Glasses);
 
-            chara->Alpha = 0.25f;
+            chara->Alpha = Math.Clamp(manager.Plugin.Config.EmoteAlpha / 100, 0, 1);
             chara->SetMode(CharacterModes.AnimLock, 0);
             if (emoteRow != null) {
                 chara->Timeline.BaseOverride = (ushort) emoteRow.ActionTimeline[0].Row;
@@ -235,7 +247,6 @@ internal class ActorManager : IDisposable {
                 return true;
             }
 
-            objMan->DeleteObjectByIndex((ushort) idx, 0);
             manager._idx = null;
             return true;
         }
