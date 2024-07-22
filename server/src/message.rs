@@ -106,8 +106,8 @@ pub struct OwnMessage {
 pub struct EmoteData {
     pub id: u32,
     pub customise: Vec<u8>,
-    pub equipment_data: Vec<EquipmentData>,
-    pub weapon_data: Vec<WeaponData>,
+    pub equipment: Vec<EquipmentData>,
+    pub weapon: Vec<WeaponData>,
     pub glasses: u32,
     pub hat_hidden: bool,
     pub visor_toggled: bool,
@@ -120,7 +120,6 @@ pub struct EquipmentData {
     pub variant: u8,
     pub stain_0: u8,
     pub stain_1: u8,
-    pub value: u64,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -138,5 +137,4 @@ pub struct WeaponModelId {
     pub variant: u16,
     pub stain_0: u8,
     pub stain_1: u8,
-    pub value: u64,
 }

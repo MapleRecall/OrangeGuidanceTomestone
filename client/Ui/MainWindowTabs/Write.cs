@@ -29,6 +29,9 @@ internal class Write : ITab {
     private (int, int) _word2 = (-1, -1);
     private int _glyph;
     private int _emoteIdx = -1;
+
+    private string _word1Search = string.Empty;
+    private string _word2Search = string.Empty;
     private string _emoteSearch = string.Empty;
 
     private const string Placeholder = "****";
@@ -69,10 +72,12 @@ internal class Write : ITab {
     internal Write(Plugin plugin) {
         this.Plugin = plugin;
 
-        this.Emotes = this.Plugin.DataManager.GetExcelSheet<Emote>()!
-            .Skip(1)
-            .Where(emote => emote.TextCommand.Row != 0)
-            .ToList();
+        this.Emotes = [
+            .. this.Plugin.DataManager.GetExcelSheet<Emote>()!
+                .Skip(1)
+                .Where(emote => emote.TextCommand.Row != 0)
+                .OrderBy(emote => emote.Order)
+        ];
 
         this._glyph = this.Plugin.Config.DefaultGlyph;
         Pack.UpdatePacks();
@@ -161,7 +166,7 @@ internal class Write : ITab {
             }
         }
 
-        void DrawSpecificWordPicker(string id, Template template, ref (int, int) x) {
+        void DrawSpecificWordPicker(string id, Template template, ref (int, int) x, ref string search) {
             if (template.Words == null) {
                 return;
             }
@@ -171,16 +176,21 @@ internal class Write : ITab {
                 return;
             }
 
+            using var endCombo = new OnDispose(ImGui.EndCombo);
+
             for (var wordIdx = 0; wordIdx < template.Words.Length; wordIdx++) {
-                if (ImGui.Selectable(template.Words[wordIdx], x == (-1, wordIdx))) {
+                var word = template.Words[wordIdx];
+                if (!string.IsNullOrEmpty(search) && !word.Contains(search, StringComparison.InvariantCultureIgnoreCase)) {
+                    continue;
+                }
+
+                if (ImGui.Selectable(word, x == (-1, wordIdx))) {
                     x = (-1, wordIdx);
                 }
             }
-
-            ImGui.EndCombo();
         }
 
-        void DrawWordPicker(string id, IReadOnlyList<WordList> words, ref (int, int) x) {
+        void DrawWordPicker(string id, IReadOnlyList<WordList> words, ref (int, int) x, ref string search) {
             var preview = x == (-1, -1) ? "" : words[x.Item1].Words[x.Item2];
             if (!ImGui.BeginCombo(id, preview)) {
                 return;
@@ -196,8 +206,15 @@ internal class Write : ITab {
 
                 using var endMenu = new OnDispose(ImGui.EndMenu);
 
+                ImGui.InputText("###word-search", ref search, 100);
+
                 for (var wordIdx = 0; wordIdx < list.Words.Length; wordIdx++) {
-                    if (ImGui.MenuItem(list.Words[wordIdx])) {
+                    var word = list.Words[wordIdx];
+                    if (!string.IsNullOrEmpty(search) && !word.Contains(search, StringComparison.InvariantCultureIgnoreCase)) {
+                        continue;
+                    }
+
+                    if (ImGui.MenuItem(word)) {
                         x = (listIdx, wordIdx);
                     }
                 }
@@ -265,9 +282,9 @@ internal class Write : ITab {
         DrawTemplatePicker("Template##part-1", templateStrings, ref this._part1, ref this._word1);
         if (this.Template1 is { } template1 && template1.Text.Contains("{0}")) {
             if (template1.Words == null && pack.Words != null) {
-                DrawWordPicker("Word##word-1", pack.Words, ref this._word1);
+                DrawWordPicker("Word##word-1", pack.Words, ref this._word1, ref this._word1Search);
             } else if (template1.Words != null) {
-                DrawSpecificWordPicker("Word##word-1", template1, ref this._word1);
+                DrawSpecificWordPicker("Word##word-1", template1, ref this._word1, ref this._word1Search);
             }
         }
 
@@ -279,9 +296,9 @@ internal class Write : ITab {
             DrawTemplatePicker("Template##part-2", templateStrings, ref this._part2, ref this._word2);
             if (this.Template1 is { } template2 && template2.Text.Contains("{0}")) {
                 if (template2.Words == null && pack.Words != null) {
-                    DrawWordPicker("Word##word-2", pack.Words, ref this._word2);
+                    DrawWordPicker("Word##word-2", pack.Words, ref this._word2, ref this._word2Search);
                 } else if (template2.Words != null) {
-                    DrawSpecificWordPicker("Word##word-2", template2, ref this._word2);
+                    DrawSpecificWordPicker("Word##word-2", template2, ref this._word2, ref this._word2Search);
                 }
             }
         }
@@ -336,15 +353,14 @@ internal class Write : ITab {
 
                 for (var i = 0; i < this.Emotes.Count; i++) {
                     var emote = this.Emotes[i];
+                    var name = emote.Name.ToDalamudString().TextValue;
                     if (!string.IsNullOrEmpty(this._emoteSearch)) {
-                        if (!emote.Name.ToDalamudString().TextValue.Contains(this._emoteSearch, StringComparison.InvariantCultureIgnoreCase)) {
+                        if (!name.Contains(this._emoteSearch, StringComparison.InvariantCultureIgnoreCase)) {
                             if (!emote.TextCommand.Value!.Command.ToDalamudString().TextValue.Contains(this._emoteSearch, StringComparison.InvariantCultureIgnoreCase)) {
                                 continue;
                             }
                         }
                     }
-
-                    var name = emote.Name.ToDalamudString().TextValue;
 
                     var unlocked = IsEmoteUnlocked(emote);
                     if (!unlocked) {
@@ -451,7 +467,6 @@ internal class Write : ITab {
                     Variant = equip.Variant,
                     Stain0 = equip.Stain0,
                     Stain1 = equip.Stain1,
-                    Value = equip.Value,
                 })
                 .ToArray(),
             Weapon = chara->DrawData.WeaponData
@@ -463,7 +478,6 @@ internal class Write : ITab {
                         Variant = weapon.ModelId.Variant,
                         Stain0 = weapon.ModelId.Stain0,
                         Stain1 = weapon.ModelId.Stain1,
-                        Value = weapon.ModelId.Value,
                     },
                     Flags1 = weapon.Flags1,
                     Flags2 = weapon.Flags2,
@@ -488,6 +502,8 @@ internal class Write : ITab {
         this._glyph = this.Plugin.Config.DefaultGlyph;
         this._emoteIdx = -1;
         this._emoteSearch = string.Empty;
+        this._word1Search = string.Empty;
+        this._word2Search = string.Empty;
     }
 
     private void ClearIfNecessary() {

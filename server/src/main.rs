@@ -112,7 +112,6 @@ async fn main() -> Result<()> {
 
     spawn_command_reader(Arc::clone(&state), Handle::current());
 
-
     let address = state.config.address.clone();
     let server = warp::serve(web::routes(state));
     println!("listening at {address}");

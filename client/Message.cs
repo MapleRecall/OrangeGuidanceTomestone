@@ -95,7 +95,6 @@ public class EquipmentData {
     public required byte Stain0 { get; set; }
     [JsonProperty("stain_1")]
     public required byte Stain1 { get; set; }
-    public required ulong Value { get; set; }
 }
 
 [Serializable]
@@ -119,7 +118,6 @@ public class WeaponModelId {
     public required byte Stain0 { get; set; }
     [JsonProperty("stain_1")]
     public required byte Stain1 { get; set; }
-    public required ulong Value { get; set; }
 }
 
 [Serializable]
