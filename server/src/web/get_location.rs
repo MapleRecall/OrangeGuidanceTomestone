@@ -125,7 +125,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
             .map_err(warp::reject::custom)?
     };
 
-    filter_messages(&mut messages, id, state.config.vote_threshold_hide);
+    tokio::task::block_in_place(|| filter_messages(&mut messages, id, state.config.vote_threshold_hide));
     Ok(warp::reply::json(&messages))
 }
 
