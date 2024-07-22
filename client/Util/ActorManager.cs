@@ -92,18 +92,18 @@ internal class ActorManager : IDisposable {
             Pointer<ClientObjectManager> objMan
         ) {
             foreach (var idx in manager._idx) {
-                Pointer<BattleChara> ptr;
-                unsafe {
-                    var obj = (BattleChara*) objMan.Value->GetObjectByIndex((ushort) idx);
-                    if (obj == null) {
-                        continue;
-                    }
-
-                    ptr = obj;
+                var ptr = GetChara(objMan, idx);
+                if (ptr == null) {
+                    continue;
                 }
 
-                yield return ptr;
+                yield return ptr.Value;
             }
+        }
+
+        private static Pointer<BattleChara>? GetChara(Pointer<ClientObjectManager> objMan, uint idx) {
+            var obj = (BattleChara*) objMan.Value->GetObjectByIndex((ushort) idx);
+            return obj == null ? null : obj;
         }
     }
 
