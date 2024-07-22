@@ -1,13 +1,14 @@
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.Interop;
 using Lumina.Excel.GeneratedSheets;
 
 namespace OrangeGuidanceTomestone.Util;
 
 internal class ActorManager : IDisposable {
     private Plugin Plugin { get; }
-    private uint? _idx;
+    private readonly Stack<uint> _idx = [];
     private readonly Queue<BaseActorAction> _tasks = [];
 
     internal ActorManager(Plugin plugin) {
@@ -22,10 +23,9 @@ internal class ActorManager : IDisposable {
         this.Plugin.ClientState.TerritoryChanged -= this.OnTerritoryChange;
         this.Plugin.Framework.Update -= this.OnFramework;
 
-        if (this._idx != null) {
+        if (this._idx.Count > 0) {
             unsafe {
                 var objMan = ClientObjectManager.Instance();
-                new DisableAction().Run(this, objMan);
                 new DeleteAction().Run(this, objMan);
             }
         }
@@ -57,7 +57,7 @@ internal class ActorManager : IDisposable {
     }
 
     private void OnTerritoryChange(ushort obj) {
-        this._idx = null;
+        this._idx.Clear();
     }
 
     private void OnView(Message? message) {
@@ -75,11 +75,6 @@ internal class ActorManager : IDisposable {
     }
 
     internal void Despawn() {
-        if (this._idx == null) {
-            return;
-        }
-
-        this._tasks.Enqueue(new DisableAction());
         this._tasks.Enqueue(new DeleteAction());
     }
 
@@ -92,36 +87,28 @@ internal class ActorManager : IDisposable {
 
         public int Tries { get; set; }
 
-        protected bool TryGetBattleChara(
+        protected IEnumerable<Pointer<BattleChara>> GetBattleCharas(
             ActorManager manager,
-            ClientObjectManager* objMan,
-            out BattleChara* chara
+            Pointer<ClientObjectManager> objMan
         ) {
-            chara = null;
+            foreach (var idx in manager._idx) {
+                Pointer<BattleChara> ptr;
+                unsafe {
+                    var obj = (BattleChara*) objMan.Value->GetObjectByIndex((ushort) idx);
+                    if (obj == null) {
+                        continue;
+                    }
 
-            if (manager._idx is not { } idx) {
-                Plugin.Log.Warning("tried to get battlechara but idx was null");
-                return false;
+                    ptr = obj;
+                }
+
+                yield return ptr;
             }
-
-            var obj = objMan->GetObjectByIndex((ushort) idx);
-            if (obj == null) {
-                Plugin.Log.Warning("tried to get battlechara but it was null");
-                return false;
-            }
-
-            chara = (BattleChara*) obj;
-            return true;
         }
     }
 
     private unsafe class SpawnAction(Message message) : BaseActorAction {
         public override bool Run(ActorManager manager, ClientObjectManager* objMan) {
-            if (manager._idx != null) {
-                Plugin.Log.Warning("refusing to spawn a second actor");
-                return true;
-            }
-
             if (message.Emote == null) {
                 Plugin.Log.Warning("refusing to spawn an actor for a message without an emote");
                 return true;
@@ -133,7 +120,7 @@ internal class ActorManager : IDisposable {
                 return true;
             }
 
-            manager._idx = idx;
+            manager._idx.Push(idx);
             var emote = message.Emote;
             var emoteRow = manager.GetValidEmote(emote.Id);
 
@@ -211,43 +198,29 @@ internal class ActorManager : IDisposable {
 
     private unsafe class EnableAction : BaseActorAction {
         public override bool Run(ActorManager manager, ClientObjectManager* objMan) {
-            if (!this.TryGetBattleChara(manager, objMan, out var chara)) {
-                return true;
+            var allReady = true;
+            foreach (var chara in this.GetBattleCharas(manager, objMan)) {
+                if (!chara.Value->IsReadyToDraw()) {
+                    allReady = false;
+                    continue;
+                }
+
+                chara.Value->EnableDraw();
             }
 
-            if (!chara->IsReadyToDraw()) {
-                return false;
-            }
-
-            chara->EnableDraw();
-            return true;
-        }
-    }
-
-    private unsafe class DisableAction : BaseActorAction {
-        public override bool Run(ActorManager manager, ClientObjectManager* objMan) {
-            if (!this.TryGetBattleChara(manager, objMan, out var chara)) {
-                return true;
-            }
-
-            chara->DisableDraw();
-            return true;
+            return allReady;
         }
     }
 
     private unsafe class DeleteAction : BaseActorAction {
         public override bool Run(ActorManager manager, ClientObjectManager* objMan) {
-            if (manager._idx is not { } idx) {
-                Plugin.Log.Warning("delete action but idx was null");
-                return true;
+            foreach (var wrapper in this.GetBattleCharas(manager, objMan)) {
+                wrapper.Value->DisableDraw();
+                var idx = objMan->GetIndexByObject((GameObject*) wrapper.Value);
+                objMan->DeleteObjectByIndex((ushort) idx, 0);
             }
 
-            if (objMan->GetObjectByIndex((ushort) idx) == null) {
-                Plugin.Log.Warning("delete action but object at idx was null");
-                return true;
-            }
-
-            manager._idx = null;
+            manager._idx.Clear();
             return true;
         }
     }
