@@ -20,6 +20,9 @@ internal class Message {
     public int NegativeVotes { get; set; }
     public int UserVote { get; set; }
 
+    public uint? Emote { get; set; }
+    public byte[]? Customise { get; set; }
+
     public int Glyph { get; set; }
 
     internal Vector3 Position => new(this.X, this.Y, this.Z);
@@ -45,6 +48,9 @@ internal class MessageWithTerritory {
     public int NegativeVotes { get; init; }
     public int UserVote { get; set; }
 
+    public uint? Emote { get; set; }
+    public byte[]? Customise { get; set; }
+
     public int Glyph { get; set; }
     public bool IsHidden { get; set; }
 
@@ -62,10 +68,54 @@ internal class MessageWithTerritory {
             PositiveVotes = message.PositiveVotes,
             NegativeVotes = message.NegativeVotes,
             UserVote = message.UserVote,
+            Emote = message.Emote,
+            Customise = message.Customise,
             Glyph = message.Glyph,
             IsHidden = false,
         };
     }
+}
+
+[Serializable]
+[JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
+internal class EmoteData {
+    public uint Id { get; set; }
+    public byte[] Customise { get; set; }
+    public EquipmentData[] Equipment { get; set; }
+    public WeaponData[] Weapon { get; set; }
+    public bool HatHidden { get; set; }
+    public bool VisorToggled { get; set; }
+    public bool WeaponHidden { get; set; }
+}
+
+[Serializable]
+[JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
+internal class EquipmentData {
+    public ushort Id { get; set; }
+    public byte Variant { get; set; }
+    public byte Stain0 { get; set; }
+    public byte Stain1 { get; set; }
+    public ulong Value { get; set; }
+}
+
+[Serializable]
+[JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
+internal class WeaponData {
+    public WeaponModelId ModelId { get; set; }
+    public byte State { get; set; }
+    public ushort Flags1 { get; set; }
+    public byte Flags2 { get; set; }
+}
+
+[Serializable]
+[JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
+internal class WeaponModelId {
+    public ushort Id { get; set; }
+    public ushort Type { get; set; }
+    public ushort Variant { get; set; }
+    public byte Stain0 { get; set; }
+    public byte Stain1 { get; set; }
+    public ulong Value { get; set; }
 }
 
 [Serializable]

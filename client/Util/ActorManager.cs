@@ -21,10 +21,6 @@ internal class ActorManager : IDisposable {
     }
 
     private unsafe void OnFramework(IFramework framework) {
-        if (this._idx is not { } idx) {
-            return;
-        }
-
         if (!this._tasks.TryPeek(out var actorAction)) {
             return;
         }
@@ -60,15 +56,8 @@ internal class ActorManager : IDisposable {
         }
     }
 
-    internal unsafe void Spawn(Message message) {
-        if (this._idx != null) {
-            Plugin.Log.Warning("refusing to spawn more than one actor");
-            return;
-        }
-
-        Plugin.Log.Debug("spawning actor");
-
-
+    internal void Spawn(Message message) {
+        this._tasks.Enqueue(new SpawnAction(message));
     }
 
     internal void Despawn() {
@@ -80,7 +69,7 @@ internal class ActorManager : IDisposable {
         this._tasks.Enqueue(new DeleteAction());
     }
 
-    private unsafe abstract class BaseActorAction {
+    private abstract unsafe class BaseActorAction {
         /// <summary>
         /// Run this action.
         /// </summary>
@@ -130,6 +119,7 @@ internal class ActorManager : IDisposable {
             var chara = (BattleChara*) objMan->GetObjectByIndex((ushort) idx);
 
             chara->ObjectKind = ObjectKind.BattleNpc;
+            chara->TargetableStatus = 0;
             chara->Position = message.Position;
             chara->Rotation = message.Yaw;
             var drawData = &chara->DrawData;
@@ -183,6 +173,7 @@ internal class ActorManager : IDisposable {
             }
 
             objMan->DeleteObjectByIndex((ushort) idx, 0);
+            manager._idx = null;
             return true;
         }
     }
