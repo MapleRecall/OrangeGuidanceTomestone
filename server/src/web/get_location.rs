@@ -7,10 +7,11 @@ use rand::Rng;
 use rand::seq::SliceRandom;
 use rayon::prelude::*;
 use serde::Deserialize;
+use sqlx::types::Json;
 use warp::{Filter, Rejection, Reply};
 use warp::filters::BoxedFilter;
 
-use crate::message::RetrievedMessage;
+use crate::message::{EmoteData, RetrievedMessage};
 use crate::State;
 use crate::util::HOUSING_ZONES;
 use crate::web::{AnyhowRejection, WebError};
@@ -68,6 +69,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                        coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
                        coalesce(v2.vote, 0)                      as user_vote,
                        m.glyph,
+                       m.emote as "emote: Json<Option<EmoteData>>",
                        m.created,
                        m.user,
                        coalesce(cast((julianday(current_timestamp) - julianday(u.last_seen)) * 1440 as int), 0) as last_seen_minutes
@@ -103,6 +105,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                        coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
                        coalesce(v2.vote, 0)                      as user_vote,
                        m.glyph,
+                       m.emote as "emote: Json<Option<EmoteData>>",
                        m.created,
                        m.user,
                        coalesce(cast((julianday(current_timestamp) - julianday(u.last_seen)) * 1440 as int), 0) as last_seen_minutes

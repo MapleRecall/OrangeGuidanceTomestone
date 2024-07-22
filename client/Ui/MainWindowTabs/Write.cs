@@ -1,8 +1,14 @@
 using System.Numerics;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Interface.Textures;
+using Dalamud.Utility;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using ImGuiNET;
+using Lumina.Excel.GeneratedSheets;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
 using OrangeGuidanceTomestone.Util;
@@ -21,6 +27,7 @@ internal class Write : ITab {
     private int _part2 = -1;
     private (int, int) _word2 = (-1, -1);
     private int _glyph;
+    private int _emoteIdx = -1;
 
     private const string Placeholder = "****";
     private Pack? Pack => Pack.All.Get(this._pack);
@@ -29,6 +36,8 @@ internal class Write : ITab {
     private string? Word1 => this.GetWord(this._word1, this.Template1);
     private string? Word2 => this.GetWord(this._word2, this.Template2);
     private string? Conjunction => this.Pack?.Conjunctions?.Get(this._conj);
+
+    private List<Emote> Emotes { get; }
 
     private string? GetWord((int, int) word, Template? template) {
         if (word.Item2 == -1) {
@@ -57,6 +66,10 @@ internal class Write : ITab {
 
     internal Write(Plugin plugin) {
         this.Plugin = plugin;
+
+        this.Emotes = this.Plugin.DataManager.GetExcelSheet<Emote>()!
+            .Skip(1)
+            .ToList();
 
         this._glyph = this.Plugin.Config.DefaultGlyph;
         Pack.UpdatePacks();
@@ -296,6 +309,37 @@ internal class Write : ITab {
             }
         }
 
+        var emoteLabel = this._emoteIdx == -1
+            ? "None"
+            : this.Emotes[this._emoteIdx].Name.ToDalamudString().TextValue;
+        if (ImGui.BeginCombo("Emote", emoteLabel)) {
+            using var endCombo = new OnDispose(ImGui.EndCombo);
+
+            if (ImGui.Selectable("None##no-emote", this._emoteIdx == -1)) {
+                this._emoteIdx = -1;
+            }
+
+            ImGui.Separator();
+
+            for (var i = 0; i < this.Emotes.Count; i++) {
+                var emote = this.Emotes[i];
+                var name = emote.Name.ToDalamudString().TextValue;
+
+                var unlocked = IsEmoteUnlocked(emote);
+                if (!unlocked) {
+                    ImGui.BeginDisabled();
+                }
+
+                if (ImGui.Selectable($"{name}##emote-{emote.RowId}", this._emoteIdx == i)) {
+                    this._emoteIdx = i;
+                }
+
+                if (!unlocked) {
+                    ImGui.EndDisabled();
+                }
+            }
+        }
+
         this.ClearIfNecessary();
 
         var valid = this.ValidSetup();
@@ -310,7 +354,7 @@ internal class Write : ITab {
             var location = HousingLocation.Current();
             var req = new MessageRequest {
                 Territory = this.Plugin.ClientState.TerritoryType,
-                World = this.Plugin.ClientState.LocalPlayer?.CurrentWorld.Id ?? 0,
+                World = player.CurrentWorld.Id,
                 Ward = location?.Ward,
                 Plot = location?.CombinedPlot(),
                 X = player.Position.X,
@@ -326,6 +370,9 @@ internal class Write : ITab {
                 Word2List = this._word2.Item1 == -1 ? null : this._word2.Item1,
                 Word2Word = this._word2.Item2 == -1 ? null : this._word2.Item2,
                 Glyph = this._glyph,
+                Emote = this._emoteIdx == -1
+                    ? null
+                    : this.GetEmoteData(this.Emotes[this._emoteIdx], player),
             };
 
             var json = JsonConvert.SerializeObject(req);
@@ -348,7 +395,9 @@ internal class Write : ITab {
                         Text = actualText,
                         NegativeVotes = 0,
                         PositiveVotes = 0,
+                        UserVote = 0,
                         Glyph = this._glyph,
+                        Emote = req.Emote,
                     };
 
                     this.Plugin.Messages.Add(newMsg);
@@ -364,6 +413,50 @@ internal class Write : ITab {
         if (!valid) {
             ImGui.EndDisabled();
         }
+    }
+
+    private unsafe EmoteData GetEmoteData(Emote emote, IPlayerCharacter player) {
+        var objMan = ClientObjectManager.Instance();
+        var chara = (BattleChara*) objMan->GetObjectByIndex(player.ObjectIndex);
+
+        return new EmoteData {
+            Id = emote.RowId,
+            Customise = player.Customize,
+            Equipment = chara->DrawData.EquipmentModelIds
+                .ToArray()
+                .Select(equip => new EquipmentData {
+                    Id = equip.Id,
+                    Variant = equip.Variant,
+                    Stain0 = equip.Stain0,
+                    Stain1 = equip.Stain1,
+                    Value = equip.Value,
+                })
+                .ToArray(),
+            Weapon = chara->DrawData.WeaponData
+                .ToArray()
+                .Select(weapon => new WeaponData {
+                    ModelId = new WeaponModelId {
+                        Id = weapon.ModelId.Id,
+                        Kind = weapon.ModelId.Type,
+                        Variant = weapon.ModelId.Variant,
+                        Stain0 = weapon.ModelId.Stain0,
+                        Stain1 = weapon.ModelId.Stain1,
+                        Value = weapon.ModelId.Value,
+                    },
+                    Flags1 = weapon.Flags1,
+                    Flags2 = weapon.Flags2,
+                    State = weapon.State,
+                })
+                .ToArray(),
+            Glasses = chara->DrawData.GlassesIds[0],
+            HatHidden = chara->DrawData.IsHatHidden,
+            VisorToggled = chara->DrawData.IsVisorToggled,
+            WeaponHidden = chara->DrawData.IsWeaponHidden,
+        };
+    }
+
+    private static unsafe bool IsEmoteUnlocked(Emote emote) {
+        return UIState.Instance()->IsEmoteUnlocked((ushort) emote.RowId);
     }
 
     private void ResetWriter() {

@@ -2,10 +2,11 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use anyhow::Context;
+use sqlx::types::Json;
 use warp::{Filter, Rejection, Reply};
 use warp::filters::BoxedFilter;
 
-use crate::message::OwnMessage;
+use crate::message::{EmoteData, OwnMessage};
 use crate::State;
 use crate::web::AnyhowRejection;
 
@@ -44,6 +45,7 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, mut query: HashMap<String
                    coalesce(v2.vote, 0)                      as user_vote,
                    m.glyph,
                    m.created,
+                   m.emote as "emote: Json<Option<EmoteData>>",
                    0 as "is_hidden: bool"
             from messages m
                      left join votes v on m.id = v.message

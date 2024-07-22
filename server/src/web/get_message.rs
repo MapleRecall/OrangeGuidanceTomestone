@@ -1,11 +1,12 @@
 use std::sync::Arc;
 
 use anyhow::Context;
+use sqlx::types::Json;
 use uuid::Uuid;
 use warp::{Filter, Rejection, Reply};
 use warp::filters::BoxedFilter;
 
-use crate::message::RetrievedMessageTerritory;
+use crate::message::{EmoteData, RetrievedMessageTerritory};
 use crate::State;
 use crate::web::{AnyhowRejection, WebError};
 
@@ -39,6 +40,7 @@ async fn logic(state: Arc<State>, id: i64, message_id: Uuid) -> Result<impl Repl
                    coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
                    coalesce(v2.vote, 0)                      as user_vote,
                    m.glyph,
+                   m.emote as "emote: Json<Option<EmoteData>>",
                    m.created
             from messages m
                      left join votes v on m.id = v.message

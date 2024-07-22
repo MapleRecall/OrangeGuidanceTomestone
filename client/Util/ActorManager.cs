@@ -1,6 +1,7 @@
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using Lumina.Excel.GeneratedSheets;
 
 namespace OrangeGuidanceTomestone.Util;
 
@@ -51,7 +52,7 @@ internal class ActorManager : IDisposable {
         Plugin.Log.Debug($"OnView message is {msg}");
         this.Despawn();
 
-        if (message != null) {
+        if (message?.Emote != null) {
             this.Spawn(message);
         }
     }
@@ -108,6 +109,11 @@ internal class ActorManager : IDisposable {
                 return true;
             }
 
+            if (message.Emote == null) {
+                Plugin.Log.Warning("refusing to spawn an actor for a message without an emote");
+                return true;
+            }
+
             var idx = objMan->CreateBattleCharacter();
             if (idx == 0xFFFFFFFF) {
                 Plugin.Log.Debug("actor could not be spawned");
@@ -115,6 +121,7 @@ internal class ActorManager : IDisposable {
             }
 
             manager._idx = idx;
+            var emote = message.Emote;
 
             var chara = (BattleChara*) objMan->GetObjectByIndex((ushort) idx);
 
@@ -123,11 +130,53 @@ internal class ActorManager : IDisposable {
             chara->Position = message.Position;
             chara->Rotation = message.Yaw;
             var drawData = &chara->DrawData;
-            drawData->CustomizeData = new CustomizeData();
+
+            var maxLen = Math.Min(sizeof(CustomizeData), emote.Customise.Length);
+            var rawCustomise = (byte*) &drawData->CustomizeData;
+            for (var i = 0; i < maxLen; i++) {
+                rawCustomise[i] = emote.Customise[i];
+            }
+
+            for (var i = 0; i < Math.Min(drawData->EquipmentModelIds.Length, emote.Equipment.Length); i++) {
+                var equip = emote.Equipment[i];
+                drawData->Equipment((DrawDataContainer.EquipmentSlot) i) = new EquipmentModelId {
+                    Id = equip.Id,
+                    Variant = equip.Variant,
+                    Stain0 = equip.Stain0,
+                    Stain1 = equip.Stain1,
+                    Value = equip.Value,
+                };
+            }
+
+            for (var i = 0; i < Math.Min(drawData->WeaponData.Length, emote.Weapon.Length); i++) {
+                var weapon = emote.Weapon[i];
+                drawData->Weapon((DrawDataContainer.WeaponSlot) i) = new DrawObjectData {
+                    ModelId = new FFXIVClientStructs.FFXIV.Client.Game.Character.WeaponModelId {
+                        Id = weapon.ModelId.Id,
+                        Type = weapon.ModelId.Kind,
+                        Variant = weapon.ModelId.Variant,
+                        Stain0 = weapon.ModelId.Stain0,
+                        Stain1 = weapon.ModelId.Stain1,
+                        Value = weapon.ModelId.Value,
+                    },
+                    DrawObject = chara->DrawObject,
+                    Flags1 = weapon.Flags1,
+                    Flags2 = weapon.Flags2,
+                    State = weapon.State,
+                };
+            }
+
+            drawData->IsHatHidden = emote.HatHidden;
+            drawData->IsVisorToggled = emote.VisorToggled;
+            drawData->IsWeaponHidden = emote.WeaponHidden;
+
+            drawData->SetGlasses(0, (ushort) emote.Glasses);
 
             chara->Alpha = 0.25f;
             chara->SetMode(CharacterModes.AnimLock, 0);
-            chara->Timeline.BaseOverride = 4818;
+            if (manager.Plugin.DataManager.GetExcelSheet<Emote>()?.GetRow(emote.Id) is { } row) {
+                chara->Timeline.BaseOverride = (ushort) row.ActionTimeline[0].Row;
+            }
 
             manager._tasks.Enqueue(new EnableAction());
             return true;

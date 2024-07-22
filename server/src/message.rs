@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::types::chrono::NaiveDateTime;
+use sqlx::types::{chrono::NaiveDateTime, Json};
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
@@ -29,6 +29,9 @@ pub struct Message {
     pub ward: Option<u16>,
     #[serde(default)]
     pub plot: Option<u16>,
+
+    #[serde(default)]
+    pub emote: Option<EmoteData>,
 }
 
 fn glyph_default() -> i8 {
@@ -47,6 +50,7 @@ pub struct RetrievedMessage {
     pub negative_votes: i32,
     pub user_vote: i64,
     pub glyph: i64,
+    pub emote: Option<Json<Option<EmoteData>>>,
     #[serde(skip)]
     pub created: NaiveDateTime,
     #[serde(skip)]
@@ -71,6 +75,7 @@ pub struct RetrievedMessageTerritory {
     pub negative_votes: i32,
     pub user_vote: i64,
     pub glyph: i64,
+    pub emote: Option<Json<Option<EmoteData>>>,
     #[serde(skip)]
     pub created: NaiveDateTime,
 }
@@ -91,7 +96,47 @@ pub struct OwnMessage {
     pub negative_votes: i32,
     pub user_vote: i64,
     pub glyph: i64,
+    pub emote: Option<Json<Option<EmoteData>>>,
     #[serde(skip)]
     pub created: NaiveDateTime,
     pub is_hidden: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct EmoteData {
+    pub id: u32,
+    pub customise: Vec<u8>,
+    pub equipment_data: Vec<EquipmentData>,
+    pub weapon_data: Vec<WeaponData>,
+    pub glasses: u32,
+    pub hat_hidden: bool,
+    pub visor_toggled: bool,
+    pub weapon_hidden: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct EquipmentData {
+    pub id: u16,
+    pub variant: u8,
+    pub stain_0: u8,
+    pub stain_1: u8,
+    pub value: u64,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct WeaponData {
+    pub model_id: WeaponModelId,
+    pub state: u8,
+    pub flags_1: u16,
+    pub flags_2: u8,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct WeaponModelId {
+    pub id: u16,
+    pub kind: u16,
+    pub variant: u16,
+    pub stain_0: u8,
+    pub stain_1: u8,
+    pub value: u64,
 }

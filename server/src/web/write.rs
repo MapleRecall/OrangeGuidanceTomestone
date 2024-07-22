@@ -65,9 +65,13 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, message: Message) -> Resu
     let message_id = Uuid::new_v4().simple().to_string();
     let territory = message.territory as i64;
 
+    let json = serde_json::to_string(&message.emote)
+        .context("could not serialise emote")
+        .map_err(AnyhowRejection)
+        .map_err(warp::reject::custom)?;
     sqlx::query!(
         // language=sqlite
-        "insert into messages (id, user, territory, world, ward, plot, x, y, z, yaw, message, glyph) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "insert into messages (id, user, territory, world, ward, plot, x, y, z, yaw, message, glyph, emote) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         message_id,
         id,
         territory,
@@ -80,6 +84,7 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, message: Message) -> Resu
         message.yaw,
         text,
         message.glyph,
+        json,
     )
         .execute(&state.db)
         .await
