@@ -3,6 +3,7 @@ using System.Text;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Interface.Textures;
+using Dalamud.Interface.Utility;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
@@ -28,6 +29,7 @@ internal class Write : ITab {
     private (int, int) _word2 = (-1, -1);
     private int _glyph;
     private int _emoteIdx = -1;
+    private string _emoteSearch = string.Empty;
 
     private const string Placeholder = "****";
     private Pack? Pack => Pack.All.Get(this._pack);
@@ -69,6 +71,7 @@ internal class Write : ITab {
 
         this.Emotes = this.Plugin.DataManager.GetExcelSheet<Emote>()!
             .Skip(1)
+            .Where(emote => emote.TextCommand.Row != 0)
             .ToList();
 
         this._glyph = this.Plugin.Config.DefaultGlyph;
@@ -312,30 +315,50 @@ internal class Write : ITab {
         var emoteLabel = this._emoteIdx == -1
             ? "None"
             : this.Emotes[this._emoteIdx].Name.ToDalamudString().TextValue;
-        if (ImGui.BeginCombo("Emote", emoteLabel)) {
+        if (ImGui.BeginCombo("Emote", emoteLabel, ImGuiComboFlags.HeightLarge)) {
             using var endCombo = new OnDispose(ImGui.EndCombo);
 
-            if (ImGui.Selectable("None##no-emote", this._emoteIdx == -1)) {
-                this._emoteIdx = -1;
+            if (ImGui.IsWindowAppearing()) {
+                ImGui.SetKeyboardFocusHere();
             }
 
-            ImGui.Separator();
+            ImGui.SetNextItemWidth(-1);
+            ImGui.InputTextWithHint("###emote-search", "Search...", ref this._emoteSearch, 100, ImGuiInputTextFlags.AutoSelectAll);
 
-            for (var i = 0; i < this.Emotes.Count; i++) {
-                var emote = this.Emotes[i];
-                var name = emote.Name.ToDalamudString().TextValue;
-
-                var unlocked = IsEmoteUnlocked(emote);
-                if (!unlocked) {
-                    ImGui.BeginDisabled();
+            using var endChild = new OnDispose(ImGui.EndChild);
+            if (ImGui.BeginChild("##emote-search-child", new Vector2(0, 150) * ImGuiHelpers.GlobalScale)) {
+                if (ImGui.Selectable("None##no-emote", this._emoteIdx == -1)) {
+                    this._emoteIdx = -1;
+                    ImGui.CloseCurrentPopup();
                 }
 
-                if (ImGui.Selectable($"{name}##emote-{emote.RowId}", this._emoteIdx == i)) {
-                    this._emoteIdx = i;
-                }
+                ImGui.Separator();
 
-                if (!unlocked) {
-                    ImGui.EndDisabled();
+                for (var i = 0; i < this.Emotes.Count; i++) {
+                    var emote = this.Emotes[i];
+                    if (!string.IsNullOrEmpty(this._emoteSearch)) {
+                        if (!emote.Name.ToDalamudString().TextValue.Contains(this._emoteSearch, StringComparison.InvariantCultureIgnoreCase)) {
+                            if (!emote.TextCommand.Value!.Command.ToDalamudString().TextValue.Contains(this._emoteSearch, StringComparison.InvariantCultureIgnoreCase)) {
+                                continue;
+                            }
+                        }
+                    }
+
+                    var name = emote.Name.ToDalamudString().TextValue;
+
+                    var unlocked = IsEmoteUnlocked(emote);
+                    if (!unlocked) {
+                        ImGui.BeginDisabled();
+                    }
+
+                    if (ImGui.Selectable($"{name}##emote-{emote.RowId}", this._emoteIdx == i)) {
+                        this._emoteIdx = i;
+                        ImGui.CloseCurrentPopup();
+                    }
+
+                    if (!unlocked) {
+                        ImGui.EndDisabled();
+                    }
                 }
             }
         }
@@ -416,12 +439,11 @@ internal class Write : ITab {
     }
 
     private unsafe EmoteData GetEmoteData(Emote emote, IPlayerCharacter player) {
-        var objMan = ClientObjectManager.Instance();
-        var chara = (BattleChara*) objMan->GetObjectByIndex(player.ObjectIndex);
+        var chara = (Character*) GameObjectManager.Instance()->Objects.GetObjectByGameObjectId(player.GameObjectId);
 
         return new EmoteData {
             Id = emote.RowId,
-            Customise = player.Customize,
+            Customise = player.Customize.ToList(),
             Equipment = chara->DrawData.EquipmentModelIds
                 .ToArray()
                 .Select(equip => new EquipmentData {
@@ -464,6 +486,8 @@ internal class Write : ITab {
         this._word1 = (-1, -1);
         this._word2 = (-1, -1);
         this._glyph = this.Plugin.Config.DefaultGlyph;
+        this._emoteIdx = -1;
+        this._emoteSearch = string.Empty;
     }
 
     private void ClearIfNecessary() {

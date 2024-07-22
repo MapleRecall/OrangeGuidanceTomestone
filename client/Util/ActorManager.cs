@@ -19,6 +19,14 @@ internal class ActorManager : IDisposable {
     public void Dispose() {
         this.Plugin.Ui.Viewer.View -= this.OnView;
         this.Plugin.Framework.Update -= this.OnFramework;
+
+        if (this._idx != null) {
+            unsafe {
+                var objMan = ClientObjectManager.Instance();
+                new DisableAction().Run(this, objMan);
+                new DeleteAction().Run(this, objMan);
+            }
+        }
     }
 
     private unsafe void OnFramework(IFramework framework) {
@@ -52,7 +60,7 @@ internal class ActorManager : IDisposable {
         Plugin.Log.Debug($"OnView message is {msg}");
         this.Despawn();
 
-        if (message?.Emote != null) {
+        if (this.Plugin.Config.ShowEmotes && message?.Emote != null) {
             this.Spawn(message);
         }
     }
@@ -122,6 +130,7 @@ internal class ActorManager : IDisposable {
 
             manager._idx = idx;
             var emote = message.Emote;
+            var emoteRow = manager.GetValidEmote(emote.Id);
 
             var chara = (BattleChara*) objMan->GetObjectByIndex((ushort) idx);
 
@@ -131,7 +140,7 @@ internal class ActorManager : IDisposable {
             chara->Rotation = message.Yaw;
             var drawData = &chara->DrawData;
 
-            var maxLen = Math.Min(sizeof(CustomizeData), emote.Customise.Length);
+            var maxLen = Math.Min(sizeof(CustomizeData), emote.Customise.Count);
             var rawCustomise = (byte*) &drawData->CustomizeData;
             for (var i = 0; i < maxLen; i++) {
                 rawCustomise[i] = emote.Customise[i];
@@ -144,26 +153,23 @@ internal class ActorManager : IDisposable {
                     Variant = equip.Variant,
                     Stain0 = equip.Stain0,
                     Stain1 = equip.Stain1,
-                    Value = equip.Value,
                 };
             }
 
-            for (var i = 0; i < Math.Min(drawData->WeaponData.Length, emote.Weapon.Length); i++) {
-                var weapon = emote.Weapon[i];
-                drawData->Weapon((DrawDataContainer.WeaponSlot) i) = new DrawObjectData {
-                    ModelId = new FFXIVClientStructs.FFXIV.Client.Game.Character.WeaponModelId {
+            if (emoteRow is { DrawsWeapon: true }) {
+                for (var i = 0; i < Math.Min(drawData->WeaponData.Length, emote.Weapon.Length); i++) {
+                    var weapon = emote.Weapon[i];
+                    drawData->Weapon((DrawDataContainer.WeaponSlot) i).ModelId = new FFXIVClientStructs.FFXIV.Client.Game.Character.WeaponModelId {
                         Id = weapon.ModelId.Id,
                         Type = weapon.ModelId.Kind,
                         Variant = weapon.ModelId.Variant,
                         Stain0 = weapon.ModelId.Stain0,
                         Stain1 = weapon.ModelId.Stain1,
-                        Value = weapon.ModelId.Value,
-                    },
-                    DrawObject = chara->DrawObject,
-                    Flags1 = weapon.Flags1,
-                    Flags2 = weapon.Flags2,
-                    State = weapon.State,
-                };
+                    };
+                    drawData->Weapon((DrawDataContainer.WeaponSlot) i).Flags1 = weapon.Flags1;
+                    drawData->Weapon((DrawDataContainer.WeaponSlot) i).Flags2 = weapon.Flags2;
+                    drawData->Weapon((DrawDataContainer.WeaponSlot) i).State = weapon.State;
+                }
             }
 
             drawData->IsHatHidden = emote.HatHidden;
@@ -174,13 +180,22 @@ internal class ActorManager : IDisposable {
 
             chara->Alpha = 0.25f;
             chara->SetMode(CharacterModes.AnimLock, 0);
-            if (manager.Plugin.DataManager.GetExcelSheet<Emote>()?.GetRow(emote.Id) is { } row) {
-                chara->Timeline.BaseOverride = (ushort) row.ActionTimeline[0].Row;
+            if (emoteRow != null) {
+                chara->Timeline.BaseOverride = (ushort) emoteRow.ActionTimeline[0].Row;
             }
 
             manager._tasks.Enqueue(new EnableAction());
             return true;
         }
+    }
+
+    private Emote? GetValidEmote(uint rowId) {
+        var emote = this.Plugin.DataManager.GetExcelSheet<Emote>()?.GetRow(rowId);
+        if (emote == null) {
+            return null;
+        }
+
+        return emote.TextCommand.Row == 0 ? null : emote;
     }
 
     private unsafe class EnableAction : BaseActorAction {

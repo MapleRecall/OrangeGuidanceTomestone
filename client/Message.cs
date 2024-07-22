@@ -77,7 +77,7 @@ public class MessageWithTerritory {
 [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
 public class EmoteData {
     public required uint Id { get; set; }
-    public required byte[] Customise { get; set; }
+    public required List<byte> Customise { get; set; }
     public required EquipmentData[] Equipment { get; set; }
     public required WeaponData[] Weapon { get; set; }
     public required uint Glasses { get; set; }
@@ -91,7 +91,9 @@ public class EmoteData {
 public class EquipmentData {
     public required ushort Id { get; set; }
     public required byte Variant { get; set; }
+    [JsonProperty("stain_0")]
     public required byte Stain0 { get; set; }
+    [JsonProperty("stain_1")]
     public required byte Stain1 { get; set; }
     public required ulong Value { get; set; }
 }
@@ -101,7 +103,9 @@ public class EquipmentData {
 public class WeaponData {
     public required WeaponModelId ModelId { get; set; }
     public required byte State { get; set; }
+    [JsonProperty("flags_1")]
     public required ushort Flags1 { get; set; }
+    [JsonProperty("flags_2")]
     public required byte Flags2 { get; set; }
 }
 
@@ -111,7 +115,9 @@ public class WeaponModelId {
     public required ushort Id { get; set; }
     public required ushort Kind { get; set; }
     public required ushort Variant { get; set; }
+    [JsonProperty("stain_0")]
     public required byte Stain0 { get; set; }
+    [JsonProperty("stain_1")]
     public required byte Stain1 { get; set; }
     public required ulong Value { get; set; }
 }

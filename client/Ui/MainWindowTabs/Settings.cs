@@ -121,6 +121,7 @@ internal class Settings : ITab {
         anyChanged |= vfx |= ImGui.Checkbox("Disable in cutscenes", ref this.Plugin.Config.DisableInCutscene);
         anyChanged |= vfx |= ImGui.Checkbox("Disable in /gpose", ref this.Plugin.Config.DisableInGpose);
         anyChanged |= vfx |= ImGui.Checkbox("Remove glow effect from signs", ref this.Plugin.Config.RemoveGlow);
+        anyChanged |= ImGui.Checkbox("Show player emotes", ref this.Plugin.Config.ShowEmotes);
 
         var tt = this.Plugin.DataManager.GetExcelSheet<TerritoryType>();
         if (tt == null) {
