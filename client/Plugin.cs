@@ -2,6 +2,7 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using OrangeGuidanceTomestone.MiniPenumbra;
+using OrangeGuidanceTomestone.Util;
 
 namespace OrangeGuidanceTomestone;
 
@@ -45,6 +46,7 @@ public class Plugin : IDalamudPlugin {
     internal Vfx Vfx { get; }
     internal PluginUi Ui { get; }
     internal Messages Messages { get; }
+    internal ActorManager ActorManager { get; }
     internal VfxReplacer VfxReplacer { get; }
     internal Commands Commands { get; }
     internal Pinger Pinger { get; }
@@ -57,6 +59,7 @@ public class Plugin : IDalamudPlugin {
         this.Config = this.Interface!.GetPluginConfig() as Configuration ?? new Configuration();
         this.Vfx = new Vfx(this);
         this.Messages = new Messages(this);
+        this.ActorManager = new ActorManager(this);
         this.Ui = new PluginUi(this);
         this.VfxReplacer = new VfxReplacer(this);
         this.Commands = new Commands(this);
@@ -72,6 +75,7 @@ public class Plugin : IDalamudPlugin {
         this.Commands.Dispose();
         this.VfxReplacer.Dispose();
         this.Ui.Dispose();
+        this.ActorManager.Dispose();
         this.Messages.Dispose();
         this.Vfx.Dispose();
     }

@@ -3,6 +3,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using ImGuiNET;
 using OrangeGuidanceTomestone.Helpers;
+using OrangeGuidanceTomestone.Util;
 
 namespace OrangeGuidanceTomestone.Ui;
 
@@ -10,6 +11,11 @@ internal class Viewer {
     private Plugin Plugin { get; }
 
     internal bool Visible;
+
+    internal delegate void MessageViewDelegate(Message? message);
+    internal event MessageViewDelegate View;
+
+    private Guid _lastViewed = Guid.Empty;
 
     private int _idx;
 
@@ -19,6 +25,11 @@ internal class Viewer {
 
     internal void Draw() {
         if (!this.Visible) {
+            if (this._lastViewed != Guid.Empty) {
+                this.View(null);
+            }
+
+            this._lastViewed = Guid.Empty;
             return;
         }
 
@@ -28,8 +39,8 @@ internal class Viewer {
         flags |= this.Plugin.Config.ClickThroughViewer ? ImGuiWindowFlags.NoInputs : ImGuiWindowFlags.None;
         ImGui.SetNextWindowSize(new Vector2(350, 175), ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowBgAlpha(this.Plugin.Config.ViewerOpacity / 100.0f);
+        using var end = new OnDispose(ImGui.End);
         if (!ImGui.Begin("Messages", ref this.Visible, flags)) {
-            ImGui.End();
             return;
         }
 
@@ -47,7 +58,7 @@ internal class Viewer {
                 ImGui.TextUnformatted("No nearby messages");
             }
 
-            goto End;
+            return;
         }
 
         if (this._idx >= nearby.Count) {
@@ -55,8 +66,10 @@ internal class Viewer {
         }
 
         if (!ImGui.BeginTable("##viewer-table", 3)) {
-            goto End;
+            return;
         }
+
+        using var endTable = new OnDispose(ImGui.EndTable);
 
         ImGui.TableSetupColumn("##prev-arrow", ImGuiTableColumnFlags.WidthFixed);
         ImGui.TableSetupColumn("##content", ImGuiTableColumnFlags.WidthStretch);
@@ -82,6 +95,16 @@ internal class Viewer {
 
         if (ImGui.TableSetColumnIndex(1) && this._idx > -1 && this._idx < nearby.Count) {
             var message = nearby[this._idx];
+            if (this._lastViewed != message.Id) {
+                try {
+                    this.View(message);
+                } catch (Exception ex) {
+                    Plugin.Log.Error(ex, "Error in View event");
+                }
+            }
+
+            this._lastViewed = message.Id;
+
             var size = ImGui.CalcTextSize(message.Text, ImGui.GetContentRegionAvail().X).Y;
             size += ImGui.GetStyle().ItemSpacing.Y * 2;
             size += ImGui.CalcTextSize("A").Y;
@@ -176,10 +199,5 @@ internal class Viewer {
                 ImGui.EndDisabled();
             }
         }
-
-        ImGui.EndTable();
-
-        End:
-        ImGui.End();
     }
 }
