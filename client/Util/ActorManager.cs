@@ -49,7 +49,6 @@ internal class ActorManager : IDisposable {
             success = true;
         }
 
-
         if (success) {
             this._tasks.Dequeue();
         }

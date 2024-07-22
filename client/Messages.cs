@@ -251,7 +251,7 @@ internal class Messages : IDisposable {
 
     internal IEnumerable<Message> Nearby() {
         if (this.Plugin.ClientState.LocalPlayer is not { } player) {
-            return Array.Empty<Message>();
+            return [];
         }
 
         var position = player.Position;
@@ -262,12 +262,11 @@ internal class Messages : IDisposable {
             nearby = this.Current
                 .Values
                 .Where(msg => Math.Abs(msg.Position.Y - position.Y) <= 1f)
-                .Where(msg => Vector3.Distance(msg.Position, position) <= 2f)
+                .Where(msg => Vector3.DistanceSquared(msg.Position, position) <= 4f)
                 .ToList();
         } finally {
             this.CurrentMutex.Release();
         }
-
 
         return nearby;
     }
