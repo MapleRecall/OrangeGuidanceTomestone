@@ -34,14 +34,15 @@ internal class Settings : ITab {
             .ToList()!;
         this.FilterTerritories(null);
 
-        this.Tabs = new List<(string, DrawSettingsDelegate)> {
+        this.Tabs = [
             ("General", this.DrawGeneral),
             ("Writer", this.DrawWriter),
             ("Viewer", this.DrawViewer),
             ("Unlocks", this.DrawUnlocks),
             ("Account", this.DrawAccount),
             ("Debug", this.DrawDebug),
-        };
+            ("Data/privacy", this.DrawDataPrivacy),
+        ];
     }
 
     public void Dispose() {
@@ -276,6 +277,18 @@ internal class Settings : ITab {
                 }
             }
         }
+    }
+
+    private void DrawDataPrivacy(ref bool anyChanged, ref bool vfx) {
+        ImGui.PushTextWrapPos();
+        using var popTextWrap = new OnDispose(ImGui.PopTextWrapPos);
+
+        ImGui.TextUnformatted("The only data that Orange Guidance Tomestone collects from you is what you submit via the plugin interface.");
+        ImGui.TextUnformatted("When you install the plugin, an anonymous account is automatically created for you. This account does not store any information about you, and it can be deleted at any time.");
+        ImGui.TextUnformatted("In order for the emote function to work, the plugin sends information about your equipment as well as your complete character customisation data. This is used to display your character performing the emote when your message is viewed.");
+        ImGui.TextUnformatted("Orange Guidance Tomestone stores all data you send via the plugin until you delete it or delete your account.");
+        ImGui.TextUnformatted("While you are online, Orange Guidance Tomestone sends a periodic notification to the server to mark your account as active, which allows your messages to be viewed by other players.");
+        ImGui.TextUnformatted("Orange Guidance Tomestone does not sell or share your data, and it does not collect any personally-identifiable information. No tracking is used in this plugin.");
     }
 
     private void ExtraCodeInput() {
