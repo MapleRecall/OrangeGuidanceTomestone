@@ -10,7 +10,6 @@ internal class ActorManager : IDisposable {
     private readonly Queue<Mode> _tasks = [];
 
     private enum Mode {
-        None,
         Enable,
         Disable,
         Delete,
@@ -47,20 +46,24 @@ internal class ActorManager : IDisposable {
 
         switch (mode) {
             case Mode.Disable: {
+                Plugin.Log.Debug("disabling actor");
                 obj->DisableDraw();
                 success = true;
                 break;
             }
             case Mode.Enable: {
                 if (!obj->IsReadyToDraw()) {
+                    Plugin.Log.Debug("not ready to draw");
                     break;
                 }
 
+                Plugin.Log.Debug("drawing actor");
                 obj->EnableDraw();
                 success = true;
                 break;
             }
             case Mode.Delete: {
+                Plugin.Log.Debug("deleting actor");
                 objMan->DeleteObjectByIndex((ushort) idx, 0);
                 this._idx = null;
                 success = true;
@@ -69,11 +72,14 @@ internal class ActorManager : IDisposable {
         }
 
         if (success) {
-            this._tasks.Dequeue();
+            var res = this._tasks.Dequeue();
+            Plugin.Log.Debug($"deq {Enum.GetName(res)}");
         }
     }
 
     private void OnView(Message? message) {
+        var msg = message == null ? "null" : "not null";
+        Plugin.Log.Debug($"OnView message is {msg}");
         this.Despawn();
 
         if (message != null) {
@@ -87,9 +93,12 @@ internal class ActorManager : IDisposable {
             return;
         }
 
+        Plugin.Log.Debug("spawning actor");
+
         var objMan = ClientObjectManager.Instance();
         var idx = objMan->CreateBattleCharacter();
         if (idx == 0xFFFFFFFF) {
+            Plugin.Log.Debug("actor could not be spawned");
             return;
         }
 
@@ -97,6 +106,7 @@ internal class ActorManager : IDisposable {
 
         var chara = (BattleChara*) objMan->GetObjectByIndex((ushort) idx);
 
+        chara->ObjectKind = ObjectKind.BattleNpc;
         chara->Position = message.Position;
         chara->Rotation = message.Yaw;
         var drawData = &chara->DrawData;
@@ -109,8 +119,11 @@ internal class ActorManager : IDisposable {
         this._tasks.Enqueue(Mode.Enable);
     }
 
-    internal unsafe void Despawn() {
-        Plugin.Log.Debug("despawning actor");
+    internal void Despawn() {
+        if (this._idx == null) {
+            return;
+        }
+
         this._tasks.Enqueue(Mode.Disable);
         this._tasks.Enqueue(Mode.Delete);
     }

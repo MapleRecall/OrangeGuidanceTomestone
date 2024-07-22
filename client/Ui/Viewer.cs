@@ -13,7 +13,7 @@ internal class Viewer {
     internal bool Visible;
 
     internal delegate void MessageViewDelegate(Message? message);
-    internal event MessageViewDelegate View;
+    internal event MessageViewDelegate? View;
 
     private Guid _lastViewed = Guid.Empty;
 
@@ -26,7 +26,7 @@ internal class Viewer {
     internal void Draw() {
         if (!this.Visible) {
             if (this._lastViewed != Guid.Empty) {
-                this.View(null);
+                this.View?.Invoke(null);
             }
 
             this._lastViewed = Guid.Empty;
@@ -97,7 +97,7 @@ internal class Viewer {
             var message = nearby[this._idx];
             if (this._lastViewed != message.Id) {
                 try {
-                    this.View(message);
+                    this.View?.Invoke(message);
                 } catch (Exception ex) {
                     Plugin.Log.Error(ex, "Error in View event");
                 }
