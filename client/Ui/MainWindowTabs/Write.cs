@@ -178,6 +178,13 @@ internal class Write : ITab {
 
             using var endCombo = new OnDispose(ImGui.EndCombo);
 
+            if (ImGui.IsWindowAppearing()) {
+                ImGui.SetKeyboardFocusHere();
+            }
+
+            ImGui.SetNextItemWidth(-1);
+            ImGui.InputTextWithHint("###word-search", "Search...", ref search, 100, ImGuiInputTextFlags.AutoSelectAll);
+
             for (var wordIdx = 0; wordIdx < template.Words.Length; wordIdx++) {
                 var word = template.Words[wordIdx];
                 if (!string.IsNullOrEmpty(search) && !word.Contains(search, StringComparison.InvariantCultureIgnoreCase)) {
@@ -206,7 +213,12 @@ internal class Write : ITab {
 
                 using var endMenu = new OnDispose(ImGui.EndMenu);
 
-                ImGui.InputText("###word-search", ref search, 100);
+                if (ImGui.IsWindowAppearing()) {
+                    ImGui.SetKeyboardFocusHere();
+                }
+
+                ImGui.SetNextItemWidth(-1);
+                ImGui.InputTextWithHint("###word-search", "Search...", ref search, 100, ImGuiInputTextFlags.AutoSelectAll);
 
                 for (var wordIdx = 0; wordIdx < list.Words.Length; wordIdx++) {
                     var word = list.Words[wordIdx];
