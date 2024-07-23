@@ -133,6 +133,12 @@ internal unsafe class Vfx : IDisposable {
         // update rotation
         vfx->Rotation = new Quaternion(rotation.X, rotation.Y, rotation.Z, rotation.W);
 
+        // set alpha and colours from config
+        vfx->Red = Math.Clamp(this.Plugin.Config.SignRed / 100, 0, 100);
+        vfx->Green = Math.Clamp(this.Plugin.Config.SignGreen / 100, 0, 100);
+        vfx->Blue = Math.Clamp(this.Plugin.Config.SignBlue / 100, 0, 100);
+        vfx->Alpha = Math.Clamp(this.Plugin.Config.SignAlpha / 100, 0, 100);
+
         // remove flag that sometimes causes vfx to not appear?
         vfx->SomeFlags &= 0xF7;
 
@@ -176,6 +182,18 @@ internal unsafe class Vfx : IDisposable {
 
         [FieldOffset(0x248)]
         public byte SomeFlags;
+
+        [FieldOffset(0x260)]
+        public float Red;
+
+        [FieldOffset(0x264)]
+        public float Green;
+
+        [FieldOffset(0x268)]
+        public float Blue;
+
+        [FieldOffset(0x26C)]
+        public float Alpha;
     }
 }
 

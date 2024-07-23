@@ -20,6 +20,10 @@ public class Configuration : IPluginConfiguration {
     public bool HideTitlebar;
     public bool ShowEmotes = true;
     public float EmoteAlpha = 25.0f;
+    public float SignAlpha = 100.0f;
+    public float SignRed = 100.0f;
+    public float SignGreen = 100.0f;
+    public float SignBlue = 100.0f;
     public float ViewerOpacity = 100.0f;
     public int DefaultGlyph = 3;
 }

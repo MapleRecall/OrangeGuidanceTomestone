@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Numerics;
 using Dalamud.Utility;
+using FFXIVClientStructs.Interop;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using OrangeGuidanceTomestone.Helpers;
@@ -38,6 +39,7 @@ internal class Settings : ITab {
             ("General", this.DrawGeneral),
             ("Writer", this.DrawWriter),
             ("Viewer", this.DrawViewer),
+            ("Signs", this.DrawSigns),
             ("Unlocks", this.DrawUnlocks),
             ("Account", this.DrawAccount),
             ("Debug", this.DrawDebug),
@@ -121,7 +123,6 @@ internal class Settings : ITab {
         anyChanged |= vfx |= ImGui.Checkbox("Disable in Deep Dungeons", ref this.Plugin.Config.DisableDeepDungeon);
         anyChanged |= vfx |= ImGui.Checkbox("Disable in cutscenes", ref this.Plugin.Config.DisableInCutscene);
         anyChanged |= vfx |= ImGui.Checkbox("Disable in /gpose", ref this.Plugin.Config.DisableInGpose);
-        anyChanged |= vfx |= ImGui.Checkbox("Remove glow effect from signs", ref this.Plugin.Config.RemoveGlow);
 
         var tt = this.Plugin.DataManager.GetExcelSheet<TerritoryType>();
         if (tt == null) {
@@ -224,6 +225,81 @@ internal class Settings : ITab {
 
         anyChanged |= ImGui.Checkbox("Show player emotes", ref this.Plugin.Config.ShowEmotes);
         anyChanged |= ImGui.SliderFloat("Player emote opacity", ref this.Plugin.Config.EmoteAlpha, 0f, 100f, "%.2f%%");
+    }
+
+    private void DrawSigns(ref bool anyChanged, ref bool vfx) {
+        anyChanged |= vfx |= ImGui.Checkbox("Remove glow effect from signs", ref this.Plugin.Config.RemoveGlow);
+        if (ImGui.SliderFloat("Sign opacity", ref this.Plugin.Config.SignAlpha, 0, 100, "%.2f%%")) {
+            anyChanged = true;
+
+            this.WithEachVfx(vfx => {
+                unsafe {
+                    vfx.Value->Alpha = Math.Clamp(this.Plugin.Config.SignAlpha / 100.0f, 0, 1);
+                }
+            });
+        }
+
+        var intensity = (this.Plugin.Config.SignRed + this.Plugin.Config.SignGreen + this.Plugin.Config.SignBlue) / 3;
+        if (ImGui.SliderFloat("Sign intensity", ref intensity, 0, 100, "%.2f%%")) {
+            anyChanged = true;
+            this.Plugin.Config.SignRed = intensity;
+            this.Plugin.Config.SignGreen = intensity;
+            this.Plugin.Config.SignBlue = intensity;
+
+            var scaled = Math.Clamp(intensity / 100.0f, 0, 1);
+            this.WithEachVfx(vfx => {
+                unsafe {
+                    vfx.Value->Red = scaled;
+                    vfx.Value->Green = scaled;
+                    vfx.Value->Blue = scaled;
+                }
+            });
+        }
+
+        if (ImGui.TreeNodeEx("Individual colour intensities")) {
+            using var treePop = new OnDispose(ImGui.TreePop);
+
+            if (ImGui.SliderFloat("Red intensity", ref this.Plugin.Config.SignRed, 0, 100, "%.2f%%")) {
+                anyChanged = true;
+                this.WithEachVfx(vfx => {
+                    unsafe {
+                        vfx.Value->Red = Math.Clamp(this.Plugin.Config.SignRed / 100, 0, 100);
+                    }
+                });
+            }
+
+            if (ImGui.SliderFloat("Green intensity", ref this.Plugin.Config.SignGreen, 0, 100, "%.2f%%")) {
+                anyChanged = true;
+                this.WithEachVfx(vfx => {
+                    unsafe {
+                        vfx.Value->Green = Math.Clamp(this.Plugin.Config.SignGreen / 100, 0, 100);
+                    }
+                });
+            }
+
+            if (ImGui.SliderFloat("Blue intensity", ref this.Plugin.Config.SignBlue, 0, 100, "%.2f%%")) {
+                anyChanged = true;
+                this.WithEachVfx(vfx => {
+                    unsafe {
+                        vfx.Value->Blue = Math.Clamp(this.Plugin.Config.SignBlue / 100, 0, 100);
+                    }
+                });
+            }
+        }
+    }
+
+    private void WithEachVfx(Action<Pointer<Vfx.VfxStruct>> action) {
+        if (!this.Plugin.Vfx.Mutex.With(TimeSpan.Zero, out var releaser)) {
+            return;
+        }
+
+        using (releaser) {
+            foreach (var (_, ptr) in this.Plugin.Vfx.Spawned) {
+                unsafe {
+                    action((Vfx.VfxStruct*) ptr);
+                }
+            }
+        }
     }
 
     private void DrawUnlocks(ref bool anyChanged, ref bool vfx) {
