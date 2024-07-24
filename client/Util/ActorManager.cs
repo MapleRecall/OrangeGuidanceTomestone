@@ -177,12 +177,8 @@ internal class ActorManager : IDisposable {
             drawData->SetGlasses(0, (ushort) emote.Glasses);
 
             chara->Alpha = Math.Clamp(manager.Plugin.Config.EmoteAlpha / 100, 0, 1);
-            chara->SetMode(CharacterModes.AnimLock, 0);
-            if (emoteRow != null) {
-                chara->Timeline.BaseOverride = (ushort) emoteRow.ActionTimeline[0].Row;
-            }
 
-            manager._tasks.Enqueue(new EnableAction());
+            manager._tasks.Enqueue(new EnableAction(emoteRow?.ActionTimeline[0].Value));
             return true;
         }
     }
@@ -196,7 +192,7 @@ internal class ActorManager : IDisposable {
         return emote.TextCommand.Row == 0 ? null : emote;
     }
 
-    private unsafe class EnableAction : BaseActorAction {
+    private unsafe class EnableAction(ActionTimeline? action) : BaseActorAction {
         public override bool Run(ActorManager manager, ClientObjectManager* objMan) {
             var allReady = true;
             foreach (var chara in this.GetBattleCharas(manager, objMan)) {
@@ -206,6 +202,17 @@ internal class ActorManager : IDisposable {
                 }
 
                 chara.Value->EnableDraw();
+
+                if (action == null) {
+                    continue;
+                }
+
+                chara.Value->SetMode(CharacterModes.AnimLock, 0);
+                if (action.Slot == 0) {
+                    chara.Value->Timeline.BaseOverride = (ushort) action.RowId;
+                } else {
+                    chara.Value->Timeline.TimelineSequencer.PlayTimeline((ushort) action.RowId);
+                }
             }
 
             return allReady;
