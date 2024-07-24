@@ -134,10 +134,10 @@ internal unsafe class Vfx : IDisposable {
         vfx->Rotation = new Quaternion(rotation.X, rotation.Y, rotation.Z, rotation.W);
 
         // set alpha and colours from config
-        vfx->Red = Math.Clamp(this.Plugin.Config.SignRed / 100, 0, 100);
-        vfx->Green = Math.Clamp(this.Plugin.Config.SignGreen / 100, 0, 100);
-        vfx->Blue = Math.Clamp(this.Plugin.Config.SignBlue / 100, 0, 100);
-        vfx->Alpha = Math.Clamp(this.Plugin.Config.SignAlpha / 100, 0, 100);
+        vfx->Red = Math.Clamp(this.Plugin.Config.SignRed / 100, 0, 1);
+        vfx->Green = Math.Clamp(this.Plugin.Config.SignGreen / 100, 0, 1);
+        vfx->Blue = Math.Clamp(this.Plugin.Config.SignBlue / 100, 0, 1);
+        vfx->Alpha = Math.Clamp(this.Plugin.Config.SignAlpha / 100, 0, 1);
 
         // remove flag that sometimes causes vfx to not appear?
         vfx->SomeFlags &= 0xF7;

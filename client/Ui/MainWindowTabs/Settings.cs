@@ -263,7 +263,7 @@ internal class Settings : ITab {
                 anyChanged = true;
                 this.WithEachVfx(vfx => {
                     unsafe {
-                        vfx.Value->Red = Math.Clamp(this.Plugin.Config.SignRed / 100, 0, 100);
+                        vfx.Value->Red = Math.Clamp(this.Plugin.Config.SignRed / 100, 0, 1);
                     }
                 });
             }
@@ -272,7 +272,7 @@ internal class Settings : ITab {
                 anyChanged = true;
                 this.WithEachVfx(vfx => {
                     unsafe {
-                        vfx.Value->Green = Math.Clamp(this.Plugin.Config.SignGreen / 100, 0, 100);
+                        vfx.Value->Green = Math.Clamp(this.Plugin.Config.SignGreen / 100, 0, 1);
                     }
                 });
             }
@@ -281,7 +281,7 @@ internal class Settings : ITab {
                 anyChanged = true;
                 this.WithEachVfx(vfx => {
                     unsafe {
-                        vfx.Value->Blue = Math.Clamp(this.Plugin.Config.SignBlue / 100, 0, 100);
+                        vfx.Value->Blue = Math.Clamp(this.Plugin.Config.SignBlue / 100, 0, 1);
                     }
                 });
             }
