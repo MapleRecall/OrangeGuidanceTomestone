@@ -67,7 +67,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                        m.message,
                        coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                        coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
-                       coalesce(sum(case when v.user = ? then v.vote else 0 end), 0) as user_vote,
+                       coalesce(sum(case when v.user = ?1 then v.vote else 0 end), 0) as user_vote,
                        m.glyph,
                        m.emote as "emote: Json<Option<EmoteData>>",
                        m.created,
@@ -76,7 +76,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                 from messages m
                          left join votes v on m.id = v.message
                          inner join users u on m.user = u.id
-                where m.territory = ? and not u.shadowbanned and m.world is ? and m.ward is ? and m.plot is ?
+                where m.territory = ?2 and (m.user = ?1 or not u.shadowbanned) and m.world is ?3 and m.ward is ?4 and m.plot is ?5
                 group by m.id
             "#,
             id,
@@ -103,7 +103,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                        m.message,
                        coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                        coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
-                       coalesce(sum(case when v.user = ? then v.vote else 0 end), 0) as user_vote,
+                       coalesce(sum(case when v.user = ?1 then v.vote else 0 end), 0) as user_vote,
                        m.glyph,
                        m.emote as "emote: Json<Option<EmoteData>>",
                        m.created,
@@ -112,7 +112,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                 from messages m
                          left join votes v on m.id = v.message
                          inner join users u on m.user = u.id
-                where m.territory = ? and not u.shadowbanned
+                where m.territory = ?2 and (m.id = ?1 or not u.shadowbanned)
                 group by m.id
             "#,
             id,
