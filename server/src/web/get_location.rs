@@ -76,8 +76,9 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                 from messages m
                          left join votes v on m.id = v.message
                          inner join users u on m.user = u.id
-                where m.territory = ? and m.world is ? and m.ward is ? and m.plot is ?
-                group by m.id"#,
+                where m.territory = ? and not u.shadowbanned and m.world is ? and m.ward is ? and m.plot is ?
+                group by m.id
+            "#,
             id,
             location,
             world,
@@ -111,8 +112,9 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                 from messages m
                          left join votes v on m.id = v.message
                          inner join users u on m.user = u.id
-                where m.territory = ?
-                group by m.id"#,
+                where m.territory = ? and not u.shadowbanned
+                group by m.id
+            "#,
             id,
             location,
         )
