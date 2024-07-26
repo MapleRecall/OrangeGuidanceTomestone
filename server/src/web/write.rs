@@ -6,6 +6,7 @@ use warp::{Filter, Rejection, Reply};
 use warp::filters::BoxedFilter;
 
 use crate::message::Message;
+use crate::pack::Template;
 use crate::State;
 use crate::util::HOUSING_ZONES;
 use crate::web::{AnyhowRejection, WebError};
@@ -36,12 +37,33 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, message: Message) -> Resu
         let pack = packs.get(&message.pack_id)
             .ok_or(WebError::InvalidPackId)
             .map_err(warp::reject::custom)?;
+
+        let template_1_is_list = pack.templates
+            .get(message.template_1)
+            .map(|template| matches!(template, Template::List { .. }))
+            .unwrap_or_default();
+        let word_1_idx = if template_1_is_list {
+            message.word_1_word.map(|word| (0, word))
+        } else {
+            message.word_1_list.and_then(|list| message.word_1_word.map(|word| (list, word)))
+        };
+
+        let template_2_is_list = message.template_2
+            .and_then(|idx| pack.templates.get(idx))
+            .map(|template| matches!(template, Template::List { .. }))
+            .unwrap_or_default();
+        let word_2_idx = if template_2_is_list {
+            message.word_2_word.map(|word| (0, word))
+        } else {
+            message.word_2_list.and_then(|list| message.word_2_word.map(|word| (list, word)))
+        };
+
         pack.format(
             message.template_1,
-            message.word_1_list.and_then(|list| message.word_1_word.map(|word| (list, word))),
+            word_1_idx,
             message.conjunction,
             message.template_2,
-            message.word_2_list.and_then(|list| message.word_2_word.map(|word| (list, word))),
+            word_2_idx,
         )
             .ok_or(WebError::InvalidIndex)
             .map_err(warp::reject::custom)?
