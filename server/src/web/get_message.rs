@@ -38,13 +38,12 @@ async fn logic(state: Arc<State>, id: i64, message_id: Uuid) -> Result<impl Repl
                    m.message,
                    coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                    coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
-                   coalesce(v2.vote, 0)                      as user_vote,
+                   coalesce(sum(case when v.user = ? then v.vote else 0 end), 0) as user_vote,
                    m.glyph,
                    m.emote as "emote: Json<Option<EmoteData>>",
                    m.created
             from messages m
                      left join votes v on m.id = v.message
-                     left join votes v2 on m.id = v2.message and v2.user = ?
             where m.id = ?
             group by m.id"#,
         id,

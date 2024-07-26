@@ -67,7 +67,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                        m.message,
                        coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                        coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
-                       coalesce(v2.vote, 0)                      as user_vote,
+                       coalesce(sum(case when v.user = ? then v.vote else 0 end), 0) as user_vote,
                        m.glyph,
                        m.emote as "emote: Json<Option<EmoteData>>",
                        m.created,
@@ -75,7 +75,6 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                        coalesce(cast((julianday(current_timestamp) - julianday(u.last_seen)) * 1440 as int), 0) as last_seen_minutes
                 from messages m
                          left join votes v on m.id = v.message
-                         left join votes v2 on m.id = v2.message and v2.user = ?
                          inner join users u on m.user = u.id
                 where m.territory = ? and m.world is ? and m.ward is ? and m.plot is ?
                 group by m.id"#,
@@ -103,7 +102,7 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                        m.message,
                        coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                        coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
-                       coalesce(v2.vote, 0)                      as user_vote,
+                       coalesce(sum(case when v.user = ? then v.vote else 0 end), 0) as user_vote,
                        m.glyph,
                        m.emote as "emote: Json<Option<EmoteData>>",
                        m.created,
@@ -111,7 +110,6 @@ async fn logic(state: Arc<State>, id: i64, location: u32, query: GetLocationQuer
                        coalesce(cast((julianday(current_timestamp) - julianday(u.last_seen)) * 1440 as int), 0) as last_seen_minutes
                 from messages m
                          left join votes v on m.id = v.message
-                         left join votes v2 on m.id = v2.message and v2.user = ?
                          inner join users u on m.user = u.id
                 where m.territory = ?
                 group by m.id"#,
@@ -181,7 +179,6 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64, vote_threshold
                         return;
                     }
                 };
-
 
                 let time_since_creation = a.created.signed_duration_since(Utc::now().naive_utc());
                 let brand_new = time_since_creation < Duration::minutes(30);

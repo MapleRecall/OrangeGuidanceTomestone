@@ -42,14 +42,13 @@ async fn logic(state: Arc<State>, id: i64, extra: i64, mut query: HashMap<String
                    m.message,
                    coalesce(sum(v.vote between 0 and 1), 0)  as positive_votes,
                    coalesce(sum(v.vote between -1 and 0), 0) as negative_votes,
-                   coalesce(v2.vote, 0)                      as user_vote,
+                   coalesce(sum(case when v.user = ? then v.vote else 0 end), 0) as user_vote,
                    m.glyph,
                    m.created,
                    m.emote as "emote: Json<Option<EmoteData>>",
                    0 as "is_hidden: bool"
             from messages m
                      left join votes v on m.id = v.message
-                     left join votes v2 on m.id = v2.message and v2.user = ?
             where m.user = ?
             group by m.id"#,
         id,
