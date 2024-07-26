@@ -169,16 +169,19 @@ fn filter_messages(messages: &mut Vec<RetrievedMessage>, id: i64, vote_threshold
                 // no need to do calculations for groups of three or fewer
                 (17, 20)
             } else {
-                let already_visible = {
+                {
+                    // do this in its own scope to keep the read lock,
+                    // preventing a race where we can end up with four messages
                     let ids = ids.read();
-                    nearby_ids.iter()
+                    let already_visible = nearby_ids.iter()
                         .filter(|id| ids.contains(id))
-                        .count()
+                        .count();
+
+                    if already_visible >= 3 {
+                        return;
+                    }
                 };
 
-                if already_visible >= 3 {
-                    return;
-                }
 
                 let time_since_creation = a.created.signed_duration_since(Utc::now().naive_utc());
                 let brand_new = time_since_creation < Duration::minutes(30);
