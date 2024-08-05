@@ -1,0 +1,852 @@
+name: Demon's Souls (PS5)
+id: ed854733-bd09-446d-981b-a50efd6aa599
+visible: true
+order: 8
+
+word-refs:
+  people: &people
+    - 'beginners'
+    - 'veterans'
+    - 'enemies'
+    - 'monsters'
+    - 'demons'
+    - 'ghosts'
+    - 'dragons'
+    - 'corpses'
+    - 'crows'
+    - 'skeletons'
+    - 'prisoners'
+    - 'rats'
+    - 'lizards'
+    - 'friends'
+    - 'Black Phantoms'
+    - 'Blue Phantoms'
+    - 'White Phantoms'
+    - 'challengers'
+    - 'knights'
+    - 'soldiers'
+    - 'magicians'
+    - 'priests'
+    - 'hunters'
+    - 'thieves'
+    - 'royalty'
+    - 'temple knights'
+    - 'barbarians'
+    - 'wanderers'
+    - 'heroes'
+    - 'cowards'
+    - 'warriors'
+    - 'chairs'
+    - 'barrels'
+
+  article-people: &article-people
+    - 'a hero'
+    - 'a villain'
+    - 'a liar'
+    - 'a hidden foe'
+    - 'the king'
+    - 'a friend'
+    - 'a good guy'
+    - 'a bad guy'
+    - 'a merchant'
+    - 'a false god'
+    - 'the true hero'
+    - 'a slayer'
+    - 'a beginner'
+    - 'a veteran'
+    - 'a demon'
+    - 'a coward'
+    - 'a madman'
+    - 'a keeper'
+    - 'a master'
+    - 'a tyrant'
+    - 'a bird'
+    - 'a poor guy'
+    - 'a tough guy'
+    - 'your heart'
+    - 'your soulmate'
+    - 'pure luck'
+
+  things: &things
+    # - 'traps'
+    - 'enemy'
+    - 'floor'
+    - 'fall'
+    - 'false reports'
+    - 'other messages'
+    - 'poison'
+    - 'lava'
+    - 'plague'
+    - 'rocks'
+    - 'ranged attacks'
+    - 'water'
+    - 'shield break'
+    - 'monsters'
+    - 'fog'
+    - 'parry'
+    - 'magic'
+    - 'miracles'
+    - 'cages'
+    - 'firebombs'
+    - 'barrels'
+    - 'blades'
+    - 'tip'
+    - 'soul signs'
+    - 'Black Phantoms'
+    - 'Blue Phantoms'
+    - 'White Phantoms'
+    - 'doors'
+    - 'lights'
+    - 'sounds'
+    - 'ambushes'
+    - 'boulders'
+    - 'treasures'
+    - 'elevators'
+    - 'spice'
+    - 'grass'
+    - 'projectiles'
+    - 'fire'
+    - 'adversaries'
+    - 'corrosion'
+    - 'misperceptions'
+    - 'ghosts'
+    - 'demons'
+
+  actions: &actions
+    - 'rolling'
+    - 'fighting'
+    - 'blocking'
+    - 'shooting'
+    - 'aiming'
+    - 'running away'
+    - 'escaping'
+    - 'a break'
+    - 'snacking'
+    - 'partying'
+    - 'napping'
+    - 'yelling'
+    - 'healing'
+    - 'guarding'
+    - 'talking'
+    - 'eating'
+    - 'climbing'
+    - 'vaulting'
+    - 'dueling'
+    - 'taking a chance'
+    - 'upgrading'
+    - 'messaging'
+    - 'dying'
+    - 'upvoting'
+    - 'trading'
+    - 'parrying'
+    - 'getting hurt'
+    - 'soul draining'
+    - 'luck'
+    - 'hoping'
+    - 'falling down'
+    - 'kicking'
+    - 'shopping'
+    - 'piercing'
+    - 'slashing'
+    - 'hoarding'
+    - 'equipping'
+    - 'disguising'
+    - 'slaying'
+
+  mechanics: &mechanics
+    - 'grass'
+    - 'fire'
+    - 'magic'
+    - 'miracle'
+    - 'stamina'
+    - 'tactics'
+    - 'brute force'
+    - 'blocking'
+    - 'lever'
+    - 'dodging'
+    - 'rolling'
+    - 'stealth'
+    - 'flanking'
+    - 'strong attack'
+    - 'combo attack'
+    - 'normal attack'
+    - 'parry'
+    - 'riposte'
+    - 'blunt attack'
+    - 'slash attack'
+    - 'pierce attack'
+    - 'lunge'
+    - 'one-handed attack'
+    - 'two-handed attack'
+    - 'guard break'
+    - 'knockback'
+    - 'ranged attack'
+    - 'arrow'
+    - 'teamwork'
+    - 'poison resistance'
+    - 'bleed resistance'
+    - 'plague resistance'
+    - 'fire defense'
+    - 'magic defense'
+    - 'Nexial Binding'
+    - 'Augite of Guidance'
+    - 'Soul Remains'
+    - 'Pine Resin'
+    - 'stone'
+    - 'shield'
+    - 'axe'
+    - 'katana'
+    - 'straight sword'
+    - 'spear'
+    - 'polearm'
+    - 'hammer'
+    - 'fist'
+    - 'dagger'
+    - 'large sword'
+    - 'rapier'
+    - 'nothing'
+    - 'Blue Eye Stone'
+    - 'White Eye Stone'
+    - 'Black Eye Stone'
+    - 'Red Eye Stone'
+
+  objects: &objects
+    - 'chest'
+    - 'treasures'
+    - 'loot'
+    - 'ore'
+    - 'key'
+    - 'path'
+    - 'message'
+    - 'lever'
+    # - 'trap'
+    - 'enemy'
+    - 'sign'
+    - 'corpse'
+    - 'grass'
+    - 'spice'
+    - 'secret'
+    - 'passage'
+    - 'luck'
+    - 'fortune'
+    - 'karma'
+    - 'destiny'
+    - 'magic'
+    - 'miracle'
+    - 'ring'
+    - 'armor'
+    - 'weapon'
+    - 'item'
+    - 'soul'
+    - 'equipment'
+    - 'bloodstain'
+    - 'Sharpstone'
+    - 'Hardstone'
+    - 'Clearstone'
+    - 'Greystone'
+    - 'Bladestone'
+    - 'Dragonstone'
+    - 'Suckerstone'
+    - 'Mercurystone'
+    - 'Marrowstone'
+    - 'Spiderstone'
+    - 'Moonlightstone'
+    - 'Moonshadestone'
+    - 'Faintstone'
+    - 'Cloudstone'
+    - 'Meltstone'
+
+  locations: &locations
+    - 'castle'
+    - 'mines'
+    - 'underground'
+    - 'tunnel'
+    - 'prison'
+    - 'tower'
+    - 'pit'
+    - 'dungeon'
+    - 'lair'
+    - 'building'
+    - 'store'
+    - 'house'
+    - 'cage'
+    - 'cave'
+    - 'shrine'
+    - 'temple'
+    - 'church'
+    - 'bridge'
+    - 'cliff'
+    - 'room'
+    - 'swamp'
+    - 'valley'
+    - 'abyss'
+    - 'beach'
+    - 'ruins'
+    - 'mausoleum'
+    - 'tomb'
+    - 'dump'
+    - 'haven'
+    - 'storm'
+    - 'rain'
+    - 'other side'
+    - 'fight'
+    - 'party'
+    - 'pool'
+    - 'shortcut'
+    - 'detour'
+    - 'danger zone'
+    - 'safe place'
+    - 'darkness'
+    - 'Nexus'
+    - 'Archstone'
+    - 'dead end'
+    - "sniper's perch"
+
+  adjectives: &adjectives
+    - 'strong'
+    - 'kind'
+    - 'brave'
+    - 'undefeated'
+    - 'trustworthy'
+    - 'confident'
+    - 'impatient'
+    - 'scared'
+    - 'lying'
+    - 'tired'
+    - 'formidable'
+    - 'useful'
+    - 'useless'
+    - 'stubborn'
+    - 'lost'
+    - 'sad'
+    - 'dead'
+    - 'waiting'
+    - 'cautious'
+    - 'lonely'
+    - 'crestfallen'
+    - 'emotional'
+    - 'wondering'
+    - 'defeated'
+    - 'dying'
+    - 'the best'
+    - 'beautiful'
+    - 'hard'
+    - 'easy'
+    - 'funny'
+    - 'proud of you'
+    - 'proud of me'
+    - 'helpful'
+    - 'trading'
+    - 'filthy'
+    - 'sparkly'
+    - 'twinkly'
+    - 'everywhere'
+    - 'all alone'
+    - 'crazy'
+    - 'delusional'
+    - 'cute'
+    - 'loved'
+    - 'careless'
+    - 'heavy'
+    - 'burnt'
+    - 'real'
+    - 'fake'
+    - 'unknown'
+    - 'renowned'
+    - 'storied'
+    - 'legendary'
+
+  numbers: &numbers
+    - '1'
+    - '2'
+    - '3'
+    - '4'
+    - '5'
+    - '6'
+    - '7'
+    - '8'
+    - '9'
+    - '0'
+    - '10'
+    - '20'
+    - '30'
+    - '40'
+    - '50'
+    - '60'
+    - '70'
+    - '80'
+    - '90'
+    - '100'
+    - '110'
+    - '120'
+    - '130'
+    - '140'
+    - '150'
+    - '160'
+    - '170'
+    - '180'
+    - '190'
+    - '200'
+    - '210'
+    - '220'
+    - '230'
+    - '240'
+    - '250'
+    - '260'
+    - '270'
+    - '280'
+    - '290'
+    - '300'
+    - '310'
+    - '320'
+    - '330'
+    - '340'
+    - '350'
+    - '360'
+    - '370'
+    - '380'
+    - '390'
+    - '400'
+    - '450'
+    - '500'
+    - '600'
+    - '700'
+    - '800'
+    - '900'
+    - '1000'
+    - '2000'
+    - '3000'
+    - '4000'
+    - '5000'
+    - '6000'
+    - '7000'
+    - '8000'
+    - '9000'
+    - 'over 9000'
+
+  directions: &directions
+    - 'up'
+    - 'down'
+    - 'left'
+    - 'right'
+    - 'below'
+    - 'above'
+    - 'behind you'
+    - 'the rear'
+    - 'the front'
+    - 'all around'
+    - 'anywhere'
+    - 'overhead'
+    - 'this way'
+    - 'a dead end'
+    - 'a narrow corridor'
+    - 'an open space'
+    - 'a great view'
+    - 'the wound'
+    - 'the stomach'
+    - 'the foot'
+    - 'the finger'
+    - 'the head'
+    - 'the shoulders'
+    - 'the knees'
+    - 'the toes'
+    - 'the leg'
+    - 'the bird'
+
+  actions-2: &actions-2
+    - 'get the key'
+    - 'use the lever'
+    - 'have white Soul tendency'
+    - 'have black Soul tendency'
+    - 'press on'
+    - 'level up'
+    - 'keep trying'
+    - "don't give up"
+    - 'disguise yourself'
+    - 'restock items'
+    - 'upgrade your weapon'
+    - 'summon help'
+
+  words: &words
+    - 'Fight'
+    - 'Attack'
+    - 'Block'
+    - 'Run'
+    - 'Hide'
+    - 'Escape'
+    - 'Punch'
+    - 'Stop'
+    - 'Surprise'
+    - 'Now'
+    - 'Farewell'
+    - 'Nothing'
+    - 'Ignore'
+    - 'Success'
+    - 'Dead'
+    - 'Help'
+    - 'Heal'
+    - 'Bleeding'
+    - 'Poison'
+    - 'Plague'
+    - 'Fire'
+    - 'Burnt'
+    - 'Magic'
+    - 'Miracle'
+    - 'Soul Form'
+    - 'Body Form'
+    - 'Umbasa'
+    - 'Enemy'
+    - 'Demon'
+    - 'Boss'
+    - 'Trust'
+    - 'Lies'
+    # - 'Trap'
+    - 'Friend'
+    - 'Treasure'
+    - 'Rare'
+    - 'Loved'
+    - 'Sad'
+    - 'Real'
+    - 'Fake'
+    - 'Hard'
+    - 'Easy'
+    - 'Good'
+    - 'Bad'
+    - 'Scary'
+    - 'Trade'
+    - 'Vault'
+    - 'Fall'
+    - 'Rock'
+    - 'Paper'
+    - 'Scissors'
+    - 'Misperception'
+
+  terms: &terms
+    - 'from'
+    - 'focus'
+    - 'look'
+    - 'fire'
+    - 'point'
+    - 'character'
+    - 'nothing'
+    - 'died'
+    - 'photo'
+    - 'society'
+    - 'white'
+    - 'black'
+    - 'blue'
+    - 'red'
+    - 'fun'
+    - 'evil'
+    - 'tendency'
+    - 'burden'
+    - 'equipment'
+    - 'item'
+    - 'augite'
+    - 'gesture'
+    - 'love'
+    - 'karma'
+    - 'fortune'
+    - 'chance'
+    - 'hope'
+    - 'song'
+    - 'ruin'
+    - 'hate'
+    - 'demon'
+    - 'monster'
+    - 'secret'
+    - 'shard'
+    - 'phantom'
+    - 'grass'
+    - 'spice'
+    - 'lotus'
+    - 'grains'
+    - 'stone'
+    - 'souls'
+    - 'key'
+    - 'moon'
+    - 'unlock'
+    - 'escape'
+    - 'sound'
+    - 'merchant'
+    - 'sprint'
+    - 'lookout'
+    - 'range'
+    - 'close'
+    - 'far'
+    - 'filthy'
+    - 'careless'
+    - 'oops'
+    - 'ready'
+    - 'steady'
+    - 'set'
+    - 'go'
+    - 'stop'
+    - 'up'
+    - 'down'
+    - 'right'
+    - 'wrong'
+    - 'left'
+    - 'front'
+    - 'back'
+    - 'clockwise'
+    - 'counter'
+
+templates:
+  - template: 'Beware of {0} ahead.'
+    words: *people
+
+  - template: 'Be wary of {0}.'
+    words: *article-people
+
+  - template: 'Avoid those who are {0}.'
+    words: *adjectives
+
+  - template: "Don't forget to {0}."
+    words: *actions-2
+
+  - template: "Beware of the enemy's {0}."
+    words: *things
+
+  - template: 'Am stuck in the {0}!'
+    words: *locations
+
+  - template: 'That {0} is not a good choice.'
+    words: *mechanics
+
+  - template: 'Bad time for {0}.'
+    words: *actions
+
+  - template: 'Bring on the {0}.'
+    words: *people
+
+  - template: 'Strange {0} ahead.'
+    words: *objects
+
+  - template: 'Could be {0}.'
+    words: *article-people
+
+  - template: 'Avoid {0}.'
+    words: *things
+
+  - template: "{0} won't work against this foe."
+    words: *actions
+
+  - template: 'There are {0} enemies ahead.'
+    words: *numbers
+
+  - template: "Don't go forward without {0}."
+    words: *mechanics
+
+  - template: 'Time for {0}!'
+    words: *actions
+
+  - template: 'The {0} is the best option.'
+    words: *mechanics
+
+  - template: 'Look for {0}.'
+    words: *objects
+
+  - template: 'Turn back and go {0}.'
+    words: *directions
+
+  - template: 'Always trust {0}.'
+    words: *article-people
+
+  - template: 'Watch the {0}.'
+    words: *people
+
+  - template: 'Look forward to {0}.'
+    words: *things
+
+  - template: "Let's meet at the {0}."
+    words: *locations
+
+  - template: 'Try {0}.'
+    words: *mechanics
+
+  - template: 'That person is {0}.'
+    words: *adjectives
+
+  - template: '{0} should go here first.'
+    words: *people
+
+  - template: 'Focus on the {0}.'
+    words: *things
+
+  - template: 'Bring {0} health items to survive.'
+    words: *numbers
+
+  - template: '{0} should try this area later.'
+    words: *people
+
+  - template: 'Use {0} on the next enemy.'
+    words: *mechanics
+
+  - template: "The next enemy's weakness is {0}."
+    words: *directions
+
+  - template: 'If you {0}, you can proceed.'
+    words: *actions-2
+
+  - template: 'I am {0}.'
+    words: *adjectives
+
+  - template: 'You are {0}.'
+    words: *adjectives
+
+  - template: '{0}!'
+    words: *words
+
+  - template: '{0}???'
+    words: *words
+
+  - template: '{0}.'
+    words: *words
+
+  - template: 'This is {0}.'
+    words: *adjectives
+
+  - template: "I've died {0} times!"
+    words: *numbers
+
+  - template: "I've defeated {0} demons!"
+    words: *numbers
+
+  - template: 'A little {0} never hurt anyone.'
+    words: *actions
+
+  - template: 'Here is {0}.'
+    words: *article-people
+
+  - template: 'Visions of {0}.'
+    words: *people
+
+  - template: "You'll need a Soul level of {0} ahead."
+    words: *numbers
+
+  - template: 'Check behind {0}.'
+    words: *things
+
+  - template: 'Enjoy the {0}.'
+    words: *locations
+
+  - template: 'Valuable {0} ahead.'
+    words: *objects
+
+  - template: 'My sign is {0}.'
+    words: *directions
+
+  - template: "Let's fight using only {0}."
+    words: *mechanics
+
+  - template: "You'll get {0} from the next foe."
+    words: *objects
+
+  - template: 'Welcome to the {0}.'
+    words: *locations
+
+  - template: 'The {0} are near.'
+    words: *people
+
+  - template: 'No signs of {0}.'
+    words: *people
+
+  - template: 'Look at {0}.'
+    words: *directions
+
+  - template: 'A {0} person awaits.'
+    words: *adjectives
+
+  - template: "You'll find a {0} past here."
+    words: *objects
+
+  - template: 'No {0} ahead.'
+    words: *objects
+
+  - template: 'Summon me in the {0}.'
+    words: *locations
+
+  - template: 'Challenge in the {0}.'
+    words: *locations
+
+  - template: 'Take a picture in the {0}.'
+    words: *locations
+
+  - template: '{0} lies in wait ahead.'
+    words: *article-people
+
+  - template: "There's a {0} ahead."
+    words: *locations
+
+  - 'Welcome!'
+  - 'Hi!'
+  - 'Best of luck to you.'
+  - 'Farewell!'
+  - 'Congratulations!'
+  - 'Over here!'
+  - 'Thank you.'
+  - "It's safe here."
+  - "It's not safe here."
+  - 'Behind you!'
+  - 'I want to go home...'
+  - 'Keep trying!'
+  - 'If you press onward...'
+  - 'Take a step forward.'
+  - 'Take a step back.'
+  - 'Run straight through.'
+  - "Don't stop!"
+  - 'This is so easy!'
+  - 'This is so hard!'
+  - 'Barely made it...'
+  - 'Help... please...'
+  - "My heart's breaking..."
+  - 'Why me...'
+  - "I'm lost..."
+  - "I've got a good item..."
+  - 'This place again...?'
+  - 'Try again.'
+  - 'Listen well.'
+  - 'What is wrong with you?!'
+  - 'This is the way.'
+  - 'I told you so.'
+  - 'Think hard.'
+  - 'Remember...'
+  - 'Watch out.'
+  - 'You can summon here.'
+  - 'Request a challenger.'
+  - 'Want to test your might?'
+  - 'I want to be resurrected...'
+  - 'Get good.'
+  - 'Happy birthday!'
+  - 'On three...'
+  - 'There has been a misunderstanding...'
+  - 'Thanks for reading.'
+  - 'Recommend this message.'
+  - 'Write more messages!'
+  - 'If you read this message...'
+  - 'Beware of false messages.'
+  - 'This is no time to read messages!'
+  - "I'm in trouble... please recommend this message!"
+  - "Did you think there'd be a hint?"
+  - 'If only I had some friends...'
+  - 'The answer is within you.'
+  - 'If Soul Tendency is black...'
+  - 'If Soul Tendency is white...'
+  - "I've been in Soul Form for so long..."
+  - 'Do not fear death.'
+  - 'Get me out of here!'
+  - "Now I've done it..."
+  - 'Please hurry!'
+  - 'Begone with you.'
+  - 'Why is it always...'
+  - 'This is it.'
+  - 'If you jump down from here...'
+  - 'Attack!'
+  - "Don't attack!"
+  - 'There are demons nearby.'
+  - "The true Demon's Souls starts here."
+  - 'Umbasa.'
+
+  - template: '{0}'
+    words: *terms

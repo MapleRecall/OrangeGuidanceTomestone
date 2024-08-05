@@ -1,7 +1,7 @@
 name: Sekiro
 id: 9eab71b5-4f13-4571-b6a4-531fa2d8d0d8
 visible: true
-order: 8
+order: 9
 
 templates:
   - "{0}"
