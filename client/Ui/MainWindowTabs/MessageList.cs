@@ -2,7 +2,7 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface;
 using Dalamud.Utility;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
 
@@ -71,17 +71,17 @@ internal class MessageList : ITab {
             }
 
             foreach (var message in messages) {
-                var territory = this.Plugin.DataManager.GetExcelSheet<TerritoryType>()?.GetRow(message.Territory);
-                var territoryName = territory?.PlaceName.Value?.Name?.ToDalamudString().TextValue ?? "???";
+                var territory = this.Plugin.DataManager.GetExcelSheet<TerritoryType>().GetRowOrDefault(message.Territory);
+                var territoryName = territory?.PlaceName.Value.Name.ToDalamudString().TextValue ?? "???";
 
                 var loc = $"Location: {territoryName}";
                 if (message.Ward != null) {
                     loc += " (";
 
                     if (message.World != null) {
-                        var world = this.Plugin.DataManager.GetExcelSheet<World>()?.GetRow((ushort) message.World);
+                        var world = this.Plugin.DataManager.GetExcelSheet<World>().GetRowOrDefault((ushort) message.World);
                         if (world != null) {
-                            loc += world.Name.ToDalamudString().TextValue;
+                            loc += world.Value.Name.ToDalamudString().TextValue;
                         }
                     }
 
@@ -117,8 +117,8 @@ internal class MessageList : ITab {
 
                 if (ImGuiHelper.SmallIconButton(FontAwesomeIcon.MapMarkerAlt, $"{message.Id}") && territory != null) {
                     this.Plugin.GameGui.OpenMapWithMapLink(new MapLinkPayload(
-                        territory.RowId,
-                        territory.Map.Row,
+                        territory.Value.RowId,
+                        territory.Value.Map.RowId,
                         (int) (message.X * 1_000),
                         (int) (message.Z * 1_000)
                     ));

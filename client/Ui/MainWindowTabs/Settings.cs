@@ -3,7 +3,7 @@ using System.Numerics;
 using Dalamud.Utility;
 using FFXIVClientStructs.Interop;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OrangeGuidanceTomestone.Helpers;
 using OrangeGuidanceTomestone.Util;
 
@@ -28,11 +28,11 @@ internal class Settings : ITab {
     internal Settings(Plugin plugin) {
         this.Plugin = plugin;
 
-        this.Territories = this.Plugin.DataManager.GetExcelSheet<TerritoryType>()!
+        this.Territories = this.Plugin.DataManager.GetExcelSheet<TerritoryType>()
             .Where(row => row.RowId != 0)
-            .Select(row => (row.RowId, row.PlaceName.Value?.Name?.ToDalamudString().TextValue))
-            .Where(entry => entry.TextValue != null && !string.IsNullOrWhiteSpace(entry.TextValue))
-            .ToList()!;
+            .Select(row => (row.RowId, row.PlaceName.Value.Name.ToDalamudString().TextValue))
+            .Where(entry => !string.IsNullOrWhiteSpace(entry.TextValue))
+            .ToList();
         this.FilterTerritories(null);
 
         this.Tabs = [
@@ -57,10 +57,10 @@ internal class Settings : ITab {
             .Where(terr => !this.Plugin.Config.BannedTerritories.Contains(terr.Item1))
             .Select(terr => (terr.Item1, false, terr.Item2));
 
-        var tt = this.Plugin.DataManager.GetExcelSheet<TerritoryType>()!;
+        var tt = this.Plugin.DataManager.GetExcelSheet<TerritoryType>();
         this.FilteredTerritories = this.Plugin.Config.BannedTerritories
             .OrderBy(terr => terr)
-            .Select(terr => (terr, true, tt.GetRow(terr)?.PlaceName.Value?.Name.ToDalamudString().TextValue ?? $"{terr}"))
+            .Select(terr => (terr, true, tt.GetRowOrDefault(terr)?.PlaceName.Value.Name.ToDalamudString().TextValue ?? $"{terr}"))
             .Concat(territories)
             .Where(terr => !filter || CultureInfo.InvariantCulture.CompareInfo.IndexOf(terr.Item3, text!, CompareOptions.OrdinalIgnoreCase) != -1)
             .ToList();
@@ -123,11 +123,6 @@ internal class Settings : ITab {
         anyChanged |= vfx |= ImGui.Checkbox("Disable in Deep Dungeons", ref this.Plugin.Config.DisableDeepDungeon);
         anyChanged |= vfx |= ImGui.Checkbox("Disable in cutscenes", ref this.Plugin.Config.DisableInCutscene);
         anyChanged |= vfx |= ImGui.Checkbox("Disable in /gpose", ref this.Plugin.Config.DisableInGpose);
-
-        var tt = this.Plugin.DataManager.GetExcelSheet<TerritoryType>();
-        if (tt == null) {
-            return;
-        }
 
         ImGui.Spacing();
         ImGui.TextUnformatted("Ban list (click to ban or unban)");

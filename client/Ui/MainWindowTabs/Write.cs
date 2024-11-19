@@ -9,7 +9,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
 using OrangeGuidanceTomestone.Util;
@@ -73,10 +73,10 @@ internal class Write : ITab {
         this.Plugin = plugin;
 
         this.Emotes = [
-            .. this.Plugin.DataManager.GetExcelSheet<Emote>()!
+            .. this.Plugin.DataManager.GetExcelSheet<Emote>()
                 .Skip(1)
-                .Where(emote => emote.TextCommand.Row != 0)
-                .OrderBy(emote => emote.Order)
+                .Where(emote => emote.TextCommand.RowId != 0)
+                .OrderBy(emote => emote.Order),
         ];
 
         this._glyph = this.Plugin.Config.DefaultGlyph;
@@ -370,7 +370,7 @@ internal class Write : ITab {
                     var name = emote.Name.ToDalamudString().TextValue;
                     if (!string.IsNullOrEmpty(this._emoteSearch)) {
                         if (!name.Contains(this._emoteSearch, StringComparison.InvariantCultureIgnoreCase)) {
-                            if (!emote.TextCommand.Value!.Command.ToDalamudString().TextValue.Contains(this._emoteSearch, StringComparison.InvariantCultureIgnoreCase)) {
+                            if (!emote.TextCommand.Value.Command.ToDalamudString().TextValue.Contains(this._emoteSearch, StringComparison.InvariantCultureIgnoreCase)) {
                                 continue;
                             }
                         }
@@ -407,7 +407,7 @@ internal class Write : ITab {
             var location = HousingLocation.Current();
             var req = new MessageRequest {
                 Territory = this.Plugin.ClientState.TerritoryType,
-                World = player.CurrentWorld.Id,
+                World = player.CurrentWorld.RowId,
                 Ward = location?.Ward,
                 Plot = location?.CombinedPlot(),
                 X = player.Position.X,

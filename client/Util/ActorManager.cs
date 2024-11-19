@@ -2,7 +2,7 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.Interop;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace OrangeGuidanceTomestone.Util;
 
@@ -184,12 +184,12 @@ internal class ActorManager : IDisposable {
     }
 
     private Emote? GetValidEmote(uint rowId) {
-        var emote = this.Plugin.DataManager.GetExcelSheet<Emote>()?.GetRow(rowId);
+        var emote = this.Plugin.DataManager.GetExcelSheet<Emote>().GetRowOrDefault(rowId);
         if (emote == null) {
             return null;
         }
 
-        return emote.TextCommand.Row == 0 ? null : emote;
+        return emote.Value.TextCommand.RowId == 0 ? null : emote;
     }
 
     private unsafe class EnableAction(ActionTimeline? action) : BaseActorAction {
@@ -208,10 +208,10 @@ internal class ActorManager : IDisposable {
                 }
 
                 chara.Value->SetMode(CharacterModes.AnimLock, 0);
-                if (action.Slot == 0) {
-                    chara.Value->Timeline.BaseOverride = (ushort) action.RowId;
+                if (action.Value.Slot == 0) {
+                    chara.Value->Timeline.TimelineSequencer.PlayTimeline((ushort) action.Value.RowId);
                 } else {
-                    chara.Value->Timeline.TimelineSequencer.PlayTimeline((ushort) action.RowId);
+                    chara.Value->Timeline.BaseOverride = (ushort) action.Value.RowId;
                 }
             }
 

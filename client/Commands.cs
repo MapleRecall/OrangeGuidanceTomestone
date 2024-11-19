@@ -1,7 +1,7 @@
 using System.Text;
 using Dalamud.Game.Command;
 using Dalamud.Utility;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace OrangeGuidanceTomestone;
 
@@ -24,11 +24,11 @@ internal class Commands : IDisposable {
     private void OnCommand(string command, string arguments) {
         switch (arguments) {
             case "ban": {
-                var name = this.Plugin.DataManager.GetExcelSheet<TerritoryType>()?.GetRow(this.Plugin.ClientState.TerritoryType)
+                var name = this.Plugin.DataManager.GetExcelSheet<TerritoryType>().GetRowOrDefault(this.Plugin.ClientState.TerritoryType)
                     ?.PlaceName
                     .Value
-                    ?.Name
-                    ?.ToDalamudString()
+                    .Name
+                    .ToDalamudString()
                     .TextValue;
 
                 if (this.Plugin.Config.BannedTerritories.Contains(this.Plugin.ClientState.TerritoryType)) {
@@ -47,11 +47,11 @@ internal class Commands : IDisposable {
                 break;
             }
             case "unban": {
-                var name = this.Plugin.DataManager.GetExcelSheet<TerritoryType>()?.GetRow(this.Plugin.ClientState.TerritoryType)
+                var name = this.Plugin.DataManager.GetExcelSheet<TerritoryType>().GetRowOrDefault(this.Plugin.ClientState.TerritoryType)
                     ?.PlaceName
                     .Value
-                    ?.Name
-                    ?.ToDalamudString()
+                    .Name
+                    .ToDalamudString()
                     .TextValue;
 
                 if (!this.Plugin.Config.BannedTerritories.Contains(this.Plugin.ClientState.TerritoryType)) {

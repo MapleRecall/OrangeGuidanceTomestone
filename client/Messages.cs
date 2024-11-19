@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Numerics;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
 using OrangeGuidanceTomestone.Util;
@@ -40,6 +40,7 @@ internal class Messages : IDisposable {
 
     private SemaphoreSlim CurrentMutex { get; } = new(1, 1);
     private Dictionary<Guid, Message> Current { get; } = [];
+
     internal IReadOnlyDictionary<Guid, Message> CurrentCloned {
         get {
             using var guard = this.CurrentMutex.With();
@@ -66,19 +67,19 @@ internal class Messages : IDisposable {
     internal Messages(Plugin plugin) {
         this.Plugin = plugin;
 
-        foreach (var cfc in this.Plugin.DataManager.GetExcelSheet<ContentFinderCondition>()!) {
+        foreach (var cfc in this.Plugin.DataManager.GetExcelSheet<ContentFinderCondition>()) {
             // Trials, Raids, and Ultimate Raids
-            if (cfc.ContentType.Row is 4 or 5 or 28) {
+            if (cfc.ContentType.RowId is 4 or 5 or 28) {
                 // "Raids" - but we only want non-alliance raids
-                if (cfc.ContentType.Row == 5 && cfc.ContentMemberType.Row == 4) {
+                if (cfc.ContentType.RowId == 5 && cfc.ContentMemberType.RowId == 4) {
                     continue;
                 }
 
-                this.Trials.Add(cfc.TerritoryType.Row);
+                this.Trials.Add(cfc.TerritoryType.RowId);
             }
 
-            if (cfc.ContentType.Row == 21) {
-                this.DeepDungeons.Add(cfc.TerritoryType.Row);
+            if (cfc.ContentType.RowId == 21) {
+                this.DeepDungeons.Add(cfc.TerritoryType.RowId);
             }
         }
 
@@ -165,7 +166,7 @@ internal class Messages : IDisposable {
             return;
         }
 
-        var world = this.Plugin.ClientState.LocalPlayer?.CurrentWorld.Id ?? 0;
+        var world = this.Plugin.ClientState.LocalPlayer?.CurrentWorld.RowId ?? 0;
         if (world == 0) {
             return;
         }
@@ -234,6 +235,10 @@ internal class Messages : IDisposable {
         } finally {
             this.CurrentMutex.Release();
         }
+    }
+
+    private void RemoveVfx(int type, int code) {
+        this.RemoveVfx();
     }
 
     internal void RemoveVfx() {
