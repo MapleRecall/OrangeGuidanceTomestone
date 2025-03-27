@@ -103,7 +103,7 @@ public class Plugin : IDalamudPlugin {
             var key = await resp.Content.ReadAsStringAsync();
             this.Config.ApiKey = key;
             this.SaveConfig();
-            this.Messages.SpawnVfx();
+            this.Framework.RunOnFrameworkThread(this.Messages.SpawnVfx);
         });
     }
 }

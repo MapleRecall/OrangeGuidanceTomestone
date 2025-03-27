@@ -84,7 +84,7 @@ internal class Messages : IDisposable {
         }
 
         if (this.Plugin.Config.ApiKey != string.Empty) {
-            this.SpawnVfx();
+            this.Plugin.Framework.RunOnFrameworkThread(this.SpawnVfx);
         }
 
         this.Plugin.Framework.Update += this.DetermineIfSpawn;

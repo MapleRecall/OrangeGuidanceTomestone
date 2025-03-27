@@ -54,7 +54,7 @@ public class HousingLocation {
                 this.Apartment = null;
             }
         } else if (currentPlot > 0) {
-            if (manager->GetCurrentHouseId() == -1) {
+            if (manager->GetCurrentIndoorHouseId() == -1) {
                 // not inside a plot
                 // yard is 0xFF when not in one
                 this.Yard = (ushort?) (currentPlot + 1);
