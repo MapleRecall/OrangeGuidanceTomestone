@@ -1,11 +1,11 @@
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Style;
-using ImGuiNET;
 
 namespace OrangeGuidanceTomestone.Helpers;
 
 internal static class ImGuiHelper {
-    private static bool InternalIconButton(Func<string, bool> func, FontAwesomeIcon icon, string? id = null) {
+    private static bool InternalIconButton(Func<ImU8String, bool> func, FontAwesomeIcon icon, string? id = null) {
         var label = icon.ToIconString();
         if (id != null) {
             label += $"##{id}";
@@ -23,7 +23,7 @@ internal static class ImGuiHelper {
     }
 
     internal static bool IconButton(FontAwesomeIcon icon, string? id = null) {
-        return InternalIconButton(ImGui.Button, icon, id);
+        return InternalIconButton(id => ImGui.Button(id), icon, id);
     }
 
     internal static void HelpIcon(string text) {
@@ -36,7 +36,7 @@ internal static class ImGuiHelper {
     }
 
     internal static unsafe ImGuiListClipperPtr Clipper(int itemsCount) {
-        var clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+        var clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper());
         clipper.Begin(itemsCount);
 
         return clipper;

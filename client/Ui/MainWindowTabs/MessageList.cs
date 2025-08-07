@@ -1,10 +1,11 @@
+using Dalamud.Bindings.ImGui;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface;
 using Dalamud.Utility;
-using ImGuiNET;
 using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
+using OrangeGuidanceTomestone.Util;
 
 namespace OrangeGuidanceTomestone.Ui.MainWindowTabs;
 
@@ -111,44 +112,46 @@ internal class MessageList : ITab {
                 }
 
                 ImGui.TextUnformatted(message.Text);
-                ImGui.TreePush();
-                ImGui.TextUnformatted(loc);
-                ImGui.SameLine();
+                ImGui.TreePush("location");
+                using (new OnDispose(ImGui.TreePop)) {
+                    ImGui.TextUnformatted(loc);
+                    ImGui.SameLine();
 
-                if (ImGuiHelper.SmallIconButton(FontAwesomeIcon.MapMarkerAlt, $"{message.Id}") && territory != null) {
-                    this.Plugin.GameGui.OpenMapWithMapLink(new MapLinkPayload(
-                        territory.Value.RowId,
-                        territory.Value.Map.RowId,
-                        (int) (message.X * 1_000),
-                        (int) (message.Z * 1_000)
-                    ));
+                    if (ImGuiHelper.SmallIconButton(FontAwesomeIcon.MapMarkerAlt, $"{message.Id}") && territory != null) {
+                        this.Plugin.GameGui.OpenMapWithMapLink(new MapLinkPayload(
+                            territory.Value.RowId,
+                            territory.Value.Map.RowId,
+                            (int) (message.X * 1_000),
+                            (int) (message.Z * 1_000)
+                        ));
+                    }
+
+                    if (message.IsHidden) {
+                        ImGuiHelper.WarningText("This message will not be shown to other players due to its low score.");
+                    }
+
+                    var ctrl = ImGui.GetIO().KeyCtrl;
+
+                    var appraisals = Math.Max(0, message.PositiveVotes - message.NegativeVotes);
+                    ImGui.TextUnformatted($"Appraisals: {appraisals:N0} ({message.PositiveVotes:N0} - {message.NegativeVotes:N0})");
+
+                    if (!ctrl) {
+                        ImGui.BeginDisabled();
+                    }
+
+                    try {
+                        if (ImGui.Button($"Delete##{message.Id}")) {
+                            this.Delete(message.Id);
+                        }
+                    } finally {
+                        if (!ctrl) {
+                            ImGui.EndDisabled();
+                        }
+                    }
+
+                    ImGui.SameLine();
+                    ImGuiHelper.HelpIcon("Hold Ctrl to enable the delete button.");
                 }
-
-                if (message.IsHidden) {
-                    ImGuiHelper.WarningText("This message will not be shown to other players due to its low score.");
-                }
-
-                var ctrl = ImGui.GetIO().KeyCtrl;
-
-                var appraisals = Math.Max(0, message.PositiveVotes - message.NegativeVotes);
-                ImGui.TextUnformatted($"Appraisals: {appraisals:N0} ({message.PositiveVotes:N0} - {message.NegativeVotes:N0})");
-
-                if (!ctrl) {
-                    ImGui.BeginDisabled();
-                }
-
-                if (ImGui.Button($"Delete##{message.Id}")) {
-                    this.Delete(message.Id);
-                }
-
-                if (!ctrl) {
-                    ImGui.EndDisabled();
-                }
-
-                ImGui.SameLine();
-                ImGuiHelper.HelpIcon("Hold Ctrl to enable the delete button.");
-
-                ImGui.TreePop();
 
                 ImGui.Separator();
             }

@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Utility;
 using FFXIVClientStructs.Interop;
-using ImGuiNET;
 using Lumina.Excel.Sheets;
 using OrangeGuidanceTomestone.Helpers;
 using OrangeGuidanceTomestone.Util;
@@ -210,7 +210,7 @@ internal class Settings : ITab {
         anyChanged |= ImGui.Checkbox("Close the viewer automatically when no signs are nearby", ref this.Plugin.Config.AutoViewerClose);
 
         if (this.Plugin.Config.AutoViewerClose) {
-            ImGui.TreePush();
+            ImGui.TreePush("auto-viewer-close-sub");
             anyChanged |= ImGui.Checkbox("Hide viewer titlebar", ref this.Plugin.Config.HideTitlebar);
             ImGui.TreePop();
         }

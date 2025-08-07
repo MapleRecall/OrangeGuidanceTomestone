@@ -1,7 +1,7 @@
 using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
-using ImGuiNET;
 using OrangeGuidanceTomestone.Helpers;
 using OrangeGuidanceTomestone.Util;
 
@@ -105,7 +105,7 @@ internal class Viewer {
 
             this._lastViewed = message.Id;
 
-            var size = ImGui.CalcTextSize(message.Text, ImGui.GetContentRegionAvail().X).Y;
+            var size = ImGui.CalcTextSize(message.Text, wrapWidth: ImGui.GetContentRegionAvail().X).Y;
             size += ImGui.GetStyle().ItemSpacing.Y * 2;
             size += ImGui.CalcTextSize("A").Y;
             size += ImGuiHelpers.GetButtonSize("A").Y;

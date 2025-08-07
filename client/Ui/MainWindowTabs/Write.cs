@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Text;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Interface.Textures;
@@ -8,7 +9,6 @@ using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using ImGuiNET;
 using Lumina.Excel.Sheets;
 using Newtonsoft.Json;
 using OrangeGuidanceTomestone.Helpers;
@@ -252,7 +252,7 @@ internal class Write : ITab {
             if (ImGui.TableSetColumnIndex(0)) {
                 var glyphImage = this.GetGlyphImage(this._glyph);
                 var wrap = glyphImage.GetWrapOrEmpty();
-                ImGui.Image(wrap.ImGuiHandle, new Vector2(imageHeight));
+                ImGui.Image(wrap.Handle, new Vector2(imageHeight));
             }
 
             if (ImGui.TableSetColumnIndex(1) && this._part1 != -1) {
@@ -338,7 +338,7 @@ internal class Write : ITab {
                 ImGui.BeginTooltip();
                 using var endTooltip = new OnDispose(ImGui.EndTooltip);
 
-                ImGui.Image(wrap.ImGuiHandle, new Vector2(imageHeight));
+                ImGui.Image(wrap.Handle, new Vector2(imageHeight));
                 tooltipShown = true;
             }
         }
