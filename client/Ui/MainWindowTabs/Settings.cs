@@ -306,46 +306,72 @@ internal class Settings : ITab {
     }
 
     private void DrawDebug(ref bool anyChanged, ref bool vfx) {
-        ImGui.Checkbox("Show debug information", ref this.Plugin.Ui.Debug);
+        if (!ImGui.BeginTabBar("debug-tabs")) {
+            return;
+        }
 
-        ImGui.InputText("Filter", ref this._debugFilter, 64);
+        using var endTabBar = new OnDispose(ImGui.EndTabBar);
 
-        if (ImGui.BeginTable("###debug-info", 2)) {
-            using var endTable = new OnDispose(ImGui.EndTable);
+        if (ImGui.BeginTabItem("VFX")) {
+            using var endTabItem = new OnDispose(ImGui.EndTabItem);
 
-            ImGui.TableSetupColumn("ID", ImGuiTableColumnFlags.WidthStretch);
-            ImGui.TableSetupColumn("VFX pointer");
-            ImGui.TableHeadersRow();
+            ImGui.Checkbox("Show debug information", ref this.Plugin.Ui.Debug);
 
-            using var guard = this.Plugin.Vfx.Mutex.With();
-            foreach (var (id, ptr) in this.Plugin.Vfx.Spawned) {
-                var idLabel = id.ToString("N");
-                var ptrLabel = ptr.ToString("X");
+            ImGui.InputText("Filter", ref this._debugFilter, 64);
 
-                if (!string.IsNullOrWhiteSpace(this._debugFilter)) {
-                    if (
-                        !idLabel.Contains(this._debugFilter, StringComparison.CurrentCultureIgnoreCase)
-                        && !ptrLabel.Contains(this._debugFilter, StringComparison.CurrentCultureIgnoreCase)
-                    ) {
-                        continue;
+            if (ImGui.BeginTable("###debug-info", 2)) {
+                using var endTable = new OnDispose(ImGui.EndTable);
+
+                ImGui.TableSetupColumn("ID", ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn("VFX pointer");
+                ImGui.TableHeadersRow();
+
+                using var guard = this.Plugin.Vfx.Mutex.With();
+                foreach (var (id, ptr) in this.Plugin.Vfx.Spawned) {
+                    var idLabel = id.ToString("N");
+                    var ptrLabel = ptr.ToString("X");
+
+                    if (!string.IsNullOrWhiteSpace(this._debugFilter)) {
+                        if (
+                            !idLabel.Contains(this._debugFilter, StringComparison.CurrentCultureIgnoreCase)
+                            && !ptrLabel.Contains(this._debugFilter, StringComparison.CurrentCultureIgnoreCase)
+                        ) {
+                            continue;
+                        }
+                    }
+
+                    ImGui.TableNextRow();
+
+                    if (ImGui.TableSetColumnIndex(0)) {
+                        ImGui.TextUnformatted(id.ToString("N"));
+                        if (ImGui.IsItemClicked()) {
+                            ImGui.SetClipboardText(id.ToString("N"));
+                        }
+                    }
+
+                    if (ImGui.TableSetColumnIndex(1)) {
+                        ImGui.TextUnformatted(ptr.ToString("X"));
+                        if (ImGui.IsItemClicked()) {
+                            ImGui.SetClipboardText(ptr.ToString("X"));
+                        }
                     }
                 }
+            }
+        }
 
-                ImGui.TableNextRow();
+        if (ImGui.BeginTabItem("Housing")) {
+            using var endTabItem = new OnDispose(ImGui.EndTabItem);
 
-                if (ImGui.TableSetColumnIndex(0)) {
-                    ImGui.TextUnformatted(id.ToString("N"));
-                    if (ImGui.IsItemClicked()) {
-                        ImGui.SetClipboardText(id.ToString("N"));
-                    }
-                }
+            var loc = HousingLocation.Current();
+            if (loc != null) {
+                ImGui.TextUnformatted($"Apartment: {loc.Apartment:X}h/{loc.Apartment}");
+                ImGui.TextUnformatted($"ApartmentWing: {loc.ApartmentWing:X}h/{loc.ApartmentWing}");
+                ImGui.TextUnformatted($"Ward: {loc.Ward:X}h/{loc.Ward}");
+                ImGui.TextUnformatted($"Plot: {loc.Plot:X}h/{loc.Plot}");
+                ImGui.TextUnformatted($"Yard: {loc.Yard:X}h/{loc.Yard}");
 
-                if (ImGui.TableSetColumnIndex(1)) {
-                    ImGui.TextUnformatted(ptr.ToString("X"));
-                    if (ImGui.IsItemClicked()) {
-                        ImGui.SetClipboardText(ptr.ToString("X"));
-                    }
-                }
+            } else {
+                ImGui.TextUnformatted("loc was null");
             }
         }
     }
