@@ -1,7 +1,7 @@
 <Project Sdk="Dalamud.NET.Sdk/14.0.1">
 
     <PropertyGroup>
-        <Version>1.10.5</Version>
+        <Version>1.10.6.1</Version>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -15,12 +15,17 @@
 
     <ItemGroup>
         <PackageReference Include="Fody" Version="6.9.2" PrivateAssets="all" />
-        <PackageReference Include="Resourcer.Fody" Version="1.8.1" PrivateAssets="all"/>
+        <PackageReference Include="Resourcer.Fody" Version="1.8.1" PrivateAssets="all" />
+        <PackageReference Include="WebTranslator" Version="1.0.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="vfx/sign_*.avfx"/>
-        <EmbeddedResource Include="img/sign_*.jpg"/>
+        <EmbeddedResource Include="vfx/sign_*.avfx" />
+        <EmbeddedResource Include="img/sign_*.jpg" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <EmbeddedResource Include="Resources\zh.json" />
     </ItemGroup>
 
 </Project>

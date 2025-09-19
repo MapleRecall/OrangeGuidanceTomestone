@@ -30,10 +30,10 @@ internal class ViewerButton {
             return;
         }
 
-        var label = "View message";
-        if (nearby.Count > 1) {
-            label += "s";
-        }
+        var label = $"查看谏言({nearby.Count}条)";
+        //if (nearby.Count > 1) {
+        //    label += "s";
+        //}
 
         if (ImGui.Button(label)) {
             this.Plugin.Ui.Viewer.Visible = true;
