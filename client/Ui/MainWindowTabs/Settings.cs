@@ -119,16 +119,16 @@ internal class Settings : ITab {
     }
 
     private void DrawGeneral(ref bool anyChanged, ref bool vfx) {
-        anyChanged |= vfx |= ImGui.Checkbox("Disable in trials", ref this.Plugin.Config.DisableTrials);
-        anyChanged |= vfx |= ImGui.Checkbox("Disable in Deep Dungeons", ref this.Plugin.Config.DisableDeepDungeon);
-        anyChanged |= vfx |= ImGui.Checkbox("Disable in cutscenes", ref this.Plugin.Config.DisableInCutscene);
-        anyChanged |= vfx |= ImGui.Checkbox("Disable in /gpose", ref this.Plugin.Config.DisableInGpose);
+        anyChanged |= vfx |= ImGui.Checkbox("在副本中禁用", ref this.Plugin.Config.DisableTrials);
+        anyChanged |= vfx |= ImGui.Checkbox("在深层迷宫中禁用", ref this.Plugin.Config.DisableDeepDungeon);
+        anyChanged |= vfx |= ImGui.Checkbox("在过场动画中禁用", ref this.Plugin.Config.DisableInCutscene);
+        anyChanged |= vfx |= ImGui.Checkbox("在/gpose中禁用", ref this.Plugin.Config.DisableInGpose);
 
         ImGui.Spacing();
-        ImGui.TextUnformatted("Ban list (click to ban or unban)");
+        ImGui.TextUnformatted("禁用列表 (点击禁用/启用)");
 
         ImGui.SetNextItemWidth(-1);
-        if (ImGui.InputTextWithHint("##filter", "Search...", ref this._filter, 128)) {
+        if (ImGui.InputTextWithHint("##filter", "搜索...", ref this._filter, 128)) {
             this.FilterTerritories(this._filter);
         }
 

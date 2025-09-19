@@ -225,7 +225,7 @@ internal class Viewer {
             ImGui.PopTextWrapPos();
 
             var appraisals = Math.Max(0, message.PositiveVotes - message.NegativeVotes);
-            ImGui.TextUnformatted($"ºÃÆÀ: {appraisals:N0}");
+            ImGui.TextUnformatted($"å¥½è¯„: {appraisals:N0}");
 
             void Vote(int way) {
                 Task.Run(async () => {
@@ -267,7 +267,7 @@ internal class Viewer {
                 ImGui.BeginDisabled();
             }
 
-            if (ImGui.Button("ºÃÆÀ")) {
+            if (ImGui.Button("å¥½è¯„")) {
                 Vote(1);
             }
 
@@ -281,7 +281,7 @@ internal class Viewer {
                 ImGui.BeginDisabled();
             }
 
-            if (ImGui.Button("²îÆÀ")) {
+            if (ImGui.Button("å·®è¯„")) {
                 Vote(-1);
             }
 

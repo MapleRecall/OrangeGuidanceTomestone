@@ -25,13 +25,13 @@ internal class MessageList : ITab {
     }
 
     public void Draw() {
-        if (ImGui.Button("Refresh")) {
+        if (ImGui.Button("刷新")) {
             this.Refresh();
         }
 
         ImGui.SameLine();
 
-        if (ImGui.BeginCombo("Sort", $"{this.Sort}")) {
+        if (ImGui.BeginCombo("排序", $"{this.Sort}")) {
             foreach (var mode in Enum.GetValues<SortMode>()) {
                 if (ImGui.Selectable($"{mode}", mode == this.Sort)) {
                     this.Sort = mode;
@@ -50,7 +50,7 @@ internal class MessageList : ITab {
     }
 
     private void ShowList() {
-        ImGui.TextUnformatted($"Messages: {this.Messages.Count:N0} / {OrangeGuidanceTomestone.Messages.MaxAmount + this.Plugin.Ui.MainWindow.ExtraMessages:N0}");
+        ImGui.TextUnformatted($"谏言: {this.Messages.Count:N0} / {OrangeGuidanceTomestone.Messages.MaxAmount + this.Plugin.Ui.MainWindow.ExtraMessages:N0}");
 
         ImGui.Separator();
 
@@ -75,7 +75,7 @@ internal class MessageList : ITab {
                 var territory = this.Plugin.DataManager.GetExcelSheet<TerritoryType>().GetRowOrDefault(message.Territory);
                 var territoryName = territory?.PlaceName.Value.Name.ToDalamudString().TextValue ?? "???";
 
-                var loc = $"Location: {territoryName}";
+                var loc = $"位置: {territoryName}";
                 if (message.Ward != null) {
                     loc += " (";
 
@@ -135,14 +135,14 @@ internal class MessageList : ITab {
                     var ctrl = ImGui.GetIO().KeyCtrl;
 
                     var appraisals = Math.Max(0, message.PositiveVotes - message.NegativeVotes);
-                    ImGui.TextUnformatted($"Appraisals: {appraisals:N0} ({message.PositiveVotes:N0} - {message.NegativeVotes:N0})");
+                    ImGui.TextUnformatted($"评价: {appraisals:N0} ({message.PositiveVotes:N0} - {message.NegativeVotes:N0})");
 
                     if (!ctrl) {
                         ImGui.BeginDisabled();
                     }
 
                     try {
-                        if (ImGui.Button($"Delete##{message.Id}")) {
+                        if (ImGui.Button($"删除##{message.Id}")) {
                             this.Delete(message.Id);
                         }
                     } finally {
@@ -152,7 +152,7 @@ internal class MessageList : ITab {
                     }
 
                     ImGui.SameLine();
-                    ImGuiHelper.HelpIcon("Hold Ctrl to enable the delete button.");
+                    ImGuiHelper.HelpIcon("按住 Ctrl 键以启用删除按钮。");
                 }
 
                 ImGui.Separator();
