@@ -10,7 +10,7 @@ using OrangeGuidanceTomestone.Util;
 namespace OrangeGuidanceTomestone.Ui.MainWindowTabs;
 
 internal class Settings : ITab {
-    public string Name => "Settings";
+    public string Name => "设置";
 
     private Plugin Plugin { get; }
     private int _tab;
@@ -36,14 +36,14 @@ internal class Settings : ITab {
         this.FilterTerritories(null);
 
         this.Tabs = [
-            ("General", this.DrawGeneral),
-            ("Writer", this.DrawWriter),
-            ("Viewer", this.DrawViewer),
-            ("Signs", this.DrawSigns),
-            ("Unlocks", this.DrawUnlocks),
-            ("Account", this.DrawAccount),
-            ("Debug", this.DrawDebug),
-            ("Data/privacy", this.DrawDataPrivacy),
+            ("通常", this.DrawGeneral),
+            ("撰写", this.DrawWriter),
+            ("谏言窗口", this.DrawViewer),
+            ("地板标记", this.DrawSigns),
+            ("解锁", this.DrawUnlocks),
+            ("帐户", this.DrawAccount),
+            ("调试", this.DrawDebug),
+            ("数据/隐私", this.DrawDataPrivacy),
         ];
     }
 
@@ -193,38 +193,38 @@ internal class Settings : ITab {
     }
 
     private void DrawWriter(ref bool anyChanged, ref bool vfx) {
-        if (ImGui.Button("Refresh packs")) {
+        if (ImGui.Button("刷新语料包")) {
             Pack.UpdatePacks();
         }
 
         var glyph = this.Plugin.Config.DefaultGlyph + 1;
-        if (ImGui.InputInt("Default glyph", ref glyph)) {
+        if (ImGui.InputInt("默认标记图案", ref glyph)) {
             this.Plugin.Config.DefaultGlyph = Math.Min(Messages.VfxPaths.Length - 1, Math.Max(0, glyph - 1));
             anyChanged = true;
         }
     }
 
     private void DrawViewer(ref bool anyChanged, ref bool vfx) {
-        anyChanged |= ImGui.SliderFloat("Viewer opacity", ref this.Plugin.Config.ViewerOpacity, 0f, 100.0f, $"{this.Plugin.Config.ViewerOpacity:N3}%%");
-        anyChanged |= ImGui.Checkbox("Open the viewer automatically when near a sign", ref this.Plugin.Config.AutoViewer);
-        anyChanged |= ImGui.Checkbox("Close the viewer automatically when no signs are nearby", ref this.Plugin.Config.AutoViewerClose);
+        anyChanged |= ImGui.SliderFloat("透明度", ref this.Plugin.Config.ViewerOpacity, 0f, 100.0f, $"{this.Plugin.Config.ViewerOpacity:N3}%%");
+        anyChanged |= ImGui.Checkbox("靠近谏言标记时自动显示", ref this.Plugin.Config.AutoViewer);
+        anyChanged |= ImGui.Checkbox("离开谏言标记时自动关闭", ref this.Plugin.Config.AutoViewerClose);
 
         if (this.Plugin.Config.AutoViewerClose) {
             ImGui.TreePush("auto-viewer-close-sub");
-            anyChanged |= ImGui.Checkbox("Hide viewer titlebar", ref this.Plugin.Config.HideTitlebar);
+            anyChanged |= ImGui.Checkbox("隐藏标题栏", ref this.Plugin.Config.HideTitlebar);
             ImGui.TreePop();
         }
 
-        anyChanged |= ImGui.Checkbox("Lock viewer in place", ref this.Plugin.Config.LockViewer);
-        anyChanged |= ImGui.Checkbox("Click through viewer", ref this.Plugin.Config.ClickThroughViewer);
+        anyChanged |= ImGui.Checkbox("锁定位置", ref this.Plugin.Config.LockViewer);
+        anyChanged |= ImGui.Checkbox("点击穿透", ref this.Plugin.Config.ClickThroughViewer);
 
-        anyChanged |= ImGui.Checkbox("Show player emotes", ref this.Plugin.Config.ShowEmotes);
-        anyChanged |= ImGui.SliderFloat("Player emote opacity", ref this.Plugin.Config.EmoteAlpha, 0f, 100f, "%.2f%%");
+        anyChanged |= ImGui.Checkbox("显示玩家表情", ref this.Plugin.Config.ShowEmotes);
+        anyChanged |= ImGui.SliderFloat("玩家表情透明度", ref this.Plugin.Config.EmoteAlpha, 0f, 100f, "%.2f%%");
     }
 
     private void DrawSigns(ref bool anyChanged, ref bool vfx) {
-        anyChanged |= vfx |= ImGui.Checkbox("Remove glow effect from signs", ref this.Plugin.Config.RemoveGlow);
-        if (ImGui.SliderFloat("Sign opacity", ref this.Plugin.Config.SignAlpha, 0, 100, "%.2f%%")) {
+        anyChanged |= vfx |= ImGui.Checkbox("移除标记的发光效果", ref this.Plugin.Config.RemoveGlow);
+        if (ImGui.SliderFloat("标记透明度", ref this.Plugin.Config.SignAlpha, 0, 100, "%.2f%%")) {
             anyChanged = true;
 
             this.WithEachVfx(vfx => {
@@ -235,7 +235,7 @@ internal class Settings : ITab {
         }
 
         var intensity = (this.Plugin.Config.SignRed + this.Plugin.Config.SignGreen + this.Plugin.Config.SignBlue) / 3;
-        if (ImGui.SliderFloat("Sign intensity", ref intensity, 0, 100, "%.2f%%")) {
+        if (ImGui.SliderFloat("标记亮度", ref intensity, 0, 100, "%.2f%%")) {
             anyChanged = true;
             this.Plugin.Config.SignRed = intensity;
             this.Plugin.Config.SignGreen = intensity;
@@ -251,7 +251,7 @@ internal class Settings : ITab {
             });
         }
 
-        if (ImGui.TreeNodeEx("Individual colour intensities")) {
+        if (ImGui.TreeNodeEx("RGB亮度")) {
             using var treePop = new OnDispose(ImGui.TreePop);
 
             if (ImGui.SliderFloat("Red intensity", ref this.Plugin.Config.SignRed, 0, 100, "%.2f%%")) {

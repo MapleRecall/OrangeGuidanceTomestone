@@ -10,7 +10,7 @@ using OrangeGuidanceTomestone.Util;
 namespace OrangeGuidanceTomestone.Ui.MainWindowTabs;
 
 internal class MessageList : ITab {
-    public string Name => "Your messages";
+    public string Name => "你的谏言";
     private Plugin Plugin { get; }
     private SortMode Sort { get; set; }
 
@@ -110,8 +110,10 @@ internal class MessageList : ITab {
 
                     loc += ")";
                 }
+                
+                var text = string.IsNullOrWhiteSpace(message.TextZh) ? message.Text : message.TextZh;
 
-                ImGui.TextUnformatted(message.Text);
+                ImGui.TextUnformatted(text);
                 ImGui.TreePush("location");
                 using (new OnDispose(ImGui.TreePop)) {
                     ImGui.TextUnformatted(loc);

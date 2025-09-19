@@ -1,6 +1,6 @@
-using System.Numerics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System.Numerics;
 
 namespace OrangeGuidanceTomestone;
 
@@ -14,7 +14,9 @@ public class Message {
     public required float Yaw { get; init; }
 
     [JsonProperty("message")]
-    public required string Text { get; init; }
+    public string Text { get; init; }
+    public string TextZh { get; set; }
+    public bool Translating { get; set; }
 
     public required int PositiveVotes { get; set; }
     public required int NegativeVotes { get; set; }
@@ -42,6 +44,7 @@ public class MessageWithTerritory {
 
     [JsonProperty("message")]
     public string Text { get; init; }
+    public string TextZh { get; init; }
 
     public int PositiveVotes { get; init; }
     public int NegativeVotes { get; init; }

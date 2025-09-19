@@ -13,7 +13,7 @@ public class Configuration : IPluginConfiguration {
     public bool DisableInCutscene = true;
     public bool DisableInGpose = true;
     public bool RemoveGlow = true;
-    public bool AutoViewer;
+    public bool AutoViewer = true;
     public bool AutoViewerClose = true;
     public bool LockViewer;
     public bool ClickThroughViewer;

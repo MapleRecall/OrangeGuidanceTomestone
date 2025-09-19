@@ -17,7 +17,7 @@ using OrangeGuidanceTomestone.Util;
 namespace OrangeGuidanceTomestone.Ui.MainWindowTabs;
 
 internal class Write : ITab {
-    public string Name => "Write";
+    public string Name => "撰写谏言";
 
     private Plugin Plugin { get; }
 
@@ -114,7 +114,7 @@ internal class Write : ITab {
         }
 
         var packPrev = Pack.All[this._pack].Name;
-        if (ImGui.BeginCombo("Pack", packPrev)) {
+        if (ImGui.BeginCombo("语料包", packPrev)) {
             using var endCombo = new OnDispose(ImGui.EndCombo);
 
             for (var i = 0; i < Pack.All.Length; i++) {
@@ -139,7 +139,7 @@ internal class Write : ITab {
             using var endCombo = new OnDispose(ImGui.EndCombo);
 
             var changed = false;
-            if (ImGui.Selectable("<none>")) {
+            if (ImGui.Selectable("<无>")) {
                 x = -1;
                 changed = true;
             }
@@ -293,31 +293,31 @@ internal class Write : ITab {
             .Select(template => template.Text)
             .ToArray();
 
-        DrawTemplatePicker("Template##part-1", templateStrings, ref this._part1, ref this._word1);
+        DrawTemplatePicker("模版##part-1", templateStrings, ref this._part1, ref this._word1);
         if (this.Template1 is { } template1 && template1.Text.Contains("{0}")) {
             if (template1.Words == null && pack.Words != null) {
-                DrawWordPicker("Word##word-1", pack.Words, ref this._word1, ref this._word1Search);
+                DrawWordPicker("词语##word-1", pack.Words, ref this._word1, ref this._word1Search);
             } else if (template1.Words != null) {
-                DrawSpecificWordPicker("Word##word-1", template1, ref this._word1, ref this._word1Search);
+                DrawSpecificWordPicker("词语##word-1", template1, ref this._word1, ref this._word1Search);
             }
         }
 
         if (pack.Conjunctions != null) {
-            DrawPicker("Conjunction##conj", pack.Conjunctions, ref this._conj);
+            DrawPicker("连词##conj", pack.Conjunctions, ref this._conj);
         }
 
         if (this._conj != -1) {
-            DrawTemplatePicker("Template##part-2", templateStrings, ref this._part2, ref this._word2);
+            DrawTemplatePicker("模版##part-2", templateStrings, ref this._part2, ref this._word2);
             if (this.Template1 is { } template2 && template2.Text.Contains("{0}")) {
                 if (template2.Words == null && pack.Words != null) {
-                    DrawWordPicker("Word##word-2", pack.Words, ref this._word2, ref this._word2Search);
+                    DrawWordPicker("词语##word-2", pack.Words, ref this._word2, ref this._word2Search);
                 } else if (template2.Words != null) {
-                    DrawSpecificWordPicker("Word##word-2", template2, ref this._word2, ref this._word2Search);
+                    DrawSpecificWordPicker("词语##word-2", template2, ref this._word2, ref this._word2Search);
                 }
             }
         }
 
-        if (ImGui.BeginCombo("Glyph", $"{this._glyph + 1}")) {
+        if (ImGui.BeginCombo("标记", $"{this._glyph + 1}")) {
             using var endCombo = new OnDispose(ImGui.EndCombo);
             var tooltipShown = false;
 
@@ -346,7 +346,7 @@ internal class Write : ITab {
         var emoteLabel = this._emoteIdx == -1
             ? "None"
             : this.Emotes[this._emoteIdx].Name.ToDalamudString().TextValue;
-        if (ImGui.BeginCombo("Emote", emoteLabel, ImGuiComboFlags.HeightLarge)) {
+        if (ImGui.BeginCombo("表情", emoteLabel, ImGuiComboFlags.HeightLarge)) {
             using var endCombo = new OnDispose(ImGui.EndCombo);
 
             if (ImGui.IsWindowAppearing()) {
@@ -403,7 +403,7 @@ internal class Write : ITab {
         var inAir = this.Plugin.Condition[ConditionFlag.Jumping]
                     || this.Plugin.Condition[ConditionFlag.Jumping61]
                     || this.Plugin.Condition[ConditionFlag.InFlight];
-        if (ImGui.Button("Write") && valid && !inAir && this.Plugin.ClientState.LocalPlayer is { } player) {
+        if (ImGui.Button("撰写") && valid && !inAir && this.Plugin.ClientState.LocalPlayer is { } player) {
             var location = HousingLocation.Current();
             var req = new MessageRequest {
                 Territory = this.Plugin.ClientState.TerritoryType,
