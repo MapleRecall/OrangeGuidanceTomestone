@@ -208,7 +208,7 @@ internal class ActorManager : IDisposable {
                 }
 
                 chara.Value->SetMode(CharacterModes.AnimLock, 0);
-                if (action.Value.Slot == 0) {
+                if (action.Value.ActionTimelineIDMode == 0) {
                     chara.Value->Timeline.TimelineSequencer.PlayTimeline((ushort) action.Value.RowId);
                 } else {
                     chara.Value->Timeline.BaseOverride = (ushort) action.Value.RowId;
