@@ -139,7 +139,7 @@ internal class ActorManager : IDisposable {
             }
 
             // check if data is valid to prevent crashes
-            if (!(&drawData->CustomizeData)->NormalizeCustomizeData(&drawData->CustomizeData)) {
+            if (!(&drawData->CustomizeData)->Normalize(&drawData->CustomizeData)) {
                 drawData->CustomizeData = new CustomizeData();
             }
 

@@ -403,7 +403,7 @@ internal class Write : ITab {
         var inAir = this.Plugin.Condition[ConditionFlag.Jumping]
                     || this.Plugin.Condition[ConditionFlag.Jumping61]
                     || this.Plugin.Condition[ConditionFlag.InFlight];
-        if (ImGui.Button("Write") && valid && !inAir && this.Plugin.ClientState.LocalPlayer is { } player) {
+        if (ImGui.Button("Write") && valid && !inAir && this.Plugin.ObjectTable.LocalPlayer is { } player) {
             var location = HousingLocation.Current();
             var req = new MessageRequest {
                 Territory = this.Plugin.ClientState.TerritoryType,

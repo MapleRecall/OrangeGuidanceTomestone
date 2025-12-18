@@ -1,3 +1,4 @@
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -38,6 +39,9 @@ public class Plugin : IDalamudPlugin {
 
     [PluginService]
     internal IGameInteropProvider GameInteropProvider { get; init; }
+
+    [PluginService]
+    internal IObjectTable ObjectTable { get; init; }
 
     [PluginService]
     internal ITextureProvider TextureProvider { get; init; }

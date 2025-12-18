@@ -118,7 +118,7 @@ internal class Messages : IDisposable {
         var current = this.Plugin.ClientState.TerritoryType;
 
         var diffTerritory = current != this._lastTerritory;
-        var playerPresent = this.Plugin.ClientState.LocalPlayer != null;
+        var playerPresent = this.Plugin.ObjectTable.LocalPlayer != null;
 
         if ((this._territoryChanged || diffTerritory) && playerPresent) {
             this._territoryChanged = false;
@@ -166,7 +166,7 @@ internal class Messages : IDisposable {
             return;
         }
 
-        var world = this.Plugin.ClientState.LocalPlayer?.CurrentWorld.RowId ?? 0;
+        var world = this.Plugin.ObjectTable.LocalPlayer?.CurrentWorld.RowId ?? 0;
         if (world == 0) {
             return;
         }
@@ -255,7 +255,7 @@ internal class Messages : IDisposable {
     }
 
     internal IEnumerable<Message> Nearby() {
-        if (this.Plugin.ClientState.LocalPlayer is not { } player) {
+        if (this.Plugin.ObjectTable.LocalPlayer is not { } player) {
             return [];
         }
 
