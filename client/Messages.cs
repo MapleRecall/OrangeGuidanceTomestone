@@ -20,6 +20,7 @@ internal class Messages : IDisposable {
         "bg/ffxiv/fst_f1/common/vfx/eff/b0941trp1e_o.avfx",
         "bg/ex2/02_est_e3/common/vfx/eff/b0941trp1f_o.avfx",
         "bg/ex4/07_lak_l5/common/vfx/eff/b2640trp1g_o.avfx",
+        "bg/ex5/06_nvt_n6/common/vfx/eff/b3700trp1_m2.avfx",
     ];
 
     private static string GetPath(IDataManager data, Message message) {

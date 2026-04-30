@@ -56,7 +56,7 @@ internal unsafe class Vfx : IDisposable {
             switch (action) {
                 case AddQueueAction add: {
                     using var guard = this.Mutex.With();
-                    Plugin.Log.Debug($"adding vfx for {add.Id}");
+                    Plugin.Log.Debug($"adding vfx for {add.Id}: {add.Path}");
                     if (this.Spawned.Remove(add.Id, out var existing)) {
                         Plugin.Log.Warning($"vfx for {add.Id} already exists, queuing remove");
                         this.Queue.Enqueue(new RemoveRawQueueAction(existing));

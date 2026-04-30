@@ -36,10 +36,6 @@ internal unsafe class VfxReplacer : IDisposable {
     }
 
     private byte ReadSqPackDetourInner(void* resourceManager, SeFileDescriptor* fileDescriptor, int priority, bool isSync) {
-        if (!this.Plugin.Config.RemoveGlow) {
-            goto Original;
-        }
-
         if (fileDescriptor == null || fileDescriptor->ResourceHandle == null) {
             goto Original;
         }
@@ -52,6 +48,16 @@ internal unsafe class VfxReplacer : IDisposable {
         var path = fileName.ToString();
         var index = Array.IndexOf(Messages.VfxPaths, path);
         if (index == -1) {
+            goto Original;
+        }
+
+        if (!this.Plugin.Config.RemoveGlow && index != 7) {
+            // This vfx doesn't actually appear when spawned by the plugin or vfxeditor,
+            // but it is the correct vfx used for the trap in the fae deep dungeon.
+            // Path: bg/ex5/06_nvt_n6/common/vfx/eff/b3700trp1_m2.avfx
+            // I'm just loading the non-glow version as a workaround, which works for some
+            // reason. IF YOU KNOW WHY THIS IS, PLEASE HELP ME.
+
             goto Original;
         }
 
