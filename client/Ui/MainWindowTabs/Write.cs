@@ -473,7 +473,7 @@ internal class Write : ITab {
 
         return new EmoteData {
             Id = emote.RowId,
-            Customise = player.Customize.ToList(),
+            Customise = [.. player.Customize],
             Equipment = chara->DrawData.EquipmentModelIds
                 .ToArray()
                 .Select(equip => new EquipmentData {

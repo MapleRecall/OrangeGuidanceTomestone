@@ -107,12 +107,12 @@ internal class Messages : IDisposable {
 
     private readonly Stopwatch _timer = new();
 
-    private void TerritoryChanged(ushort territory) {
+    private void TerritoryChanged(uint territory) {
         this._territoryChanged = true;
         this.RemoveVfx();
     }
 
-    private ushort _lastTerritory;
+    private uint _lastTerritory;
     private bool _territoryChanged;
 
     private void DetermineIfSpawn(IFramework framework) {
@@ -203,7 +203,7 @@ internal class Messages : IDisposable {
         });
     }
 
-    private async Task DownloadMessages(uint world, ushort territory, ushort? ward, ushort? plot) {
+    private async Task DownloadMessages(uint world, uint territory, ushort? ward, ushort? plot) {
         var route = $"/messages/{territory}";
         if (ward != null) {
             route += $"?ward={ward}";
