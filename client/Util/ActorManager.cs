@@ -56,7 +56,7 @@ internal class ActorManager : IDisposable {
         }
     }
 
-    private void OnTerritoryChange(ushort obj) {
+    private void OnTerritoryChange(uint obj) {
         this._idx.Clear();
     }
 
